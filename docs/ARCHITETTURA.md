@@ -54,11 +54,16 @@ riempire il desktop di icone.
 
 ## Software locale
 
-L'edizione completa include anche gli strumenti creativi, così i laboratori
-possono lavorare dalla chiavetta e senza rete. La scelta dell'indirizzo mette in
-evidenza la raccolta pertinente; il Centro App controlla ciò che è presente e
-può ripristinare una raccolta rimossa. Una futura edizione compatta potrà
-includere soltanto gli strumenti comuni e scaricare i pacchetti scelti.
+La ISO base include desktop, browser, Google Workspace e micro-app scolastiche,
+LibreOffice e gli strumenti comuni. Le applicazioni creative più pesanti non
+sono duplicate nella chiavetta: dopo l'installazione il Centro App preseleziona
+le raccolte corrispondenti agli indirizzi scelti e le scarica da Debian o
+Flathub con un'unica autorizzazione grafica.
+
+Il download non è parte obbligatoria di Calamares. In questo modo una rete lenta
+o assente non può interrompere l'installazione del sistema operativo. Nella
+sessione live il catalogo è consultabile, ma l'installazione delle raccolte è
+disabilitata perché verrebbe persa allo spegnimento.
 
 | Pacchetto | Destinazione | Applicazioni principali |
 | --- | --- | --- |
@@ -76,9 +81,9 @@ i nomi dei pacchetti e usa `pkexec`: non esegue testo arbitrario fornito
 dall'interfaccia.
 
 Seamly2D arriva da Flathub perché Debian 13 stable non contiene un CAD moda
-specialistico aggiornato. È preinstallato nella ISO completa; il Centro App può
-installarlo o aggiornarlo graficamente nelle installazioni ridotte. FreeSewing è
-invece una micro-app web per generare cartamodelli a partire dalle misure.
+specialistico aggiornato. Il Centro App lo installa graficamente insieme alla
+raccolta Moda. FreeSewing è invece una micro-app web per generare cartamodelli a
+partire dalle misure.
 
 ## Limiti dell'MVP
 

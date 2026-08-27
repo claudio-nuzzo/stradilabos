@@ -5,6 +5,10 @@ distribuite da Flathub, con formati aperti e utilizzabili senza terminale. Il
 livello indica il carico indicativo sul vecchio hardware, non la difficoltà
 didattica.
 
+Le raccolte sono scaricate dal Centro App dopo l'installazione. Quelle legate
+all'indirizzo scelto in Calamares risultano già spuntate; l'utente può aggiungere
+o togliere raccolte prima di avviare il download.
+
 | Area | Applicazioni mirate | Uso prevalente | Carico |
 | --- | --- | --- | --- |
 | Arti figurative | Krita, MyPaint, GIMP | pittura, tavoletta grafica, immagini | medio |

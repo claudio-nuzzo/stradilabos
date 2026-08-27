@@ -1,47 +1,5 @@
-# Applicazioni per i cinque indirizzi, disponibili anche dalla sessione live.
-# I programmi non consumano memoria finche non vengono avviati; aumentano pero
-# la dimensione della ISO e richiedono una chiavetta da almeno 8 GB.
-
-# Liceo Artistico, Moda e comunicazione visiva
-krita
-gimp
-inkscape
-scribus
-blender
-pencil2d
-mypaint
-qlcplus
-posterazor
-
-# Liceo Musicale e Liuteria
-musescore3
-audacity
-lmms
-hydrogen
-fmit
-ardour
-rosegarden
-sonic-visualiser
-qsynth
-fluid-soundfont-gm
-pianobooster
-
-# Liuteria, Arredo, Architettura e disegno tecnico
-freecad
-librecad
-sweethome3d
-solvespace
-openscad
-meshlab
-qelectrotech
-
-# Video e produzione multimediale
-kdenlive
-darktable
-handbrake
-obs-studio
-
-# Accessibilita
-orca
-espeak-ng
-onboard
+# Le applicazioni specialistiche non sono incorporate nella ISO leggera.
+# Il Centro App legge packs.json, preseleziona gli indirizzi scelti durante
+# l'installazione e scarica da Debian/Flathub soltanto le raccolte richieste.
+# Questo file resta intenzionalmente senza pacchetti attivi per evitare che una
+# modifica futura trasformi per errore la ISO base nell'immagine completa.

@@ -19,8 +19,9 @@ ISO collaudata su hardware reale.
   Google condivisa;
 - accesso guidato a Google Workspace e micro-app per Classroom, Drive, Gmail,
   Meet, Calendar, Documenti, Fogli, Presentazioni e Moduli;
-- Centro App grafico con pacchetti per Liceo Artistico, Liceo Musicale,
-  Liuteria, Moda e Arredo/Architettura;
+- Centro App grafico che, dopo l'installazione, scarica soltanto i pacchetti
+  scelti per Liceo Artistico, Liceo Musicale, Liuteria, Moda e
+  Arredo/Architettura;
 - strumenti comuni per documenti, PDF, scansioni, stampa, audio e video;
 - supporto a rete, Wi-Fi, Bluetooth e molti firmware non liberi inclusi.
 
@@ -28,7 +29,7 @@ ISO collaudata su hardware reale.
 
 - CPU Intel o AMD a 64 bit;
 - 2 GB di RAM come soglia minima di prova, 4 GB consigliati;
-- chiavetta USB da almeno 8 GB;
+- chiavetta USB da almeno 8 GB, con immagine base alleggerita;
 - circa 25 GB liberi per l'installazione su disco.
 
 Sono previste due edizioni a 64 bit: `amd64` per i PC Intel/AMD e `arm64` per

@@ -144,12 +144,25 @@ class WelcomeWindow(Gtk.ApplicationWindow):
                 3,
             )
 
+        if not live_session:
+            root.pack_start(
+                self.action(
+                    "Scarica le app per il tuo indirizzo",
+                    "Il Centro App ha già selezionato le raccolte consigliate; serve Internet",
+                    ["stradilabos-app-center"],
+                    primary=True,
+                ),
+                False,
+                False,
+                3,
+            )
+
         root.pack_start(
             self.action(
                 "Accedi a Google Workspace",
                 "Un solo accesso istituzionale per Classroom, Drive, Gmail, Meet e le altre app",
                 ["stradilabos-open-app", WORKSPACE_LOGIN, "workspace-login"],
-                primary=not live_session,
+                primary=False,
             ),
             False,
             False,
@@ -178,7 +191,15 @@ class WelcomeWindow(Gtk.ApplicationWindow):
             0,
         )
         root.pack_start(
-            self.action("Centro App", "Controlla e aggiungi le raccolte didattiche", ["stradilabos-app-center"]),
+            self.action(
+                "Centro App",
+                (
+                    "Scopri le raccolte che potrai aggiungere dopo l'installazione"
+                    if live_session
+                    else "Controlla, aggiungi o completa le raccolte didattiche"
+                ),
+                ["stradilabos-app-center"],
+            ),
             False,
             False,
             0,

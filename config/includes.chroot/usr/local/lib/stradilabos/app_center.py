@@ -19,6 +19,15 @@ BACKEND = "/usr/local/lib/stradilabos/install_pack.py"
 PROFILE_STATE = Path.home() / ".config/stradilabos/profiles.json"
 
 
+def is_live() -> bool:
+    if Path("/run/live/medium").exists():
+        return True
+    try:
+        return "boot=live" in Path("/proc/cmdline").read_text(encoding="utf-8")
+    except OSError:
+        return False
+
+
 def selected_profiles() -> set[str]:
     try:
         values = json.loads(PROFILE_STATE.read_text(encoding="utf-8"))["profiles"]
@@ -55,6 +64,12 @@ class AppCenterWindow(Gtk.ApplicationWindow):
         self.set_icon_name("stradilabos-app-center")
         self.packs = json.loads(CATALOG.read_text(encoding="utf-8"))["packs"]
         self.profiles = selected_profiles()
+        self.recommended = {
+            pack["id"]
+            for pack in self.packs
+            if self.profiles.intersection(pack.get("profiles", [pack["id"]]))
+        }
+        self.live_session = is_live()
         self.checks: dict[str, Gtk.CheckButton] = {}
 
         root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
@@ -63,8 +78,12 @@ class AppCenterWindow(Gtk.ApplicationWindow):
         title.set_markup("<span size='xx-large' weight='bold'>App per ogni indirizzo</span>")
         copy = Gtk.Label(
             label=(
-                "Le applicazioni principali sono già disponibili nella chiavetta completa. "
-                "Se una raccolta manca da un'installazione ridotta, selezionala qui."
+                "La chiavetta resta leggera: dopo l'installazione connettiti a Internet "
+                "e scarica soltanto gli strumenti utili. Le raccolte del tuo indirizzo "
+                "sono già selezionate."
+                if not self.live_session
+                else "Qui trovi le raccolte disponibili. Per mantenere leggera la "
+                "chiavetta, potrai scaricarle dopo aver installato StradilabOS."
             ),
             xalign=0,
         )
@@ -85,9 +104,12 @@ class AppCenterWindow(Gtk.ApplicationWindow):
         self.status = Gtk.Label(label="", xalign=0)
         profile_button = Gtk.Button(label="Cambia indirizzo")
         profile_button.connect("clicked", self.change_profile)
-        self.install_button = Gtk.Button(label="Installa le raccolte selezionate")
+        self.install_button = Gtk.Button(label="Scarica e installa le app selezionate")
         self.install_button.get_style_context().add_class("suggested-action")
         self.install_button.connect("clicked", self.start_install)
+        self.install_button.set_sensitive(not self.live_session)
+        if self.live_session:
+            self.status.set_text("Disponibile dopo l'installazione")
         footer.pack_start(profile_button, False, False, 0)
         footer.pack_start(self.status, True, True, 0)
         footer.pack_end(self.install_button, False, False, 0)
@@ -103,7 +125,8 @@ class AppCenterWindow(Gtk.ApplicationWindow):
             flatpak_installed(app_id) for app_id in pack.get("flatpaks", [])
         )
         check = Gtk.CheckButton()
-        check.set_sensitive(not installed)
+        check.set_active(pack["id"] in self.recommended and not installed)
+        check.set_sensitive(not installed and not self.live_session)
         self.checks[pack["id"]] = check
 
         text = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
@@ -119,8 +142,8 @@ class AppCenterWindow(Gtk.ApplicationWindow):
         text.pack_start(packages, False, False, 0)
 
         state_parts = []
-        if pack["id"] in self.profiles:
-            state_parts.append("Profilo attivo")
+        if pack["id"] in self.recommended:
+            state_parts.append("Consigliato per te")
         state_parts.append("Già presente" if installed else "Da installare")
         state = Gtk.Label(label=" · ".join(state_parts))
         state.get_style_context().add_class("dim-label")
@@ -141,12 +164,19 @@ class AppCenterWindow(Gtk.ApplicationWindow):
             )
 
     def start_install(self, *_args) -> None:
+        if self.live_session:
+            self.show_message(
+                Gtk.MessageType.INFO,
+                "Installa prima StradilabOS",
+                "Le raccolte specialistiche si scaricano sul disco dopo l'installazione.",
+            )
+            return
         selected = [pack_id for pack_id, check in self.checks.items() if check.get_active()]
         if not selected:
             self.show_message(
                 Gtk.MessageType.INFO,
                 "Nessuna raccolta selezionata",
-                "Scegli almeno un indirizzo non ancora presente.",
+                "Scegli almeno una raccolta non ancora presente.",
             )
             return
 

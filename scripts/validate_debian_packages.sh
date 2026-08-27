@@ -33,9 +33,30 @@ for package_list in config/package-lists/*.list.chroot; do
     done < "$package_list"
 done
 
+# Anche i pacchetti opzionali del Centro App devono esistere nei repository,
+# pur non essendo incorporati nell'immagine base.
+catalog_packages="$(python3 - <<'PY'
+import json
+
+with open(
+    "config/includes.chroot/usr/local/share/stradilabos/packs.json",
+    encoding="utf-8",
+) as source:
+    packs = json.load(source)["packs"]
+
+print(" ".join(sorted({name for pack in packs for name in pack["packages"]})))
+PY
+)"
+
+for package in $catalog_packages; do
+    if ! apt-cache show "$package" >/dev/null 2>&1; then
+        missing="$missing $package"
+    fi
+done
+
 if [ -n "$missing" ]; then
     printf '%s\n' "Pacchetti Debian non trovati:$missing" >&2
     exit 1
 fi
 
-printf '%s\n' "Tutti i pacchetti Debian richiesti sono disponibili per $architecture."
+printf '%s\n' "Pacchetti base e raccolte del Centro App disponibili per $architecture."

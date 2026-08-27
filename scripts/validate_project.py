@@ -82,6 +82,7 @@ def validate_packs(errors: list[str]) -> None:
     ids = [pack["id"] for pack in packs]
     require(len(ids) == len(set(ids)), "ID raccolta duplicati.", errors)
     require(ADDRESS_PROFILES.issubset(set(ids)), "Manca un indirizzo scolastico.", errors)
+    mapped_profiles: set[str] = set()
     included_packages: set[str] = set()
     for package_list in (ROOT / "config/package-lists").glob("*.list.chroot"):
         for line in package_list.read_text(encoding="utf-8").splitlines():
@@ -89,16 +90,28 @@ def validate_packs(errors: list[str]) -> None:
             if value and not value.startswith("#"):
                 included_packages.add(value)
     for pack in packs:
+        profiles = pack.get("profiles", [pack["id"]])
+        require(
+            set(profiles).issubset(ADDRESS_PROFILES),
+            f"Profilo non valido nella raccolta {pack['id']}.",
+            errors,
+        )
+        mapped_profiles.update(profiles)
         require(bool(pack["packages"]), f"Raccolta vuota: {pack['id']}", errors)
         for package in pack["packages"]:
             require(bool(PACKAGE_RE.fullmatch(package)), f"Pacchetto non valido: {package}", errors)
             require(
-                package in included_packages,
-                f"Pacchetto {package} non incluso nella ISO ({pack['id']}).",
+                package not in included_packages,
+                f"Pacchetto specialistico {package} incorporato nella ISO base ({pack['id']}).",
                 errors,
             )
         for app_id in pack.get("flatpaks", []):
             require(bool(FLATPAK_RE.fullmatch(app_id)), f"Flatpak non valido: {app_id}", errors)
+    require(
+        ADDRESS_PROFILES.issubset(mapped_profiles),
+        "Non tutti gli indirizzi hanno una raccolta consigliata.",
+        errors,
+    )
 
 
 def validate_code(errors: list[str]) -> None:

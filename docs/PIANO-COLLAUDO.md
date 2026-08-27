@@ -28,9 +28,15 @@ Usare inizialmente un disco di prova senza dati importanti.
 2. Installazione automatica su tutto il disco.
 3. Riavvio senza chiavetta.
 4. Creazione e accesso dell'utente scelto.
-5. Aggiornamenti da Synaptic.
-6. Riavvio e spegnimento grafici.
-7. Verifica che il launcher dell'installatore non resti visibile.
+5. Raccolte dell'indirizzo già selezionate nel Centro App.
+6. Download e avvio di almeno una raccolta specialistica.
+7. Aggiornamenti da Synaptic.
+8. Riavvio e spegnimento grafici.
+9. Verifica che il launcher dell'installatore non resti visibile.
+
+In Parallels, al termine dell'installazione usare **Dispositivi → CD/DVD →
+Disconnetti** prima del riavvio. La ISO collegata equivale a lasciare la
+chiavetta inserita e può essere scelta di nuovo dal firmware virtuale.
 
 ## Criteri di stop
 
