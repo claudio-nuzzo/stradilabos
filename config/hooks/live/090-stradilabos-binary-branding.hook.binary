@@ -1,6 +1,12 @@
 #!/bin/sh
 set -eu
 
+# live-build può eseguire gli hook binari con una directory di lavoro diversa
+# dalla radice del progetto. Risolviamo esplicitamente la posizione dello script
+# così immagini e configurazioni di StradilabOS vengono sempre copiate nella ISO.
+project_root=$(CDPATH= cd -- "$(dirname -- "$0")/../../.." && pwd)
+cd "$project_root"
+
 grub_dir=binary/boot/grub
 
 if [ -d "$grub_dir" ]; then
