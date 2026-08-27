@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+
+version_file="/usr/local/share/stradilabos/version.json"
+architecture="$(dpkg --print-architecture)"
+
+sed -i \
+    "s/\"architecture\": \"[^\"]*\"/\"architecture\": \"$architecture\"/" \
+    "$version_file"

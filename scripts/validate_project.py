@@ -101,6 +101,7 @@ def validate_code(errors: list[str]) -> None:
     shell_files = [
         *ROOT.glob("auto/*"),
         *ROOT.glob("scripts/*.sh"),
+        *ROOT.glob("config/hooks/live/*.hook.chroot"),
         *(CHROOT / "usr/local/bin").glob("*"),
     ]
     for path in shell_files:

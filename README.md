@@ -31,9 +31,10 @@ ISO collaudata su hardware reale.
 - chiavetta USB da almeno 8 GB;
 - circa 25 GB liberi per l'installazione su disco.
 
-La prima edizione è `amd64`: i PC esclusivamente a 32 bit richiederanno una
-variante distinta, perché le immagini live ufficiali Debian e Chromium correnti
-non coprono bene quel segmento.
+Sono previste due edizioni a 64 bit: `amd64` per i PC Intel/AMD e `arm64` per
+Mac Apple Silicon e dispositivi ARM compatibili. I PC esclusivamente a 32 bit
+richiederanno una variante distinta, perché le immagini live ufficiali Debian
+e Chromium correnti non coprono bene quel segmento.
 
 ## Struttura
 
@@ -68,9 +69,9 @@ finale non deve mai eseguire questo comando.
 
 La build richiede Linux e privilegi di amministrazione. Il Mac Apple Silicon
 non può produrre direttamente una ISO `amd64` con live-build; per questo il
-repository include una workflow GitHub Actions. Dopo aver pubblicato il
-repository, la build può essere avviata dalla scheda Actions e restituisce
-`stradilabos-live-amd64.hybrid.iso` come artefatto scaricabile.
+repository include workflow GitHub Actions native per entrambe le
+architetture. Dalla scheda Actions si può avviare la build PC oppure la build
+ARM64 per Parallels.
 
 Su un computer Debian 13 dedicato alla build:
 
@@ -78,6 +79,12 @@ Su un computer Debian 13 dedicato alla build:
 sudo apt update
 sudo apt install live-build
 sudo ./auto/build
+```
+
+Per creare localmente la variante ARM64 su un sistema ARM:
+
+```sh
+sudo BUILD_ARCH=arm64 ./auto/build
 ```
 
 ## Stato

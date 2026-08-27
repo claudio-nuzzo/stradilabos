@@ -1,0 +1,59 @@
+name: Crea ISO StradilabOS ARM64
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 120
+    steps:
+      - name: Scarica il progetto
+        uses: actions/checkout@v4
+
+      - name: Controlla cataloghi e script
+        run: python3 scripts/validate_project.py
+
+      - name: Crea la ISO Debian ARM64 in ambiente isolato
+        run: |
+          docker run --rm --privileged \
+            --env BUILD_ARCH=arm64 \
+            --volume "$PWD:/work" \
+            --workdir /work \
+            debian:trixie-slim \
+            sh -lc '
+              sed -i "s/^Components: main$/Components: main contrib non-free non-free-firmware/" /etc/apt/sources.list.d/debian.sources
+              apt-get update
+              apt-get install --yes live-build python3
+              ./scripts/validate_debian_packages.sh
+              ./auto/build
+            '
+
+      - name: Prepara ISO e checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t iso_files < <(find . -maxdepth 1 -type f -name '*.hybrid.iso' -print)
+          if (( ${#iso_files[@]} != 1 )); then
+            echo "Attesa una sola ISO, trovate: ${#iso_files[@]}" >&2
+            printf '%s\n' "${iso_files[@]}" >&2
+            exit 1
+          fi
+
+          target="stradilabos-live-arm64.hybrid.iso"
+          if [[ "${iso_files[0]}" != "./${target}" ]]; then
+            mv "${iso_files[0]}" "${target}"
+          fi
+
+          sha256sum "${target}" > "${target}.sha256"
+          ls -lh "${target}" "${target}.sha256"
+
+      - name: Pubblica ISO e checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: stradilabos-live-arm64
+          path: |
+            stradilabos-live-arm64.hybrid.iso
+            stradilabos-live-arm64.hybrid.iso.sha256
+          if-no-files-found: error
+          retention-days: 1

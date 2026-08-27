@@ -9,8 +9,13 @@ live-tools
 calamares
 calamares-settings-debian
 os-prober
+#if ARCHITECTURES amd64
 grub-pc-bin
 grub-efi-amd64-bin
+#endif
+#if ARCHITECTURES arm64
+grub-efi-arm64-bin
+#endif
 efibootmgr
 dosfstools
 parted
