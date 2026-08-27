@@ -114,9 +114,15 @@ class WelcomeWindow(Gtk.ApplicationWindow):
     def build_home_page(self) -> Gtk.Widget:
         root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         root.get_style_context().add_class("wrap")
+        live_session = is_live()
         brand, title, copy = self.heading(
-            "Benvenuto in StradilabOS",
-            "Un ambiente leggero per studiare, creare e usare i servizi della scuola.",
+            "Prova o installa StradilabOS" if live_session else "Benvenuto in StradilabOS",
+            (
+                "Puoi provarlo senza modificare il computer oppure avviare subito "
+                "l'installazione grafica."
+                if live_session
+                else "Un ambiente leggero per studiare, creare e usare i servizi della scuola."
+            ),
         )
         self.profile_summary = Gtk.Label(xalign=0)
         self.profile_summary.get_style_context().add_class("brand")
@@ -125,12 +131,25 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         for widget in (brand, title, copy, self.profile_summary):
             root.pack_start(widget, False, False, 0)
 
+        if live_session and shutil.which("calamares-install-debian"):
+            root.pack_start(
+                self.action(
+                    "Installa StradilabOS sul computer",
+                    "L'installatore chiederà l'indirizzo e il tipo di utilizzo del PC",
+                    ["calamares-install-debian"],
+                    primary=True,
+                ),
+                False,
+                False,
+                3,
+            )
+
         root.pack_start(
             self.action(
                 "Accedi a Google Workspace",
                 "Un solo accesso istituzionale per Classroom, Drive, Gmail, Meet e le altre app",
                 ["stradilabos-open-app", WORKSPACE_LOGIN, "workspace-login"],
-                primary=True,
+                primary=not live_session,
             ),
             False,
             False,
@@ -171,22 +190,10 @@ class WelcomeWindow(Gtk.ApplicationWindow):
             0,
         )
 
-        if is_live() and shutil.which("calamares-install-debian"):
-            root.pack_start(
-                self.action(
-                    "Installa StradilabOS sul computer",
-                    "L'installatore chiederà l'indirizzo e salverà il profilo nel nuovo sistema",
-                    ["calamares-install-debian"],
-                ),
-                False,
-                False,
-                0,
-            )
-
         footer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         self.skip = Gtk.CheckButton(label="Non mostrare questa schermata al prossimo accesso")
-        self.skip.set_sensitive(not is_live())
-        close = Gtk.Button(label="Chiudi")
+        self.skip.set_sensitive(not live_session)
+        close = Gtk.Button(label="Continua senza installare" if live_session else "Chiudi")
         close.connect("clicked", self.close_and_save)
         footer.pack_start(self.skip, True, True, 0)
         footer.pack_end(close, False, False, 0)

@@ -117,8 +117,22 @@ def validate_code(errors: list[str]) -> None:
 
 def validate_branding(errors: list[str]) -> None:
     branding = CHROOT / "etc/calamares/branding/stradilabos"
-    require((branding / "branding.desc").exists(), "Branding Calamares assente.", errors)
+    descriptor = branding / "branding.desc"
+    slideshow = branding / "show.qml"
+    require(descriptor.exists(), "Branding Calamares assente.", errors)
     require((branding / "stradilabos.svg").exists(), "Logo Calamares assente.", errors)
+    require(slideshow.exists(), "Presentazione Calamares assente.", errors)
+    if descriptor.exists():
+        text = descriptor.read_text(encoding="utf-8")
+        require(
+            re.search(r'^slideshow:\s*["\']show\.qml["\']\s*$', text, re.MULTILINE)
+            is not None,
+            "Il branding Calamares non collega show.qml.",
+            errors,
+        )
+    if slideshow.exists():
+        text = slideshow.read_text(encoding="utf-8")
+        require("Presentation" in text, "Presentazione Calamares non valida.", errors)
     wallpaper = CHROOT / "usr/share/backgrounds/stradilabos/stradilabos-wallpaper.svg"
     require(wallpaper.exists(), "Sfondo StradilabOS assente.", errors)
 

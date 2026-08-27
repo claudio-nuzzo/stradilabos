@@ -1,9 +1,10 @@
 [Desktop Entry]
 Type=Application
 Name=Benvenuto in StradilabOS
-Exec=stradilabos-welcome --autostart
+Exec=sh -c "sleep 2; exec stradilabos-welcome --autostart"
 TryExec=stradilabos-welcome
 Icon=stradilabos
 Terminal=false
 OnlyShowIn=XFCE;
 X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=2
