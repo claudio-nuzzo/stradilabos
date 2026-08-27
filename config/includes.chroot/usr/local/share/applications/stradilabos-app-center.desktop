@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Centro App StradilabOS
+GenericName=Applicazioni per indirizzo
+Comment=Scegli e installa le applicazioni per il tuo indirizzo di studio
+Exec=stradilabos-app-center
+TryExec=stradilabos-app-center
+Icon=stradilabos-app-center
+Terminal=false
+Categories=System;Education;
+Keywords=app;software;artistico;musica;liuteria;moda;arredo;
+StartupNotify=true

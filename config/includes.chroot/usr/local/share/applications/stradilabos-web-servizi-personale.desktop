@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Servizi per il personale
+Comment=Modulistica, segreteria digitale, registro e strumenti di lavoro.
+Exec=stradilabos-open-app "https://www.istitutostradivari.edu.it/servizi-personale" "servizi-personale"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;Scuola;docenti;personale;
+X-StradilabOS-Category=Scuola
+StartupNotify=true

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Votazioni Scuola
+Comment=Voto palese e segreto per le sedute del Collegio Docenti.
+Exec=stradilabos-open-app "https://votazioni-scuola.stradilab.org" "votazioni-scuola"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;StradiLab;docenti;
+X-StradilabOS-Category=StradiLab
+StartupNotify=true

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Servizi per famiglie e studenti
+Comment=Libri, modulistica, registro, pagamenti e servizi di orientamento.
+Exec=stradilabos-open-app "https://www.istitutostradivari.edu.it/servizi-famiglie" "servizi-famiglie"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;Scuola;studenti;famiglie;
+X-StradilabOS-Category=Scuola
+StartupNotify=true

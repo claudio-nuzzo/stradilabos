@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Google Classroom
+Comment=Corsi, materiali, compiti e comunicazioni delle classi.
+Exec=stradilabos-open-app "https://classroom.google.com/" "google-classroom"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;Workspace;docenti;studenti;
+X-StradilabOS-Category=Workspace
+StartupNotify=true

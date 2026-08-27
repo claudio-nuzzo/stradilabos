@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <radialGradient id="light" cx="30%" cy="20%" r="95%">
+      <stop offset="0" stop-color="#fffdf8"/>
+      <stop offset="1" stop-color="#e8e2d8"/>
+    </radialGradient>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0H0V64" fill="none" stroke="#9b2335" stroke-opacity=".045"/>
+    </pattern>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#light)"/>
+  <rect width="1920" height="1080" fill="url(#grid)"/>
+  <circle cx="1540" cy="220" r="330" fill="none" stroke="#9b2335" stroke-opacity=".09" stroke-width="2"/>
+  <circle cx="1540" cy="220" r="230" fill="none" stroke="#16130f" stroke-opacity=".06"/>
+  <path d="M1430 80Q1295 220 1430 360M1650 80Q1785 220 1650 360" fill="none" stroke="#9b2335" stroke-opacity=".13" stroke-width="6" stroke-linecap="round"/>
+  <text x="110" y="820" font-family="sans-serif" font-size="86" font-weight="700" letter-spacing="8" fill="#16130f">STRADI<tspan fill="#9b2335">OS</tspan></text>
+  <text x="116" y="875" font-family="sans-serif" font-size="22" letter-spacing="7" fill="#645e55">CREARE · IMPARARE · CONDIVIDERE</text>
+  <line x1="112" y1="910" x2="720" y2="910" stroke="#9b2335" stroke-width="3"/>
+</svg>

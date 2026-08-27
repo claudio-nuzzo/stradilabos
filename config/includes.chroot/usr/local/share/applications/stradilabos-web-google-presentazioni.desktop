@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Google Presentazioni
+Comment=Presentazioni collaborative per lezioni, progetti e portfolio.
+Exec=stradilabos-open-app "https://docs.google.com/presentation/" "google-presentazioni"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;Workspace;docenti;studenti;personale;
+X-StradilabOS-Category=Workspace
+StartupNotify=true

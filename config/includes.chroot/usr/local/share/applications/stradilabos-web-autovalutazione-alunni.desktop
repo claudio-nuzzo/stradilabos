@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Autovalutazione alunni
+Comment=Griglia di autovalutazione sulle competenze del PTOF.
+Exec=stradilabos-open-app "https://autovalutazione-alunni.stradilab.org" "autovalutazione-alunni"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;StradiLab;studenti;
+X-StradilabOS-Category=StradiLab
+StartupNotify=true

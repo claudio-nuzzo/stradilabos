@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=StradiLab
+GenericName=App e servizi della scuola
+Comment=Apri le app StradiLab e i servizi dell'IIS Stradivari
+Exec=stradilabos-hub
+TryExec=stradilabos-hub
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;scuola;app;servizi;
+StartupNotify=true

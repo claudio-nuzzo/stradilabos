@@ -1,0 +1,79 @@
+# Desktop leggero e sessione live
+task-xfce-desktop
+xfce4-whiskermenu-plugin
+live-boot
+live-config
+live-tools
+
+# Installazione grafica
+calamares
+calamares-settings-debian
+os-prober
+grub-pc-bin
+grub-efi-amd64-bin
+efibootmgr
+dosfstools
+parted
+squashfs-tools
+rsync
+
+# Italiano e accessibilita tipografica
+task-italian
+task-italian-desktop
+libreoffice-l10n-it
+hunspell-it
+hyphen-it
+mythes-it
+fonts-noto-core
+fonts-liberation
+fonts-opendyslexic
+
+# Browser e strumenti comuni
+chromium
+libreoffice
+libreoffice-gtk3
+evince
+pdfarranger
+xournalpp
+simple-scan
+file-roller
+thunar-archive-plugin
+gvfs-backends
+ristretto
+parole
+vlc
+mousepad
+
+# Rete, audio, stampa e gestione grafica
+network-manager-gnome
+blueman
+pavucontrol
+pipewire-audio
+cups
+system-config-printer
+printer-driver-all
+gnome-disk-utility
+synaptic
+gdebi
+flatpak
+gnome-software
+gnome-software-plugin-flatpak
+
+# Filesystem e firmware per hardware comune
+ntfs-3g
+exfatprogs
+firmware-linux
+firmware-misc-nonfree
+firmware-iwlwifi
+firmware-realtek
+firmware-amd-graphics
+firmware-sof-signed
+
+# Runtime delle applicazioni StradilabOS
+python3-gi
+python3-yaml
+gir1.2-gtk-3.0
+pkexec
+xdg-utils
+ca-certificates
+curl

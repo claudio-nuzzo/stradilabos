@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=CAD Moda — Seamly2D
+GenericName=CAD parametrico per cartamodelli
+Comment=Crea cartamodelli riutilizzabili, graduati e su misura
+Exec=flatpak run io.seamly.seamly2d
+TryExec=flatpak
+Icon=fashion-cad
+Terminal=false
+Categories=Graphics;Education;
+Keywords=moda;CAD;cartamodelli;misure;taglio;Seamly2D;
+StartupNotify=true

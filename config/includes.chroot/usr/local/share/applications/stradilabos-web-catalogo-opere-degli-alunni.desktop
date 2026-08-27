@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Catalogo Opere degli Alunni
+Comment=Archivio digitale dei lavori degli studenti dei cinque indirizzi.
+Exec=stradilabos-open-app "https://catalogo-stradivari.stradilab.org" "catalogo-opere-degli-alunni"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;Orientamento;studenti;
+X-StradilabOS-Category=Orientamento
+StartupNotify=true

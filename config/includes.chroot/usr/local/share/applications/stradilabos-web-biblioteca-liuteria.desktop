@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Biblioteca Liuteria
+Comment=Ricerca nel catalogo della biblioteca Tiziano Vago.
+Exec=stradilabos-open-app "https://biblioteca-liuteria.stradilab.org" "biblioteca-liuteria"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;StradiLab;tutti;
+X-StradilabOS-Category=StradiLab
+StartupNotify=true

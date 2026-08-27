@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Posta istituzionale
+Comment=Gmail con l'account dell'Istituto Stradivari.
+Exec=stradilabos-open-app "https://mail.google.com/" "gmail"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;Workspace;docenti;studenti;personale;
+X-StradilabOS-Category=Workspace
+StartupNotify=true

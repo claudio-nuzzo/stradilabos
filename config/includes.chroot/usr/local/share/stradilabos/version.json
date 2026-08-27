@@ -1,0 +1,6 @@
+{
+  "name": "StradilabOS",
+  "version": "0.1.0-dev",
+  "base": "Debian 13 (trixie)",
+  "architecture": "amd64"
+}

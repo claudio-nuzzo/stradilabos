@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "packs": [
+    {
+      "id": "artistico",
+      "title": "Liceo Artistico",
+      "description": "Arti figurative, grafica, pittura digitale, impaginazione, animazione e modellazione 3D.",
+      "packages": ["krita", "gimp", "inkscape", "scribus", "blender", "pencil2d", "mypaint"],
+      "flatpaks": []
+    },
+    {
+      "id": "musicale",
+      "title": "Liceo Musicale",
+      "description": "Notazione, esercitazione, registrazione multitraccia, MIDI, produzione e analisi musicale.",
+      "packages": ["musescore3", "audacity", "lmms", "hydrogen", "ardour", "rosegarden", "sonic-visualiser", "qsynth", "fluid-soundfont-gm", "pianobooster"],
+      "flatpaks": []
+    },
+    {
+      "id": "liuteria",
+      "title": "Liuteria",
+      "description": "Disegno tecnico, CAD parametrico, tracciati, scansioni 3D, accordatura e analisi acustica.",
+      "packages": ["freecad", "librecad", "solvespace", "openscad", "inkscape", "meshlab", "fmit", "audacity", "sonic-visualiser"],
+      "flatpaks": []
+    },
+    {
+      "id": "moda",
+      "title": "Moda",
+      "description": "CAD parametrico per cartamodelli, misure, figurino, piazzamento, fotoritocco e stampa in scala.",
+      "packages": ["inkscape", "krita", "gimp", "scribus", "posterazor"],
+      "flatpaks": ["io.seamly.seamly2d"]
+    },
+    {
+      "id": "arredo",
+      "title": "Arredo e Architettura",
+      "description": "Disegno 2D, CAD parametrico, impianti, mesh, modellazione 3D e progettazione d'interni.",
+      "packages": ["freecad", "librecad", "solvespace", "openscad", "qelectrotech", "meshlab", "blender", "sweethome3d"],
+      "flatpaks": []
+    },
+    {
+      "id": "scenografia",
+      "title": "Scenografia e palco",
+      "description": "Progettazione dello spazio scenico, grafica, video e controllo delle luci DMX.",
+      "packages": ["blender", "inkscape", "sweethome3d", "qlcplus", "kdenlive"],
+      "flatpaks": []
+    },
+    {
+      "id": "video",
+      "title": "Video e comunicazione",
+      "description": "Montaggio video, sviluppo fotografico, conversione e registrazione schermo.",
+      "packages": ["kdenlive", "darktable", "handbrake", "obs-studio"],
+      "flatpaks": []
+    },
+    {
+      "id": "accessibilita",
+      "title": "Accessibilità",
+      "description": "Lettore di schermo, sintesi vocale e tastiera a schermo.",
+      "packages": ["orca", "espeak-ng", "onboard"],
+      "flatpaks": []
+    }
+  ]
+}

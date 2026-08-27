@@ -1,0 +1,443 @@
+{
+  "schema_version": 1,
+  "generated_from": "/Users/claudionuzzo/Dev/stradilab/stradilab home/progetti.json",
+  "apps": [
+    {
+      "id": "stradilab-home",
+      "title": "StradiLab",
+      "description": "Lo spazio di sperimentazione didattica digitale dell'IIS Stradivari.",
+      "url": "https://stradilab.org",
+      "audience": [
+        "tutti"
+      ],
+      "category": "StradiLab",
+      "source": "istituto"
+    },
+    {
+      "id": "istituto",
+      "title": "Sito dell'Istituto",
+      "description": "Notizie, didattica, organizzazione e informazioni ufficiali.",
+      "url": "https://www.istitutostradivari.edu.it/",
+      "audience": [
+        "tutti"
+      ],
+      "category": "Scuola",
+      "source": "istituto",
+      "icon": "istituto-stradivari"
+    },
+    {
+      "id": "circolari",
+      "title": "Circolari",
+      "description": "Le comunicazioni ufficiali rivolte a studenti, famiglie e personale.",
+      "url": "https://www.istitutostradivari.edu.it/comunicati",
+      "audience": [
+        "tutti"
+      ],
+      "category": "Scuola",
+      "source": "istituto"
+    },
+    {
+      "id": "mastercom",
+      "title": "MasterCom — Registro elettronico",
+      "description": "Accesso diretto al registro elettronico dell'IIS Stradivari.",
+      "url": "https://stradivari-cr.registroelettronico.com/mastercom/index.php",
+      "audience": [
+        "docenti",
+        "studenti",
+        "famiglie"
+      ],
+      "category": "Scuola",
+      "source": "mastercom",
+      "icon": "mastercom"
+    },
+    {
+      "id": "servizi-famiglie",
+      "title": "Servizi per famiglie e studenti",
+      "description": "Libri, modulistica, registro, pagamenti e servizi di orientamento.",
+      "url": "https://www.istitutostradivari.edu.it/servizi-famiglie",
+      "audience": [
+        "studenti",
+        "famiglie"
+      ],
+      "category": "Scuola",
+      "source": "istituto"
+    },
+    {
+      "id": "servizi-personale",
+      "title": "Servizi per il personale",
+      "description": "Modulistica, segreteria digitale, registro e strumenti di lavoro.",
+      "url": "https://www.istitutostradivari.edu.it/servizi-personale",
+      "audience": [
+        "docenti",
+        "personale"
+      ],
+      "category": "Scuola",
+      "source": "istituto"
+    },
+    {
+      "id": "unica",
+      "title": "Piattaforma Unica",
+      "description": "Servizi del Ministero per studenti e famiglie.",
+      "url": "https://unica.istruzione.gov.it/",
+      "audience": [
+        "studenti",
+        "famiglie"
+      ],
+      "category": "Scuola",
+      "source": "mim"
+    },
+    {
+      "id": "workspace-login",
+      "title": "Accedi a Google Workspace",
+      "description": "Accesso con l'account istituzionale, condiviso tra tutte le app Google.",
+      "url": "https://accounts.google.com/AccountChooser?continue=https%3A%2F%2Fclassroom.google.com%2F&hd=istitutostradivari.it",
+      "audience": [
+        "docenti",
+        "studenti",
+        "personale"
+      ],
+      "category": "Workspace",
+      "source": "google"
+    },
+    {
+      "id": "google-classroom",
+      "title": "Google Classroom",
+      "description": "Corsi, materiali, compiti e comunicazioni delle classi.",
+      "url": "https://classroom.google.com/",
+      "audience": [
+        "docenti",
+        "studenti"
+      ],
+      "category": "Workspace",
+      "source": "google"
+    },
+    {
+      "id": "google-drive",
+      "title": "Google Drive",
+      "description": "File e cartelle dell'account istituzionale.",
+      "url": "https://drive.google.com/",
+      "audience": [
+        "docenti",
+        "studenti",
+        "personale"
+      ],
+      "category": "Workspace",
+      "source": "google"
+    },
+    {
+      "id": "gmail",
+      "title": "Posta istituzionale",
+      "description": "Gmail con l'account dell'Istituto Stradivari.",
+      "url": "https://mail.google.com/",
+      "audience": [
+        "docenti",
+        "studenti",
+        "personale"
+      ],
+      "category": "Workspace",
+      "source": "google"
+    },
+    {
+      "id": "google-meet",
+      "title": "Google Meet",
+      "description": "Videolezioni, colloqui e riunioni online.",
+      "url": "https://meet.google.com/",
+      "audience": [
+        "docenti",
+        "studenti",
+        "famiglie",
+        "personale"
+      ],
+      "category": "Workspace",
+      "source": "google"
+    },
+    {
+      "id": "google-calendar",
+      "title": "Google Calendar",
+      "description": "Calendari, lezioni, appuntamenti, riunioni e scadenze.",
+      "url": "https://calendar.google.com/",
+      "audience": [
+        "docenti",
+        "studenti",
+        "personale"
+      ],
+      "category": "Workspace",
+      "source": "google"
+    },
+    {
+      "id": "google-documenti",
+      "title": "Google Documenti",
+      "description": "Crea e modifica documenti collaborativi con l'account istituzionale.",
+      "url": "https://docs.google.com/document/",
+      "audience": [
+        "docenti",
+        "studenti",
+        "personale"
+      ],
+      "category": "Workspace",
+      "source": "google"
+    },
+    {
+      "id": "google-fogli",
+      "title": "Google Fogli",
+      "description": "Fogli di calcolo collaborativi per attività e laboratori.",
+      "url": "https://docs.google.com/spreadsheets/",
+      "audience": [
+        "docenti",
+        "studenti",
+        "personale"
+      ],
+      "category": "Workspace",
+      "source": "google"
+    },
+    {
+      "id": "google-presentazioni",
+      "title": "Google Presentazioni",
+      "description": "Presentazioni collaborative per lezioni, progetti e portfolio.",
+      "url": "https://docs.google.com/presentation/",
+      "audience": [
+        "docenti",
+        "studenti",
+        "personale"
+      ],
+      "category": "Workspace",
+      "source": "google"
+    },
+    {
+      "id": "google-moduli",
+      "title": "Google Moduli",
+      "description": "Questionari, verifiche, raccolta dati e iscrizioni.",
+      "url": "https://docs.google.com/forms/",
+      "audience": [
+        "docenti",
+        "studenti",
+        "personale"
+      ],
+      "category": "Workspace",
+      "source": "google"
+    },
+    {
+      "id": "freesewing",
+      "title": "FreeSewing — Cartamodelli su misura",
+      "description": "Crea e personalizza cartamodelli nel browser partendo dalle misure.",
+      "url": "https://freesewing.eu/editor/",
+      "audience": [
+        "docenti",
+        "studenti"
+      ],
+      "category": "Moda",
+      "source": "freesewing",
+      "icon": "fashion-cad"
+    },
+    {
+      "id": "corso-ia-dall-archivio-alla-classe",
+      "title": "Corso IA — Dall'Archivio alla Classe",
+      "description": "Il corso IA per i docenti: dieci lezioni, un'esercitazione a settimana.",
+      "url": "https://corso-ai.stradilab.org",
+      "audience": [
+        "docenti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "riservato",
+      "updated": "2026-08-26"
+    },
+    {
+      "id": "sito-del-liceo-musicale",
+      "title": "Sito del Liceo Musicale",
+      "description": "Il nuovo sito del Liceo Musicale, navigabile come un circolo delle quinte.",
+      "url": "https://liceomusicalecremona.org",
+      "audience": [
+        "studenti"
+      ],
+      "category": "Orientamento",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "libero",
+      "updated": "2026-07-14"
+    },
+    {
+      "id": "sito-della-scuola-di-liuteria",
+      "title": "Sito della Scuola di Liuteria",
+      "description": "Laboratori, percorsi di studio e la tradizione liutaria cremonese.",
+      "url": "https://scuoladiliuteria.com",
+      "audience": [
+        "studenti"
+      ],
+      "category": "Orientamento",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "libero",
+      "updated": "2026-07-13"
+    },
+    {
+      "id": "documentazione-didattica",
+      "title": "Documentazione Didattica",
+      "description": "Programmazioni e schede PTOF compilate online dai docenti.",
+      "url": "https://documentazione-didattica.stradilab.org",
+      "audience": [
+        "docenti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "riservato",
+      "updated": "2026-07-06"
+    },
+    {
+      "id": "catalogo-opere-degli-alunni",
+      "title": "Catalogo Opere degli Alunni",
+      "description": "Archivio digitale dei lavori degli studenti dei cinque indirizzi.",
+      "url": "https://catalogo-stradivari.stradilab.org",
+      "audience": [
+        "studenti"
+      ],
+      "category": "Orientamento",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "libero",
+      "updated": "2026-07-02"
+    },
+    {
+      "id": "annuario-degli-ex-alunni",
+      "title": "Annuario degli ex Alunni",
+      "description": "Le storie degli alunni dopo il diploma.",
+      "url": "https://annuario-alunni.stradilab.org",
+      "audience": [
+        "studenti"
+      ],
+      "category": "Orientamento",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "libero",
+      "updated": "2026-05-10"
+    },
+    {
+      "id": "biblioteca-liuteria",
+      "title": "Biblioteca Liuteria",
+      "description": "Ricerca nel catalogo della biblioteca Tiziano Vago.",
+      "url": "https://biblioteca-liuteria.stradilab.org",
+      "audience": [
+        "tutti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "libero",
+      "updated": "2026-06-25"
+    },
+    {
+      "id": "epolicy",
+      "title": "EPolicy",
+      "description": "Le regole d'istituto per un uso consapevole del digitale.",
+      "url": "https://epolicy.stradilab.org",
+      "audience": [
+        "tutti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "libero",
+      "updated": "2026-06-25"
+    },
+    {
+      "id": "formazione-interna",
+      "title": "Formazione Interna",
+      "description": "Rendicontazione delle ore di formazione dei docenti.",
+      "url": "https://formazione-interna.stradilab.org",
+      "audience": [
+        "docenti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "riservato",
+      "updated": "2026-06-20"
+    },
+    {
+      "id": "gestione-uda-e-pfi",
+      "title": "Gestione UDA e PFI",
+      "description": "UDA e piani formativi individuali degli istituti professionali.",
+      "url": "https://gestione-uda.stradilab.org",
+      "audience": [
+        "docenti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "riservato",
+      "updated": "2026-06-25"
+    },
+    {
+      "id": "autovalutazione-alunni",
+      "title": "Autovalutazione alunni",
+      "description": "Griglia di autovalutazione sulle competenze del PTOF.",
+      "url": "https://autovalutazione-alunni.stradilab.org",
+      "audience": [
+        "studenti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "libero",
+      "updated": "2026-06-25"
+    },
+    {
+      "id": "programmi-svolti",
+      "title": "Programmi Svolti",
+      "description": "Archivio dei programmi svolti per classe, indirizzo e materia.",
+      "url": "https://programmi-svolti.stradilab.org",
+      "audience": [
+        "tutti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "riservato",
+      "updated": "2026-06-25"
+    },
+    {
+      "id": "votazioni-scuola",
+      "title": "Votazioni Scuola",
+      "description": "Voto palese e segreto per le sedute del Collegio Docenti.",
+      "url": "https://votazioni-scuola.stradilab.org",
+      "audience": [
+        "docenti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "riservato",
+      "updated": "2026-07-04"
+    },
+    {
+      "id": "elezioni-rappresentanti-genitori",
+      "title": "Elezioni Rappresentanti Genitori",
+      "description": "Candidature, spoglio e verbale per i consigli di classe.",
+      "url": "https://elezioni-genitori.stradilab.org",
+      "audience": [
+        "tutti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "riservato",
+      "updated": "2026-07-05"
+    },
+    {
+      "id": "locandine-eventi",
+      "title": "Locandine Eventi",
+      "description": "Locandine e poster per concerti e saggi, pronte in PDF.",
+      "url": "https://locandine-eventi.stradilab.org",
+      "audience": [
+        "tutti"
+      ],
+      "category": "Orientamento",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "libero",
+      "updated": "2026-07-12"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Google Meet
+Comment=Videolezioni, colloqui e riunioni online.
+Exec=stradilabos-open-app "https://meet.google.com/" "google-meet"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;Workspace;docenti;studenti;famiglie;personale;
+X-StradilabOS-Category=Workspace
+StartupNotify=true

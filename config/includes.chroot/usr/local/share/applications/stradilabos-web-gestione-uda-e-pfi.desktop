@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Gestione UDA e PFI
+Comment=UDA e piani formativi individuali degli istituti professionali.
+Exec=stradilabos-open-app "https://gestione-uda.stradilab.org" "gestione-uda-e-pfi"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;StradiLab;docenti;
+X-StradilabOS-Category=StradiLab
+StartupNotify=true

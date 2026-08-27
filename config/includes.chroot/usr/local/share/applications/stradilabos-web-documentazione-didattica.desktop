@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Documentazione Didattica
+Comment=Programmazioni e schede PTOF compilate online dai docenti.
+Exec=stradilabos-open-app "https://documentazione-didattica.stradilab.org" "documentazione-didattica"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;StradiLab;docenti;
+X-StradilabOS-Category=StradiLab
+StartupNotify=true

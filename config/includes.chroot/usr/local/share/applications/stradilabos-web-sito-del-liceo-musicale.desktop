@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Sito del Liceo Musicale
+Comment=Il nuovo sito del Liceo Musicale, navigabile come un circolo delle quinte.
+Exec=stradilabos-open-app "https://liceomusicalecremona.org" "sito-del-liceo-musicale"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;Orientamento;studenti;
+X-StradilabOS-Category=Orientamento
+StartupNotify=true

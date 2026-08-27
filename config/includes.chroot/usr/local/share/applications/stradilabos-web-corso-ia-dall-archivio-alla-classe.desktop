@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Corso IA — Dall'Archivio alla Classe
+Comment=Il corso IA per i docenti: dieci lezioni, un'esercitazione a settimana.
+Exec=stradilabos-open-app "https://corso-ai.stradilab.org" "corso-ia-dall-archivio-alla-classe"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;StradiLab;docenti;
+X-StradilabOS-Category=StradiLab
+StartupNotify=true

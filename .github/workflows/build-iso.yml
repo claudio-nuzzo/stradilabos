@@ -1,0 +1,43 @@
+name: Crea ISO StradilabOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "auto/**"
+      - "config/**"
+      - "scripts/**"
+      - ".github/workflows/build-iso.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Scarica il progetto
+        uses: actions/checkout@v4
+
+      - name: Controlla cataloghi e script
+        run: python3 scripts/validate_project.py
+
+      - name: Crea la ISO Debian in ambiente isolato
+        run: |
+          docker run --rm --privileged \
+            --volume "$PWD:/work" \
+            --workdir /work \
+            debian:trixie-slim \
+            sh -lc 'apt-get update && apt-get install --yes live-build python3 && ./scripts/validate_debian_packages.sh && ./auto/build'
+
+      - name: Crea checksum
+        run: sha256sum stradilabos-live-amd64.hybrid.iso > stradilabos-live-amd64.hybrid.iso.sha256
+
+      - name: Pubblica ISO e checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: stradilabos-live-amd64
+          path: |
+            stradilabos-live-amd64.hybrid.iso
+            stradilabos-live-amd64.hybrid.iso.sha256
+          if-no-files-found: error
+          retention-days: 14

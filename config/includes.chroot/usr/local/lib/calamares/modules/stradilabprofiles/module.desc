@@ -1,0 +1,7 @@
+---
+name: stradilabprofiles
+type: job
+interface: python
+script: main.py
+noconfig: true
+requiredModules: [ packagechooser, mount, unpackfs ]

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Benvenuto in StradilabOS
+Comment=Le azioni principali per iniziare
+Exec=stradilabos-welcome
+TryExec=stradilabos-welcome
+Icon=stradilabos
+Terminal=false
+Categories=Education;System;
+StartupNotify=true

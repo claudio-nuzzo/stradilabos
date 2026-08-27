@@ -1,0 +1,20 @@
+# Artefatti live-build
+.build/
+binary/
+cache/
+chroot/
+config/binary
+config/bootstrap
+config/chroot
+config/common
+config/source
+*.iso
+*.img
+*.hybrid.iso
+*.sha256
+build.log
+
+# Python e file locali
+__pycache__/
+*.py[cod]
+.DS_Store

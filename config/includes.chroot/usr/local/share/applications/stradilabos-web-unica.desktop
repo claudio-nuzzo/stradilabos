@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Piattaforma Unica
+Comment=Servizi del Ministero per studenti e famiglie.
+Exec=stradilabos-open-app "https://unica.istruzione.gov.it/" "unica"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;Scuola;studenti;famiglie;
+X-StradilabOS-Category=Scuola
+StartupNotify=true

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Elezioni Rappresentanti Genitori
+Comment=Candidature, spoglio e verbale per i consigli di classe.
+Exec=stradilabos-open-app "https://elezioni-genitori.stradilab.org" "elezioni-rappresentanti-genitori"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;StradiLab;tutti;
+X-StradilabOS-Category=StradiLab
+StartupNotify=true

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=FreeSewing — Cartamodelli su misura
+Comment=Crea e personalizza cartamodelli nel browser partendo dalle misure.
+Exec=stradilabos-open-app "https://freesewing.eu/editor/" "freesewing"
+TryExec=stradilabos-open-app
+Icon=fashion-cad
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;Moda;docenti;studenti;
+X-StradilabOS-Category=Moda
+StartupNotify=true

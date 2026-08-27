@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Google Moduli
+Comment=Questionari, verifiche, raccolta dati e iscrizioni.
+Exec=stradilabos-open-app "https://docs.google.com/forms/" "google-moduli"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;Workspace;docenti;studenti;personale;
+X-StradilabOS-Category=Workspace
+StartupNotify=true

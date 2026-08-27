@@ -1,0 +1,37 @@
+---
+componentName: stradilabos
+welcomeStyleCalamares: true
+welcomeExpandingLogo: true
+windowExpanding: normal
+windowSize: 900px,620px
+windowPlacement: center
+
+strings:
+    productName:         StradilabOS
+    shortProductName:    StradilabOS
+    version:             0.1
+    shortVersion:        0.1
+    versionedName:       StradilabOS 0.1
+    shortVersionedName:  StradilabOS 0.1
+    bootloaderEntryName: StradilabOS
+    productUrl:          https://stradilab.org
+    supportUrl:          https://www.istitutostradivari.edu.it
+    knownIssuesUrl:      https://www.istitutostradivari.edu.it
+    releaseNotesUrl:     https://stradilab.org
+    donateUrl:           https://stradilab.org
+
+sidebar: widget
+navigation: widget
+
+images:
+    productLogo:    "stradilabos.svg"
+    productIcon:    "stradilabos.svg"
+    productWelcome: "stradilabos.svg"
+
+style:
+    SidebarBackground:        "#16130f"
+    SidebarText:              "#f6f4ef"
+    SidebarTextCurrent:       "#ffffff"
+    SidebarBackgroundCurrent: "#9b2335"
+
+slideshowAPI: 2

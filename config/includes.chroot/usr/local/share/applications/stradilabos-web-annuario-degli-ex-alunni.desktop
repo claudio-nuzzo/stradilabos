@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Annuario degli ex Alunni
+Comment=Le storie degli alunni dopo il diploma.
+Exec=stradilabos-open-app "https://annuario-alunni.stradilab.org" "annuario-degli-ex-alunni"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;Orientamento;studenti;
+X-StradilabOS-Category=Orientamento
+StartupNotify=true

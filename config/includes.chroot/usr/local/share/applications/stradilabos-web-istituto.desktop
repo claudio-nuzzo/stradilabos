@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Sito dell'Istituto
+Comment=Notizie, didattica, organizzazione e informazioni ufficiali.
+Exec=stradilabos-open-app "https://www.istitutostradivari.edu.it/" "istituto"
+TryExec=stradilabos-open-app
+Icon=istituto-stradivari
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;Scuola;tutti;
+X-StradilabOS-Category=Scuola
+StartupNotify=true

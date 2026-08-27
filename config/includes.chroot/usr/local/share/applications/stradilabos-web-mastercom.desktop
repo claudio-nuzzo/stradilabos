@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=MasterCom — Registro elettronico
+Comment=Accesso diretto al registro elettronico dell'IIS Stradivari.
+Exec=stradilabos-open-app "https://stradivari-cr.registroelettronico.com/mastercom/index.php" "mastercom"
+TryExec=stradilabos-open-app
+Icon=mastercom
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;Scuola;docenti;studenti;famiglie;
+X-StradilabOS-Category=Scuola
+StartupNotify=true
