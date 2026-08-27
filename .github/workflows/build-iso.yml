@@ -62,4 +62,4 @@ jobs:
             stradilabos-live-amd64.hybrid.iso
             stradilabos-live-amd64.hybrid.iso.sha256
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1
