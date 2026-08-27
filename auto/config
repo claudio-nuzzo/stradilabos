@@ -16,5 +16,5 @@ lb config noauto \
     --iso-application "StradilabOS Live" \
     --iso-publisher "StradiLab - IIS Antonio Stradivari Cremona" \
     --iso-volume "STRADILABOS" \
-    --image-name "stradilabos-live-amd64" \
+    --image-name "stradilabos-live" \
     "$@"

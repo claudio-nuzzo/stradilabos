@@ -35,8 +35,24 @@ jobs:
               ./auto/build
             '
 
-      - name: Crea checksum
-        run: sha256sum stradilabos-live-amd64.hybrid.iso > stradilabos-live-amd64.hybrid.iso.sha256
+      - name: Prepara ISO e checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t iso_files < <(find . -maxdepth 1 -type f -name '*.hybrid.iso' -print)
+          if (( ${#iso_files[@]} != 1 )); then
+            echo "Attesa una sola ISO, trovate: ${#iso_files[@]}" >&2
+            printf '%s\n' "${iso_files[@]}" >&2
+            exit 1
+          fi
+
+          target="stradilabos-live-amd64.hybrid.iso"
+          if [[ "${iso_files[0]}" != "./${target}" ]]; then
+            mv "${iso_files[0]}" "${target}"
+          fi
+
+          sha256sum "${target}" > "${target}.sha256"
+          ls -lh "${target}" "${target}.sha256"
 
       - name: Pubblica ISO e checksum
         uses: actions/upload-artifact@v4
