@@ -191,6 +191,10 @@ INSTITUTIONAL_APPS = [
     },
 ]
 
+for app in INSTITUTIONAL_APPS:
+    if app.get("source") == "google":
+        app["icon"] = "stradilabos-workspace"
+
 
 def slugify(value: str) -> str:
     normalized = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode()

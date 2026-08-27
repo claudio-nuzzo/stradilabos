@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
   <title>Stradilab — cinque indirizzi</title>
-  <rect width="32" height="32" rx="6" fill="#1a1814"/>
+  <rect width="32" height="32" rx="6" fill="#16130f"/>
   <circle cx="16" cy="7" r="3.1" fill="#d4839f"/>
   <circle cx="24.56" cy="13.22" r="3.1" fill="#7dab7e"/>
   <circle cx="21.29" cy="23.28" r="3.1" fill="#d4a85a"/>

@@ -16,6 +16,18 @@ APPLICATIONS = CHROOT / "usr/local/share/applications"
 PACKAGE_RE = re.compile(r"^[a-z0-9][a-z0-9+.-]*$")
 FLATPAK_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 ADDRESS_PROFILES = {"artistico", "musicale", "liuteria", "moda", "arredo"}
+BRAND_COLORS = {
+    "#16130f",
+    "#645e55",
+    "#7a9fd4",
+    "#7dab7e",
+    "#9b2335",
+    "#c4906a",
+    "#d4839f",
+    "#d4a85a",
+    "#ded8ce",
+    "#f6f4ef",
+}
 
 
 def require(condition: bool, message: str, errors: list[str]) -> None:
@@ -49,6 +61,13 @@ def validate_catalog(errors: list[str]) -> None:
         "La dotazione Google Workspace è incompleta.",
         errors,
     )
+    for app in apps:
+        if app.get("id") in workspace_apps:
+            require(
+                app.get("icon") == "stradilabos-workspace",
+                f"Icona Workspace non coordinata: {app.get('id')}",
+                errors,
+            )
 
     generated = list(APPLICATIONS.glob("stradilabos-web-*.desktop"))
     require(len(generated) == len(apps), "Numero launcher diverso dal catalogo.", errors)
@@ -133,8 +152,38 @@ def validate_branding(errors: list[str]) -> None:
     if slideshow.exists():
         text = slideshow.read_text(encoding="utf-8")
         require("Presentation" in text, "Presentazione Calamares non valida.", errors)
-    wallpaper = CHROOT / "usr/share/backgrounds/stradilabos/stradilabos-wallpaper.svg"
+    wallpaper = CHROOT / "usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v2.png"
     require(wallpaper.exists(), "Sfondo StradilabOS assente.", errors)
+    theme = CHROOT / "usr/share/icons/StradiLab"
+    require((theme / "index.theme").exists(), "Tema icone StradilabOS assente.", errors)
+    require(
+        (theme / "scalable/places/user-home.svg").exists(),
+        "Icone del desktop StradilabOS assenti.",
+        errors,
+    )
+    require(
+        (CHROOT / "usr/local/share/icons/hicolor/scalable/apps/stradilabos-workspace.svg").exists(),
+        "Icona Workspace StradilabOS assente.",
+        errors,
+    )
+    branded_files = [
+        *branding.glob("*.svg"),
+        *branding.glob("*.qml"),
+        *(CHROOT / "usr/local/share/icons/hicolor/scalable/apps").glob("*.svg"),
+        *(theme / "scalable").glob("**/*.svg"),
+        CHROOT / "usr/local/lib/stradilabos/welcome.py",
+    ]
+    for path in branded_files:
+        colors = {
+            color.casefold()
+            for color in re.findall(r"#[0-9a-fA-F]{6}", path.read_text(encoding="utf-8"))
+        }
+        unknown = colors - BRAND_COLORS
+        require(
+            not unknown,
+            f"Colori fuori palette in {path.name}: {', '.join(sorted(unknown))}",
+            errors,
+        )
 
 
 def validate_installer(errors: list[str]) -> None:

@@ -30,11 +30,11 @@ window { background: #f6f4ef; }
 .wrap { padding: 30px; }
 .brand { color: #9b2335; font-size: 13px; font-weight: 700; }
 .title { color: #16130f; font-size: 30px; font-weight: 700; }
-.copy { color: #5d574f; font-size: 14px; }
-.action { background: #ffffff; border: 1px solid #ded8ce; border-radius: 12px; padding: 13px; }
+.copy { color: #645e55; font-size: 14px; }
+.action { background: #f6f4ef; border: 1px solid #ded8ce; border-radius: 12px; padding: 13px; }
 .action:hover { border-color: #9b2335; }
-.primary { background: #9b2335; color: #ffffff; border-radius: 12px; padding: 13px; }
-.profile-row { background: #ffffff; border: 1px solid #ded8ce; border-radius: 10px; padding: 12px; }
+.primary { background: #9b2335; color: #f6f4ef; border-radius: 12px; padding: 13px; }
+.profile-row { background: #f6f4ef; border: 1px solid #ded8ce; border-radius: 10px; padding: 12px; }
 """
 
 

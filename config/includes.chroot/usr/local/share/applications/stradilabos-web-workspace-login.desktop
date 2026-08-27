@@ -5,7 +5,7 @@ Name=Accedi a Google Workspace
 Comment=Accesso con l'account istituzionale, condiviso tra tutte le app Google.
 Exec=stradilabos-open-app "https://accounts.google.com/AccountChooser?continue=https%%3A%%2F%%2Fclassroom.google.com%%2F&hd=istitutostradivari.it" "workspace-login"
 TryExec=stradilabos-open-app
-Icon=stradilabos
+Icon=stradilabos-workspace
 Terminal=false
 Categories=Education;Network;
 Keywords=StradiLab;Workspace;docenti;studenti;personale;

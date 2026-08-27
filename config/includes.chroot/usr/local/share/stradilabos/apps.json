@@ -97,7 +97,8 @@
         "personale"
       ],
       "category": "Workspace",
-      "source": "google"
+      "source": "google",
+      "icon": "stradilabos-workspace"
     },
     {
       "id": "google-classroom",
@@ -109,7 +110,8 @@
         "studenti"
       ],
       "category": "Workspace",
-      "source": "google"
+      "source": "google",
+      "icon": "stradilabos-workspace"
     },
     {
       "id": "google-drive",
@@ -122,7 +124,8 @@
         "personale"
       ],
       "category": "Workspace",
-      "source": "google"
+      "source": "google",
+      "icon": "stradilabos-workspace"
     },
     {
       "id": "gmail",
@@ -135,7 +138,8 @@
         "personale"
       ],
       "category": "Workspace",
-      "source": "google"
+      "source": "google",
+      "icon": "stradilabos-workspace"
     },
     {
       "id": "google-meet",
@@ -149,7 +153,8 @@
         "personale"
       ],
       "category": "Workspace",
-      "source": "google"
+      "source": "google",
+      "icon": "stradilabos-workspace"
     },
     {
       "id": "google-calendar",
@@ -162,7 +167,8 @@
         "personale"
       ],
       "category": "Workspace",
-      "source": "google"
+      "source": "google",
+      "icon": "stradilabos-workspace"
     },
     {
       "id": "google-documenti",
@@ -175,7 +181,8 @@
         "personale"
       ],
       "category": "Workspace",
-      "source": "google"
+      "source": "google",
+      "icon": "stradilabos-workspace"
     },
     {
       "id": "google-fogli",
@@ -188,7 +195,8 @@
         "personale"
       ],
       "category": "Workspace",
-      "source": "google"
+      "source": "google",
+      "icon": "stradilabos-workspace"
     },
     {
       "id": "google-presentazioni",
@@ -201,7 +209,8 @@
         "personale"
       ],
       "category": "Workspace",
-      "source": "google"
+      "source": "google",
+      "icon": "stradilabos-workspace"
     },
     {
       "id": "google-moduli",
@@ -214,7 +223,8 @@
         "personale"
       ],
       "category": "Workspace",
-      "source": "google"
+      "source": "google",
+      "icon": "stradilabos-workspace"
     },
     {
       "id": "freesewing",

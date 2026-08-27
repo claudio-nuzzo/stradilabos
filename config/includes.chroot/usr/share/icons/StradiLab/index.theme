@@ -1,0 +1,26 @@
+[Icon Theme]
+Name=StradiLab
+Comment=Tema leggero coordinato con StradilabOS
+Inherits=elementary-xfce,Adwaita,hicolor
+Directories=scalable/places,scalable/devices,scalable/apps
+
+[scalable/places]
+Size=48
+Context=Places
+Type=Scalable
+MinSize=16
+MaxSize=256
+
+[scalable/devices]
+Size=48
+Context=Devices
+Type=Scalable
+MinSize=16
+MaxSize=256
+
+[scalable/apps]
+Size=48
+Context=Applications
+Type=Scalable
+MinSize=16
+MaxSize=256

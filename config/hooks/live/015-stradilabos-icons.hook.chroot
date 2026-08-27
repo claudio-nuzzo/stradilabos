@@ -1,0 +1,22 @@
+#!/bin/sh
+set -eu
+
+theme=/usr/share/icons/StradiLab
+
+ln -sf user-home.svg "$theme/scalable/places/folder-home.svg"
+ln -sf user-home.svg "$theme/scalable/places/user-desktop.svg"
+ln -sf folder.svg "$theme/scalable/places/folder-documents.svg"
+ln -sf folder.svg "$theme/scalable/places/folder-download.svg"
+ln -sf folder.svg "$theme/scalable/places/folder-music.svg"
+ln -sf folder.svg "$theme/scalable/places/folder-pictures.svg"
+ln -sf folder.svg "$theme/scalable/places/folder-publicshare.svg"
+ln -sf folder.svg "$theme/scalable/places/folder-templates.svg"
+ln -sf folder.svg "$theme/scalable/places/folder-videos.svg"
+ln -sf user-trash.svg "$theme/scalable/places/user-trash-full.svg"
+ln -sf drive-harddisk.svg "$theme/scalable/devices/drive-harddisk-system.svg"
+ln -sf drive-removable-media.svg "$theme/scalable/devices/media-flash.svg"
+ln -sf system-file-manager.svg "$theme/scalable/apps/file-manager.svg"
+
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    gtk-update-icon-cache -f "$theme" || true
+fi

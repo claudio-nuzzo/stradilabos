@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Stile StradilabOS
+Exec=sh -c "sleep 1; exec stradilabos-apply-theme"
+TryExec=stradilabos-apply-theme
+Icon=stradilabos
+Terminal=false
+OnlyShowIn=XFCE;
+X-GNOME-Autostart-enabled=true
