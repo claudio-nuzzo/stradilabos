@@ -39,6 +39,16 @@ if not any(
     for item in instances
 ):
     instances.append(device_instance)
+workspace_instance = {
+    "id": "workspace",
+    "module": "packagechooser",
+    "config": "stradilabos-workspace.conf",
+}
+if not any(
+    item.get("id") == "workspace" and item.get("module") == "packagechooser"
+    for item in instances
+):
+    instances.append(workspace_instance)
 settings["instances"] = instances
 
 for phase in settings.get("sequence", []):
@@ -46,10 +56,13 @@ for phase in settings.get("sequence", []):
         pages = phase["show"]
         profile_page = "packagechooser@profiles"
         device_page = "packagechooser@device"
+        workspace_page = "packagechooser@workspace"
         if profile_page not in pages:
             pages.insert(pages.index("welcome") + 1, profile_page)
         if device_page not in pages:
             pages.insert(pages.index(profile_page) + 1, device_page)
+        if workspace_page not in pages:
+            pages.insert(pages.index(device_page) + 1, workspace_page)
     if "exec" in phase and "unpackfs" in phase["exec"]:
         jobs = phase["exec"]
         job = "stradilabprofiles"
@@ -70,6 +83,16 @@ fi
 
 update-desktop-database /usr/local/share/applications || true
 gtk-update-icon-cache -f /usr/local/share/icons/hicolor || true
+
+# Identità coerente sia nella sessione Live sia nel sistema copiato da Calamares.
+ln -sfn ../usr/lib/os-release /etc/os-release
+
+# Il tema Plymouth viene incorporato nell'initramfs che live-build userà nella
+# ISO e che Calamares copierà sul disco installato.
+if command -v plymouth-set-default-theme >/dev/null 2>&1; then
+    plymouth-set-default-theme stradilabos
+    update-initramfs -u || true
+fi
 
 # Il terminale rimane disponibile ai tecnici tramite Alt+F2, ma non compare
 # nel menu destinato agli utenti ordinari.

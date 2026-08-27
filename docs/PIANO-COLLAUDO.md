@@ -10,29 +10,37 @@
 
 ## Prova live
 
-1. Avvio da USB senza modificare il disco interno.
-2. Lingua, tastiera, fuso orario e risoluzione corretti.
-3. Connessione Wi-Fi e cablata dall'interfaccia grafica.
-4. Riproduzione e registrazione audio.
-5. Apertura di una web app StradiLab in finestra dedicata.
-6. Login Google istituzionale condiviso fra due web app.
-7. Apertura e salvataggio di DOCX, XLSX, PPTX e PDF.
-8. Riconoscimento di una seconda chiavetta USB.
-9. Stampa o almeno rilevamento di una stampante di rete.
+1. Menu iniziale con nome e sfondo StradilabOS, senza casco Debian.
+2. Avvio da USB senza modificare il disco interno.
+3. Caricamento, sfondo, pannello e utente Live identificati come StradilabOS.
+4. Lingua, tastiera, fuso orario e risoluzione corretti.
+5. Connessione Wi-Fi e cablata dall'interfaccia grafica.
+6. Riproduzione e registrazione audio.
+7. Apertura di una web app StradiLab in finestra dedicata.
+8. Login `@istitutostradivari.it` condiviso fra due web app e rifiuto di un
+   account Google esterno al dominio.
+9. Apertura e salvataggio di DOCX, XLSX, PPTX e PDF.
+10. Riconoscimento di una seconda chiavetta USB.
+11. Stampa o almeno rilevamento di una stampante di rete.
 
 ## Prova d'installazione
 
 Usare inizialmente un disco di prova senza dati importanti.
 
 1. Avvio di Calamares da «Installa StradilabOS».
-2. Installazione automatica su tutto il disco.
-3. Riavvio senza chiavetta.
-4. Creazione e accesso dell'utente scelto.
-5. Raccolte dell'indirizzo già selezionate nel Centro App.
-6. Download e avvio di almeno una raccolta specialistica.
-7. Aggiornamenti da Synaptic.
-8. Riavvio e spegnimento grafici.
-9. Verifica che il launcher dell'installatore non resti visibile.
+2. Verifica delle scelte Studente, Docente, Segreteria e Solo base.
+3. Verifica delle scelte PC personale/condiviso e Workspace subito/in seguito.
+4. Installazione automatica su tutto il disco.
+5. Riavvio senza chiavetta.
+6. Menu di avvio, caricamento e accesso con identità StradilabOS.
+7. Creazione e accesso dell'utente scelto.
+8. Se richiesto, pulsante Workspace principale al primo avvio e dominio
+   `@istitutostradivari.it` chiaramente indicato.
+9. Raccolte coerenti con il profilo già selezionate nel Centro App.
+10. Download e avvio di almeno una raccolta specialistica.
+11. Aggiornamenti da Synaptic.
+12. Riavvio e spegnimento grafici.
+13. Verifica che il launcher dell'installatore non resti visibile.
 
 In Parallels, al termine dell'installazione usare **Dispositivi → CD/DVD →
 Disconnetti** prima del riavvio. La ISO collegata equivale a lasciare la

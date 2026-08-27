@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=File
+Comment=Apri documenti, chiavette e dischi
+Exec=thunar
+Icon=system-file-manager
+Terminal=false
+

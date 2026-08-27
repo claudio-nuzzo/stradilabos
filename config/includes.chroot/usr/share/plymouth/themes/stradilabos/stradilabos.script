@@ -1,0 +1,68 @@
+screen_width = Window.GetWidth();
+screen_height = Window.GetHeight();
+
+background_image = Image("background.png");
+background_image = background_image.Scale(screen_width, screen_height);
+background_sprite = Sprite(background_image);
+background_sprite.SetPosition(0, 0, -100);
+
+logo_image = Image("logo.png");
+logo_width = Math.Min(logo_image.GetWidth(), screen_width * 0.38);
+logo_height = logo_image.GetHeight() * logo_width / logo_image.GetWidth();
+logo_image = logo_image.Scale(logo_width, logo_height);
+logo_sprite = Sprite(logo_image);
+logo_sprite.SetPosition(
+    screen_width * 0.09,
+    (screen_height - logo_image.GetHeight()) / 2,
+    10
+);
+
+status_image = Image.Text("Avvio di StradilabOS…", 0.38, 0.15, 0.21);
+status_sprite = Sprite(status_image);
+status_sprite.SetPosition(
+    screen_width * 0.09,
+    (screen_height + logo_image.GetHeight()) / 2 + 18,
+    10
+);
+
+fun hide_prompt() {
+    if (global.prompt_sprite) global.prompt_sprite.SetOpacity(0);
+    if (global.entry_sprite) global.entry_sprite.SetOpacity(0);
+}
+
+fun show_prompt(prompt, entry) {
+    hide_prompt();
+    global.prompt_sprite = Sprite(Image.Text(prompt, 0.10, 0.09, 0.07));
+    global.prompt_sprite.SetPosition(screen_width * 0.09, screen_height * 0.73, 20);
+    global.entry_sprite = Sprite(Image.Text(entry, 0.38, 0.15, 0.21));
+    global.entry_sprite.SetPosition(screen_width * 0.09, screen_height * 0.79, 20);
+}
+
+fun password_text(bullets) {
+    local.value = "";
+    for (index = 0; index < bullets; index++) value += "•";
+    return value;
+}
+
+fun message_callback(text) {
+    if (global.message_sprite) global.message_sprite.SetOpacity(0);
+    global.message_sprite = Sprite(Image.Text(text, 0.38, 0.15, 0.21));
+    global.message_sprite.SetPosition(screen_width * 0.09, screen_height * 0.88, 12);
+}
+
+fun display_password_callback(prompt, bullets) {
+    show_prompt(prompt, password_text(bullets));
+}
+
+fun display_question_callback(prompt, entry) {
+    show_prompt(prompt, entry);
+}
+
+fun display_normal_callback() {
+    hide_prompt();
+}
+
+Plymouth.SetMessageFunction(message_callback);
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+Plymouth.SetDisplayQuestionFunction(display_question_callback);
+Plymouth.SetDisplayNormalFunction(display_normal_callback);

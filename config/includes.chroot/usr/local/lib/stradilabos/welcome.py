@@ -19,6 +19,13 @@ WELCOME_STATE = CONFIG_DIR / "welcome-seen"
 PROFILE_STATE = CONFIG_DIR / "profiles.json"
 PACKS_CATALOG = Path("/usr/local/share/stradilabos/packs.json")
 ADDRESS_IDS = ("artistico", "musicale", "liuteria", "moda", "arredo")
+ROLE_IDS = ("student", "teacher", "staff", "base")
+ROLE_LABELS = {
+    "student": "Studente",
+    "teacher": "Docente · tutti gli indirizzi",
+    "staff": "Personale di segreteria",
+    "base": "Installazione base",
+}
 WORKSPACE_LOGIN = (
     "https://accounts.google.com/AccountChooser?"
     "continue=https%3A%2F%2Fclassroom.google.com%2F&"
@@ -27,14 +34,33 @@ WORKSPACE_LOGIN = (
 
 CSS = b"""
 window { background: #f6f4ef; }
-.wrap { padding: 30px; }
+.wrap { padding: 32px; }
 .brand { color: #9b2335; font-size: 13px; font-weight: 700; }
-.title { color: #16130f; font-size: 30px; font-weight: 700; }
-.copy { color: #645e55; font-size: 14px; }
-.action { background: #f6f4ef; border: 1px solid #ded8ce; border-radius: 12px; padding: 13px; }
-.action:hover { border-color: #9b2335; }
-.primary { background: #9b2335; color: #f6f4ef; border-radius: 12px; padding: 13px; }
-.profile-row { background: #f6f4ef; border: 1px solid #ded8ce; border-radius: 10px; padding: 12px; }
+.title { color: #16130f; font-size: 32px; font-weight: 700; }
+.copy { color: #645e55; font-size: 15px; }
+.action {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #ded8ce;
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(22, 19, 15, 0.08);
+}
+.action:hover { border-color: #9b2335; background: rgba(255, 255, 255, 0.92); }
+.primary {
+  background: #9b2335;
+  color: #f6f4ef;
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 3px 10px rgba(155, 35, 53, 0.22);
+}
+.profile-row {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #ded8ce;
+  border-radius: 14px;
+  padding: 13px;
+}
+button { min-height: 34px; }
+check, radio { min-width: 20px; min-height: 20px; }
 """
 
 
@@ -65,6 +91,17 @@ def load_profiles() -> list[str]:
     return list(dict.fromkeys(value for value in profiles if value in allowed))
 
 
+def load_role() -> str:
+    try:
+        state = json.loads(PROFILE_STATE.read_text(encoding="utf-8"))
+    except (OSError, TypeError, json.JSONDecodeError):
+        return "student" if load_profiles() else "base"
+    role = state.get("role")
+    if role in ROLE_IDS:
+        return role
+    return "student" if state.get("profiles") else "base"
+
+
 def load_device_mode() -> str:
     try:
         mode = json.loads(PROFILE_STATE.read_text(encoding="utf-8"))["device_mode"]
@@ -73,17 +110,30 @@ def load_device_mode() -> str:
     return mode if mode in {"personal", "shared"} else "personal"
 
 
+def load_workspace_onboarding() -> str:
+    try:
+        mode = json.loads(PROFILE_STATE.read_text(encoding="utf-8"))[
+            "workspace_onboarding"
+        ]
+    except (OSError, KeyError, TypeError, json.JSONDecodeError):
+        return "first-boot"
+    return mode if mode in {"first-boot", "later"} else "first-boot"
+
+
 class WelcomeWindow(Gtk.ApplicationWindow):
     def __init__(self, application: Gtk.Application):
         super().__init__(application=application, title="Benvenuto in StradilabOS")
-        self.set_default_size(780, 690)
-        self.set_resizable(False)
+        self.set_default_size(860, 720)
+        self.set_resizable(True)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.set_icon_name("stradilabos")
         self.packs = load_packs()
+        self.role = load_role()
         self.profiles = load_profiles()
         self.device_mode = load_device_mode()
+        self.workspace_onboarding = load_workspace_onboarding()
         self.profile_checks: dict[str, Gtk.CheckButton] = {}
+        self.role_buttons: dict[str, Gtk.RadioButton] = {}
 
         provider = Gtk.CssProvider()
         provider.load_from_data(CSS)
@@ -98,7 +148,7 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         self.add(self.stack)
 
         force_profiles = "--profiles" in sys.argv
-        needs_profile = not is_live() and not self.profiles
+        needs_profile = not is_live() and not PROFILE_STATE.exists()
         self.stack.set_visible_child_name("profiles" if force_profiles or needs_profile else "home")
 
     def heading(self, title_text: str, copy_text: str) -> tuple[Gtk.Label, Gtk.Label, Gtk.Label]:
@@ -121,7 +171,8 @@ class WelcomeWindow(Gtk.ApplicationWindow):
                 "Puoi provarlo senza modificare il computer oppure avviare subito "
                 "l'installazione grafica."
                 if live_session
-                else "Un ambiente leggero per studiare, creare e usare i servizi della scuola."
+                else "Accedi con l'account @istitutostradivari.it, poi scegli le app "
+                "utili per il tuo ruolo."
             ),
         )
         self.profile_summary = Gtk.Label(xalign=0)
@@ -135,21 +186,8 @@ class WelcomeWindow(Gtk.ApplicationWindow):
             root.pack_start(
                 self.action(
                     "Installa StradilabOS sul computer",
-                    "L'installatore chiederà l'indirizzo e il tipo di utilizzo del PC",
+                    "Scegli Studente, Docente, Segreteria o la sola installazione base",
                     ["calamares-install-debian"],
-                    primary=True,
-                ),
-                False,
-                False,
-                3,
-            )
-
-        if not live_session:
-            root.pack_start(
-                self.action(
-                    "Scarica le app per il tuo indirizzo",
-                    "Il Centro App ha già selezionato le raccolte consigliate; serve Internet",
-                    ["stradilabos-app-center"],
                     primary=True,
                 ),
                 False,
@@ -160,14 +198,28 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         root.pack_start(
             self.action(
                 "Accedi a Google Workspace",
-                "Un solo accesso istituzionale per Classroom, Drive, Gmail, Meet e le altre app",
+                "Solo account @istitutostradivari.it · Classroom, Drive, Gmail, Meet e le altre app",
                 ["stradilabos-open-app", WORKSPACE_LOGIN, "workspace-login"],
-                primary=False,
+                primary=(
+                    not live_session and self.workspace_onboarding == "first-boot"
+                ),
             ),
             False,
             False,
             3,
         )
+        if not live_session:
+            root.pack_start(
+                self.action(
+                    "Scarica le app consigliate",
+                    "Il Centro App segue il profilo scelto; per il download serve Internet",
+                    ["stradilabos-app-center"],
+                    primary=self.workspace_onboarding == "later",
+                ),
+                False,
+                False,
+                3,
+            )
         root.pack_start(
             self.action("Apri StradiLab", "Web app e servizi della scuola", ["stradilabos-hub"]),
             False,
@@ -182,28 +234,25 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         )
         root.pack_start(
             self.callback_action(
-                "Scegli o cambia indirizzo",
-                "Personalizza le applicazioni per Artistico, Musicale, Liuteria, Moda o Arredo",
+                "Scegli o cambia profilo d'uso",
+                "Studente, docente, segreteria oppure installazione base",
                 self.show_profiles,
             ),
             False,
             False,
             0,
         )
-        root.pack_start(
-            self.action(
-                "Centro App",
-                (
-                    "Scopri le raccolte che potrai aggiungere dopo l'installazione"
-                    if live_session
-                    else "Controlla, aggiungi o completa le raccolte didattiche"
+        if live_session:
+            root.pack_start(
+                self.action(
+                    "Centro App",
+                    "Scopri le raccolte che potrai aggiungere dopo l'installazione",
+                    ["stradilabos-app-center"],
                 ),
-                ["stradilabos-app-center"],
-            ),
-            False,
-            False,
-            0,
-        )
+                False,
+                False,
+                0,
+            )
         root.pack_start(
             self.action("Apri i tuoi file", "Documenti, chiavette e dischi esterni", ["thunar"]),
             False,
@@ -225,15 +274,41 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         root.get_style_context().add_class("wrap")
         brand, title, copy = self.heading(
-            "Per quale indirizzo userai questo PC?",
+            "Chi userà questo PC?",
             (
-                "Puoi sceglierne più di uno, per esempio per un laboratorio condiviso. "
-                "StradilabOS evidenzierà le raccolte consigliate."
+                "Scegli il ruolo. Agli studenti vengono proposte le app del proprio "
+                "indirizzo; ai docenti quelle di tutti gli indirizzi. Segreteria e "
+                "installazione base restano leggere."
             ),
         )
         root.pack_start(brand, False, False, 0)
         root.pack_start(title, False, False, 0)
         root.pack_start(copy, False, False, 0)
+
+        role_title = Gtk.Label(xalign=0)
+        role_title.set_markup("<b>Profilo d'uso:</b>")
+        root.pack_start(role_title, False, False, 0)
+        role_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        role_group = None
+        role_options = (
+            ("student", "Studente — scegli il tuo indirizzo"),
+            ("teacher", "Docente — raccolte di tutti gli indirizzi"),
+            ("staff", "Personale di segreteria — strumenti comuni e servizi scolastici"),
+            ("base", "Solo base — nessuna raccolta specialistica preselezionata"),
+        )
+        for role_id, label in role_options:
+            button = Gtk.RadioButton.new_with_label_from_widget(role_group, label)
+            if role_group is None:
+                role_group = button
+            button.set_active(role_id == self.role)
+            button.connect("toggled", self.role_changed, role_id)
+            self.role_buttons[role_id] = button
+            role_box.pack_start(button, False, False, 0)
+        root.pack_start(role_box, False, False, 0)
+
+        address_title = Gtk.Label(xalign=0)
+        address_title.set_markup("<b>Indirizzo dello studente:</b>")
+        root.pack_start(address_title, False, False, 0)
 
         scroller = Gtk.ScrolledWindow()
         scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
@@ -241,6 +316,7 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         for pack in self.packs:
             check = Gtk.CheckButton()
             check.set_active(pack["id"] in self.profiles)
+            check.connect("toggled", self.address_changed, pack["id"])
             self.profile_checks[pack["id"]] = check
 
             row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
@@ -257,6 +333,7 @@ class WelcomeWindow(Gtk.ApplicationWindow):
             listing.pack_start(row, False, False, 0)
         scroller.add(listing)
         root.pack_start(scroller, True, True, 0)
+        self.apply_role_to_controls(self.role)
 
         mode_title = Gtk.Label(xalign=0)
         mode_title.set_markup("<b>Questo computer sarà:</b>")
@@ -286,7 +363,7 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         root.pack_start(note, False, False, 0)
 
         footer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        if self.profiles or is_live():
+        if PROFILE_STATE.exists() or is_live():
             back = Gtk.Button(label="Indietro")
             back.connect("clicked", lambda _button: self.stack.set_visible_child_name("home"))
             footer.pack_start(back, False, False, 0)
@@ -300,36 +377,79 @@ class WelcomeWindow(Gtk.ApplicationWindow):
     def update_profile_summary(self) -> None:
         titles = {pack["id"]: pack["title"] for pack in self.packs}
         selected = [titles[value] for value in self.profiles if value in titles]
-        label = " · ".join(selected) if selected else "Profilo non ancora scelto"
+        if self.role == "teacher":
+            label = ROLE_LABELS[self.role]
+        elif self.role == "student":
+            addresses = " · ".join(selected) if selected else "indirizzo non scelto"
+            label = f"{ROLE_LABELS[self.role]} · {addresses}"
+        else:
+            label = ROLE_LABELS[self.role]
         device = "PC CONDIVISO" if self.device_mode == "shared" else "PC PERSONALE"
         self.profile_summary.set_text(f"IL TUO PROFILO: {label.upper()} · {device}")
+
+    def role_changed(self, button: Gtk.RadioButton, role: str) -> None:
+        if button.get_active():
+            self.apply_role_to_controls(role)
+
+    def address_changed(self, button: Gtk.CheckButton, pack_id: str) -> None:
+        student_button = self.role_buttons.get("student")
+        if not button.get_active() or not student_button or not student_button.get_active():
+            return
+        for other_id, other in self.profile_checks.items():
+            if other_id != pack_id:
+                other.set_active(False)
+
+    def apply_role_to_controls(self, role: str) -> None:
+        if role == "student":
+            selected = [check for check in self.profile_checks.values() if check.get_active()]
+            for extra in selected[1:]:
+                extra.set_active(False)
+        for pack_id, check in self.profile_checks.items():
+            if role == "teacher":
+                check.set_active(True)
+            elif role in {"staff", "base"}:
+                check.set_active(False)
+            check.set_sensitive(role == "student")
 
     def show_profiles(self, *_args) -> None:
         for pack_id, check in self.profile_checks.items():
             check.set_active(pack_id in self.profiles)
+        self.role_buttons[self.role].set_active(True)
+        self.apply_role_to_controls(self.role)
         self.shared_mode.set_active(self.device_mode == "shared")
         self.personal_mode.set_active(self.device_mode == "personal")
         self.stack.set_visible_child_name("profiles")
 
     def save_profiles(self, *_args) -> None:
-        selected = [
-            pack_id
-            for pack_id in ADDRESS_IDS
-            if self.profile_checks.get(pack_id)
-            and self.profile_checks[pack_id].get_active()
-        ]
-        if not selected:
+        role = next(
+            (role_id for role_id, button in self.role_buttons.items() if button.get_active()),
+            "base",
+        )
+        if role == "teacher":
+            selected = list(ADDRESS_IDS)
+        elif role == "student":
+            selected = [
+                pack_id
+                for pack_id in ADDRESS_IDS
+                if self.profile_checks.get(pack_id)
+                and self.profile_checks[pack_id].get_active()
+            ]
+        else:
+            selected = []
+        if role == "student" and len(selected) != 1:
             self.message(
-                "Scegli almeno un indirizzo",
-                "Per continuare seleziona una o più raccolte didattiche.",
+                "Scegli un indirizzo",
+                "Per il profilo Studente seleziona un solo indirizzo scolastico.",
                 Gtk.MessageType.INFO,
             )
             return
         device_mode = "shared" if self.shared_mode.get_active() else "personal"
         state = {
-            "schema_version": 1,
+            "schema_version": 2,
+            "role": role,
             "profiles": selected,
             "device_mode": device_mode,
+            "workspace_onboarding": self.workspace_onboarding,
             "source": "welcome",
         }
         try:
@@ -343,6 +463,7 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         except OSError as error:
             self.message("Impossibile salvare il profilo", str(error))
             return
+        self.role = role
         self.profiles = selected
         self.device_mode = device_mode
         self.update_profile_summary()

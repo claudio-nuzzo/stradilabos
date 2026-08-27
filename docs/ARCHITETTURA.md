@@ -15,10 +15,14 @@ generazione automatizzabile.
 
 ## Principio di esperienza utente
 
-All'inizio dell'installazione l'utente sceglie uno o più indirizzi e indica se
-il PC è personale oppure condiviso. Calamares salva queste preferenze nel
-profilo del nuovo utente; la schermata di benvenuto consente di cambiarle in
-seguito senza usare il terminale.
+All'inizio dell'installazione l'utente sceglie un profilo d'uso: Studente con
+il proprio indirizzo, Docente con accesso alle raccolte di tutti gli indirizzi,
+Personale di segreteria oppure Installazione base. Indica poi se il PC è
+personale o condiviso e se desidera accedere a Google Workspace al primo avvio
+oppure in seguito. L'installatore dichiara sempre il dominio scolastico
+`@istitutostradivari.it`. Calamares salva queste preferenze nel profilo del
+nuovo utente; la schermata di benvenuto consente di cambiarle in seguito senza
+usare il terminale.
 
 L'utente vede sei azioni principali:
 
@@ -26,11 +30,17 @@ L'utente vede sei azioni principali:
 2. accedere a Google Workspace;
 3. aprire StradiLab;
 4. consultare i servizi della scuola;
-5. scegliere le app del proprio indirizzo;
+5. scegliere le app consigliate per il proprio ruolo e indirizzo;
 6. provare o installare il sistema.
 
 Il terminale resta installato per la manutenzione tecnica, ma non compare nei
-menu. Tutte le attività ordinarie hanno un percorso grafico.
+menu né nella barra StradiLab. Tutte le attività ordinarie hanno un percorso
+grafico.
+
+La stessa identità visiva accompagna l'intero percorso: menu della chiavetta,
+caricamento Plymouth, sessione Live, installatore, schermata di accesso e
+sistema installato. `os-release`, GRUB e Calamares usano il nome StradilabOS;
+Debian resta dichiarata come base compatibile, non come identità principale.
 
 ## Web app StradiLab
 
@@ -57,8 +67,10 @@ riempire il desktop di icone.
 La ISO base include desktop, browser, Google Workspace e micro-app scolastiche,
 LibreOffice e gli strumenti comuni. Le applicazioni creative più pesanti non
 sono duplicate nella chiavetta: dopo l'installazione il Centro App preseleziona
-le raccolte corrispondenti agli indirizzi scelti e le scarica da Debian o
-Flathub con un'unica autorizzazione grafica.
+le raccolte corrispondenti al profilo scelto e le scarica da Debian o Flathub
+con un'unica autorizzazione grafica. Il profilo Docente propone tutti gli
+indirizzi; Segreteria e Installazione base non preselezionano software
+specialistico.
 
 Il download non è parte obbligatoria di Calamares. In questo modo una rete lenta
 o assente non può interrompere l'installazione del sistema operativo. Nella
@@ -87,7 +99,9 @@ partire dalle misure.
 
 ## Limiti dell'MVP
 
-- solo PC `amd64`; nessun supporto Apple Silicon o 32 bit;
+- edizioni `amd64` e `arm64`; nessun supporto ai PC esclusivamente a 32 bit;
+- ARM64 è destinata soprattutto ai test su Mac Apple Silicon in Parallels e
+  richiede verifiche specifiche prima dell'uso su altri dispositivi ARM;
 - le web app richiedono Internet;
 - Google Drive per desktop non è disponibile per Linux; StradilabOS usa Drive
   e gli editor Workspace nel browser;

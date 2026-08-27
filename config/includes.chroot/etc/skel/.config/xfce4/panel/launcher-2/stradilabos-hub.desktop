@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=StradiLab
+Comment=Apri le web app e i servizi della scuola
+Exec=stradilabos-hub
+Icon=stradilabos
+Terminal=false
+

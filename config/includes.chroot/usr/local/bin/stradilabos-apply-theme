@@ -5,16 +5,43 @@ wallpaper=/usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v2.png
 [ -r "$wallpaper" ] || exit 0
 command -v xfconf-query >/dev/null 2>&1 || exit 0
 
-xfconf-query -c xsettings -p /Net/IconThemeName -n -t string -s StradiLab >/dev/null 2>&1 || true
+state_dir=${XDG_CONFIG_HOME:-"$HOME/.config"}/stradilabos
+marker=$state_dir/theme-applied-v2
+[ -e "$marker" ] && exit 0
+
+mkdir -p "$state_dir"
+
+xfconf-query -c xsettings -p /Net/ThemeName -n -t string -s Greybird >/dev/null 2>&1 || \
+    xfconf-query -c xsettings -p /Net/ThemeName -s Greybird >/dev/null 2>&1 || true
+xfconf-query -c xsettings -p /Net/IconThemeName -n -t string -s StradiLab >/dev/null 2>&1 || \
+    xfconf-query -c xsettings -p /Net/IconThemeName -s StradiLab >/dev/null 2>&1 || true
+xfconf-query -c xsettings -p /Gtk/FontName -n -t string -s "Noto Sans 10" >/dev/null 2>&1 || \
+    xfconf-query -c xsettings -p /Gtk/FontName -s "Noto Sans 10" >/dev/null 2>&1 || true
+
+xfconf-query -c xfwm4 -p /general/theme -s Greybird >/dev/null 2>&1 || true
+xfconf-query -c xfwm4 -p /general/title_font -s "Noto Sans Medium 10" >/dev/null 2>&1 || true
+xfconf-query -c xfwm4 -p /general/show_frame_shadow -s true >/dev/null 2>&1 || true
+
+panel_ids=$(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | sed -n '/^[[:space:]]*[0-9][0-9]*[[:space:]]*$/s/[[:space:]]//gp' || true)
+for panel_id in $panel_ids; do
+    size=44
+    xfconf-query -c xfce4-panel -p "/panels/panel-$panel_id/size" -s "$size" >/dev/null 2>&1 || true
+    xfconf-query -c xfce4-panel -p "/panels/panel-$panel_id/enter-opacity" -s 100 >/dev/null 2>&1 || true
+    xfconf-query -c xfce4-panel -p "/panels/panel-$panel_id/leave-opacity" -s 94 >/dev/null 2>&1 || true
+done
 
 attempt=0
-while [ "$attempt" -lt 10 ]; do
+while [ "$attempt" -lt 20 ]; do
     properties=$(xfconf-query -c xfce4-desktop -l 2>/dev/null | sed -n -e '/\/last-image$/p' -e '/\/image-path$/p')
     if [ -n "$properties" ]; then
         for property in $properties; do
             xfconf-query -c xfce4-desktop -p "$property" -s "$wallpaper" >/dev/null 2>&1 || true
+            style_property=${property%/*}/image-style
+            xfconf-query -c xfce4-desktop -p "$style_property" -s 5 >/dev/null 2>&1 || \
+                xfconf-query -c xfce4-desktop -p "$style_property" -n -t int -s 5 >/dev/null 2>&1 || true
         done
         command -v xfdesktop >/dev/null 2>&1 && xfdesktop --reload >/dev/null 2>&1 || true
+        touch "$marker"
         exit 0
     fi
     attempt=$((attempt + 1))
@@ -24,3 +51,8 @@ done
 xfconf-query -c xfce4-desktop \
     -p /backdrop/screen0/monitor0/workspace0/last-image \
     -n -t string -s "$wallpaper" >/dev/null 2>&1 || true
+xfconf-query -c xfce4-desktop \
+    -p /backdrop/screen0/monitor0/workspace0/image-style \
+    -n -t int -s 5 >/dev/null 2>&1 || true
+command -v xfdesktop >/dev/null 2>&1 && xfdesktop --reload >/dev/null 2>&1 || true
+touch "$marker"

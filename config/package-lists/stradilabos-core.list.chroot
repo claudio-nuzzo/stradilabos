@@ -1,6 +1,10 @@
 # Desktop leggero e sessione live
 task-xfce-desktop
 xfce4-whiskermenu-plugin
+lightdm-gtk-greeter
+plymouth
+plymouth-themes
+plymouth-label
 live-boot
 live-config
 live-tools

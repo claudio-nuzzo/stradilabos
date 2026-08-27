@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Centro App
+Comment=Scegli e installa le raccolte per il tuo profilo
+Exec=stradilabos-app-center
+Icon=stradilabos-app-center
+Terminal=false
+

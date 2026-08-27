@@ -1,0 +1,65 @@
+desktop-image: "../splash.png"
+desktop-color: "#f6f4ef"
+title-text: ""
+
++ label {
+    left = 8%
+    top = 8%
+    width = 48%
+    height = 40
+    text = "StradilabOS"
+    color = "#16130f"
+    font = "Unifont Regular 28"
+}
+
++ label {
+    left = 8%
+    top = 15%
+    width = 55%
+    height = 24
+    text = "IIS Antonio Stradivari · Cremona · In sviluppo"
+    color = "#9b2335"
+    font = "Unifont Regular 16"
+}
+
++ boot_menu {
+    left = 8%
+    width = 50%
+    top = 34%
+    height = 38%
+    item_color = "#645e55"
+    item_font = "Unifont Regular 16"
+    selected_item_color = "#9b2335"
+    selected_item_font = "Unifont Regular 16"
+    item_height = 22
+    item_padding = 4
+    item_spacing = 7
+    icon_width = 0
+    icon_height = 0
+    item_icon_space = 0
+}
+
++ label {
+    top = 100%-50
+    left = 8%
+    width = 84%
+    height = 20
+    text = "Invio: avvia · Frecce: scegli"
+    align = "left"
+    color = "#645e55"
+    font = "Unifont Regular 14"
+}
+
++ progress_bar {
+    id = "__timeout__"
+    left = 8%
+    top = 100%-82
+    height = 12
+    width = 45%
+    font = "Unifont Regular 12"
+    text_color = "#16130f"
+    fg_color = "#9b2335"
+    bg_color = "#ded8ce"
+    border_color = "#c4906a"
+    text = "Avvio automatico…"
+}

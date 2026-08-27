@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=StradilabOS
+Description=Avvio coordinato StradiLab
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/stradilabos
+ScriptFile=/usr/share/plymouth/themes/stradilabos/stradilabos.script

@@ -8,6 +8,16 @@ Presentazioni e Moduli. Tutte vengono aperte dallo stesso profilo del browser:
 l'accesso con l'account `@istitutostradivari.it` si effettua una volta sola e
 vale per l'intera sessione.
 
+Durante l'installazione una pagina dedicata chiede se proporre l'accesso al
+primo avvio oppure lasciarlo per un secondo momento. Nel primo caso il pulsante
+Workspace è l'azione principale della schermata di benvenuto; nel secondo lo
+resta disponibile nella barra e nel menu senza interrompere la configurazione.
+
+Chromium riceve inoltre il criterio gestito `AllowedDomainsForApps` con valore
+`istitutostradivari.it`: i servizi Google accettano l'accesso degli account del
+dominio scolastico e non propongono account personali. Il criterio è verificabile
+graficamente aprendo `chrome://policy`.
+
 Nessuna password, cookie o token Google viene inserito nella ISO master.
 Google Drive per desktop non esiste per Linux: file ed editor sono quindi usati
 nel browser, affiancati da LibreOffice per il lavoro locale.
@@ -32,14 +42,15 @@ l'amministratore genera un token dalla Console di amministrazione e registra
 ogni browser. Può quindi applicare criteri come accesso obbligatorio e
 limitazione degli account al dominio della scuola.
 
-Questa modalità richiede il browser Google Chrome ufficiale e un token
-amministrativo. Il prototipo usa Debian Chromium e non incorpora il token. Una
+La gestione completa dell'inventario dei browser richiede il browser Google
+Chrome ufficiale e un token amministrativo. Il prototipo usa Debian Chromium,
+applica localmente il vincolo di dominio e non incorpora alcun token. Una
 successiva edizione «gestita» potrà:
 
 1. includere Google Chrome con una decisione esplicita sulla licenza;
 2. ricevere il token da un archivio privato durante la build o dopo
    l'installazione;
-3. limitare l'accesso al modello `^.*@istitutostradivari\\.it$`;
+3. confermare centralmente il criterio di accesso del dominio;
 4. verificare i criteri in `chrome://policy` e il browser nella Console di
    amministrazione.
 

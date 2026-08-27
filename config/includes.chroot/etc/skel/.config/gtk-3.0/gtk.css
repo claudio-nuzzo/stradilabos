@@ -1,0 +1,76 @@
+/* StradilabOS: superfici calde e controlli morbidi, senza effetti pesanti. */
+window,
+dialog {
+  color: #16130f;
+}
+
+button,
+entry,
+combobox button,
+spinbutton,
+notebook tab,
+menu,
+.menu {
+  border-radius: 10px;
+}
+
+button {
+  min-height: 30px;
+  padding: 5px 11px;
+}
+
+entry,
+combobox button,
+spinbutton {
+  min-height: 30px;
+}
+
+menu,
+.menu {
+  padding: 6px;
+}
+
+tooltip {
+  border-radius: 8px;
+}
+
+scrollbar slider {
+  border-radius: 8px;
+  min-width: 10px;
+  min-height: 10px;
+}
+
+selection {
+  background-color: #9b2335;
+  color: #f6f4ef;
+}
+
+.xfce4-panel,
+#XfcePanelWindow {
+  background-color: rgba(246, 244, 239, 0.94);
+  color: #16130f;
+}
+
+#whiskermenu-window {
+  background-color: rgba(246, 244, 239, 0.98);
+  border-radius: 14px;
+}
+
+#whiskermenu-button {
+  color: #9b2335;
+  font-weight: 700;
+  padding: 4px 12px;
+}
+
+.xfce4-panel button:hover,
+#XfcePanelWindow button:hover {
+  background-color: rgba(222, 216, 206, 0.72);
+  border-radius: 12px;
+}
+
+*:focus {
+  outline-color: #7a9fd4;
+  outline-style: solid;
+  outline-width: 2px;
+  outline-offset: 1px;
+}

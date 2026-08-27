@@ -115,7 +115,7 @@ Presentation {
             }
             Text {
                 width: parent.width
-                text: qsTr("StradiLab, sito dell'Istituto, registro elettronico e Google Workspace saranno già raccolti in un unico ambiente.")
+                text: qsTr("StradiLab, sito dell'Istituto, registro elettronico e Google Workspace saranno già raccolti in un unico ambiente. L'accesso Workspace è riservato al dominio @istitutostradivari.it.")
                 color: "#16130f"
                 font.family: "Noto Sans"
                 font.pixelSize: 19
@@ -140,7 +140,7 @@ Presentation {
             }
             Text {
                 width: parent.width
-                text: qsTr("Cinque indirizzi, gli strumenti giusti")
+                text: qsTr("Il sistema giusto per chi lo usa")
                 color: "#9b2335"
                 font.family: "Noto Sans"
                 font.pixelSize: 30
@@ -149,7 +149,7 @@ Presentation {
             }
             Text {
                 width: parent.width
-                text: qsTr("Artistico, Musicale, Liuteria, Moda e Arredo: al primo avvio StradilabOS proporrà le raccolte di applicazioni più utili.")
+                text: qsTr("Studente con il proprio indirizzo, Docente con tutti gli indirizzi, Segreteria oppure installazione base: StradilabOS propone solo le raccolte utili al profilo scelto.")
                 color: "#16130f"
                 font.family: "Noto Sans"
                 font.pixelSize: 19

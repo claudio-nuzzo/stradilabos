@@ -1,0 +1,16 @@
+PRETTY_NAME="StradilabOS 0.2 (in sviluppo)"
+NAME="StradilabOS"
+VERSION_ID="0.2"
+VERSION="0.2 (Debian 13 Trixie)"
+VERSION_CODENAME=trixie
+ID=stradilabos
+ID_LIKE=debian
+HOME_URL="https://stradilab.org/stradilabos/"
+SUPPORT_URL="https://stradilab.org/#contatti"
+BUG_REPORT_URL="https://stradilab.org/#contatti"
+PRIVACY_POLICY_URL="https://stradilab.org/"
+VARIANT="StradiLab Educational Desktop"
+VARIANT_ID=education
+DEBIAN_CODENAME=trixie
+ANSI_COLOR="38;2;155;35;53"
+LOGO=stradilabos

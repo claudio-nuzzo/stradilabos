@@ -24,9 +24,10 @@ jobs:
             sh -lc '
               sed -i "s/^Components: main$/Components: main contrib non-free non-free-firmware/" /etc/apt/sources.list.d/debian.sources
               apt-get update
-              apt-get install --yes live-build python3
+              apt-get install --yes live-build python3 squashfs-tools
               ./scripts/validate_debian_packages.sh
               ./auto/build
+              ./scripts/validate_built_image.sh
             '
 
       - name: Prepara ISO e checksum

@@ -9,10 +9,10 @@ windowPlacement: center
 strings:
     productName:         StradilabOS
     shortProductName:    StradilabOS
-    version:             0.1
-    shortVersion:        0.1
-    versionedName:       StradilabOS 0.1
-    shortVersionedName:  StradilabOS 0.1
+    version:             "0.2 · in sviluppo"
+    shortVersion:        0.2
+    versionedName:       "StradilabOS 0.2 · in sviluppo"
+    shortVersionedName:  StradilabOS 0.2
     bootloaderEntryName: StradilabOS
     productUrl:          https://stradilab.org
     supportUrl:          https://www.istitutostradivari.edu.it

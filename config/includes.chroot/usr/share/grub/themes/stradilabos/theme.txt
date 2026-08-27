@@ -1,0 +1,34 @@
+desktop-image: "/usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v2.png"
+desktop-color: "#f6f4ef"
+title-text: "StradilabOS"
+title-color: "#16130f"
+title-font: "Unifont Regular 24"
+message-color: "#645e55"
+message-bg-color: "#f6f4ef"
+terminal-box: "0"
+
++ boot_menu {
+    left = 8%
+    width = 48%
+    top = 34%
+    height = 38%
+    item_color = "#645e55"
+    item_font = "Unifont Regular 16"
+    selected_item_color = "#9b2335"
+    selected_item_font = "Unifont Regular 16"
+    item_height = 22
+    item_padding = 4
+    item_spacing = 7
+}
+
++ progress_bar {
+    id = "__timeout__"
+    left = 8%
+    top = 82%
+    width = 44%
+    height = 12
+    fg_color = "#9b2335"
+    bg_color = "#ded8ce"
+    border_color = "#c4906a"
+    text_color = "#16130f"
+}

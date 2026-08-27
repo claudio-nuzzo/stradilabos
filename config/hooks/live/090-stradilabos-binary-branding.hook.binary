@@ -1,0 +1,25 @@
+#!/bin/sh
+set -eu
+
+grub_dir=binary/boot/grub
+
+if [ -d "$grub_dir" ]; then
+    cp config/branding/stradilabos-boot-800x600.png "$grub_dir/splash.png"
+    mkdir -p "$grub_dir/live-theme"
+    cp config/branding/grub-live-theme.txt "$grub_dir/live-theme/theme.txt"
+
+    for menu in "$grub_dir/grub.cfg" "$grub_dir/loopback.cfg"; do
+        [ -f "$menu" ] || continue
+        sed -i \
+            -e 's/Live system (/Prova StradilabOS (/g' \
+            -e 's/fail-safe mode/modalità compatibilità/g' \
+            -e "s/submenu 'Utilities\.\.\.'/submenu 'Strumenti…'/g" \
+            -e 's/UEFI Firmware Settings/Impostazioni firmware UEFI/g' \
+            -e 's/Verify integrity of the boot medium/Verifica integrità della chiavetta/g' \
+            "$menu"
+    done
+fi
+
+if [ -d binary/.disk ]; then
+    printf '%s\n' "StradilabOS 0.2 (in sviluppo) - Debian 13 base" > binary/.disk/info
+fi

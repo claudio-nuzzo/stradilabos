@@ -5,16 +5,23 @@ recuperare PC a 64 bit non più adatti ai sistemi operativi moderni. L'obiettivo
 è offrire un ambiente semplice, in italiano e utilizzabile senza terminale,
 centrato sull'ecosistema StradiLab dell'IIS «Antonio Stradivari» di Cremona.
 
-Questo repository contiene il primo prototipo tecnico, non ancora un'immagine
-ISO collaudata su hardware reale.
+Questo repository contiene la versione `0.2` in sviluppo. Le immagini vengono
+costruite e controllate automaticamente per AMD64 e ARM64; prima dell'uso a
+scuola resta necessario il collaudo su hardware reale.
 
 ## Cosa offre il prototipo
 
 - avvio da chiavetta USB in modalità live, senza modificare il disco;
 - installazione grafica tramite Calamares;
-- scelta in installazione di uno o più indirizzi e dell'uso personale o
-  condiviso del PC;
+- scelta iniziale fra Studente (con il proprio indirizzo), Docente (tutti gli
+  indirizzi), Personale di segreteria e Installazione base, oltre all'uso
+  personale o condiviso del PC;
+- scelta esplicita durante l'installazione fra accesso Workspace al primo avvio
+  o configurazione successiva, sempre sul dominio `istitutostradivari.it`;
 - desktop Xfce leggero, con interfaccia in italiano;
+- tema morbido e accessibile coordinato alla palette StradiLab, senza effetti
+  pesanti per i computer meno recenti, esteso a menu di avvio, caricamento,
+  schermata di accesso, pannello e sistema installato;
 - app StradiLab aperte in finestre Chromium dedicate, con una sola sessione
   Google condivisa;
 - accesso guidato a Google Workspace e micro-app per Classroom, Drive, Gmail,
@@ -90,8 +97,9 @@ sudo BUILD_ARCH=arm64 ./auto/build
 
 ## Stato
 
-MVP locale: configurazione, profili per indirizzo in Calamares, protezione delle
-sessioni sui PC condivisi, launcher StradiLab e Workspace, Centro App,
-benvenuto grafico, branding, convalida automatica e pipeline ISO. Restano
-indispensabili la prima build Linux e il collaudo su una rosa di PC reali prima
-di distribuire la chiavetta nella scuola.
+Progetto in continuo sviluppo: configurazione, profili d'uso in Calamares,
+protezione delle sessioni sui PC condivisi, launcher StradiLab e Workspace,
+Centro App, identità completa StradilabOS, convalida automatica e pipeline ISO
+sono presenti. Una versione precedente è stata installata con successo in
+Parallels ARM; ogni nuova immagine va comunque reinstallata e collaudata prima
+della distribuzione nella scuola.

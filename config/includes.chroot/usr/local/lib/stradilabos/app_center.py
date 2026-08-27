@@ -36,6 +36,14 @@ def selected_profiles() -> set[str]:
     return {value for value in values if isinstance(value, str)}
 
 
+def selected_role() -> str:
+    try:
+        role = json.loads(PROFILE_STATE.read_text(encoding="utf-8")).get("role")
+    except (OSError, TypeError, json.JSONDecodeError):
+        return "student" if selected_profiles() else "base"
+    return role if role in {"student", "teacher", "staff", "base"} else "base"
+
+
 def package_installed(package: str) -> bool:
     result = subprocess.run(
         ["dpkg-query", "-W", "-f=${db:Status-Status}", package],
@@ -64,6 +72,7 @@ class AppCenterWindow(Gtk.ApplicationWindow):
         self.set_icon_name("stradilabos-app-center")
         self.packs = json.loads(CATALOG.read_text(encoding="utf-8"))["packs"]
         self.profiles = selected_profiles()
+        self.role = selected_role()
         self.recommended = {
             pack["id"]
             for pack in self.packs
@@ -74,13 +83,18 @@ class AppCenterWindow(Gtk.ApplicationWindow):
 
         root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         root.set_border_width(20)
-        title = Gtk.Label(label="App per ogni indirizzo", xalign=0)
-        title.set_markup("<span size='xx-large' weight='bold'>App per ogni indirizzo</span>")
+        title = Gtk.Label(label="App e raccolte StradilabOS", xalign=0)
+        title.set_markup("<span size='xx-large' weight='bold'>App e raccolte StradilabOS</span>")
+        role_note = {
+            "teacher": "Profilo docente: sono consigliate le raccolte di tutti gli indirizzi.",
+            "staff": "Profilo segreteria: nessuna raccolta specialistica è obbligatoria.",
+            "base": "Installazione base: scegli soltanto ciò che vuoi aggiungere.",
+            "student": "Le raccolte del tuo indirizzo sono già selezionate.",
+        }[self.role]
         copy = Gtk.Label(
             label=(
                 "La chiavetta resta leggera: dopo l'installazione connettiti a Internet "
-                "e scarica soltanto gli strumenti utili. Le raccolte del tuo indirizzo "
-                "sono già selezionate."
+                f"e scarica soltanto gli strumenti utili. {role_note}"
                 if not self.live_session
                 else "Qui trovi le raccolte disponibili. Per mantenere leggera la "
                 "chiavetta, potrai scaricarle dopo aver installato StradilabOS."
@@ -102,7 +116,7 @@ class AppCenterWindow(Gtk.ApplicationWindow):
 
         footer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         self.status = Gtk.Label(label="", xalign=0)
-        profile_button = Gtk.Button(label="Cambia indirizzo")
+        profile_button = Gtk.Button(label="Cambia profilo d'uso")
         profile_button.connect("clicked", self.change_profile)
         self.install_button = Gtk.Button(label="Scarica e installa le app selezionate")
         self.install_button.get_style_context().add_class("suggested-action")
