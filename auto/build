@@ -3,4 +3,4 @@ set -eu
 
 cd "$(dirname "$0")/.."
 ./auto/config
-lb build
+lb build noauto "$@"
