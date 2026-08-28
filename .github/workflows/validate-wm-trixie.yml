@@ -7,6 +7,12 @@ name: Valida gestore finestre in Debian Trixie
 
 on:
   workflow_dispatch:
+  pull_request:
+    # Attivazione su PR: permette di eseguire la validazione SENZA costruire
+    # la ISO (i workflow di build hanno solo il trigger push su main). La PR
+    # viene creata dal branch di correzione verso main: qui girano test Xvfb,
+    # pacchetti Trixie, ShellCheck e preflight; la build resta su main.
+    branches: [main]
 
 jobs:
   validate-amd64:
