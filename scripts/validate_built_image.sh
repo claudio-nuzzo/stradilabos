@@ -36,6 +36,13 @@ workspace_policy=$(unsquashfs -cat \
 printf '%s\n' "$workspace_policy" | grep -q '"istitutostradivari.it"' || \
     fail "dominio Workspace errato"
 
+lightdm_hardware=$(unsquashfs -cat \
+    "$squashfs" etc/lightdm/lightdm.conf.d/50-stradilabos-hardware.conf \
+    2>/dev/null) || fail "compatibilità LightDM assente"
+printf '%s\n' "$lightdm_hardware" | grep -Eq \
+    '^[[:space:]]*logind-check-graphical[[:space:]]*=[[:space:]]*false[[:space:]]*$' || \
+    fail "LightDM può restare bloccato in attesa di CanGraphical"
+
 plymouth_config=$(unsquashfs -cat "$squashfs" etc/plymouth/plymouthd.conf 2>/dev/null) || \
     fail "configurazione Plymouth assente"
 printf '%s\n' "$plymouth_config" | grep -q 'Theme=stradilabos' || \

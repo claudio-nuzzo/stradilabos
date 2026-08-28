@@ -94,6 +94,12 @@ if command -v plymouth-set-default-theme >/dev/null 2>&1; then
     update-initramfs -u || true
 fi
 
+# La directory viene normalmente creata al primo avvio, ma prepararla nella
+# ISO evita avvisi e rende affidabile LightDM anche nel filesystem Live.
+if getent passwd lightdm >/dev/null 2>&1; then
+    install -d -o lightdm -g lightdm -m 0750 /var/lib/lightdm/data
+fi
+
 # Il terminale rimane disponibile ai tecnici tramite Alt+F2, ma non compare
 # nel menu destinato agli utenti ordinari.
 mkdir -p /usr/local/share/applications

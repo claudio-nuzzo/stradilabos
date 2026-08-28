@@ -323,6 +323,23 @@ def validate_system_branding(errors: list[str]) -> None:
             errors,
         )
 
+    lightdm_hardware = (
+        CHROOT / "etc/lightdm/lightdm.conf.d/50-stradilabos-hardware.conf"
+    )
+    require(
+        lightdm_hardware.exists(),
+        "Compatibilità LightDM con GPU virtuali e datate assente.",
+        errors,
+    )
+    if lightdm_hardware.exists():
+        text = lightdm_hardware.read_text(encoding="utf-8")
+        require(
+            re.search(r"^\s*logind-check-graphical\s*=\s*false\s*$", text, re.MULTILINE)
+            is not None,
+            "LightDM può restare bloccato in attesa di CanGraphical.",
+            errors,
+        )
+
     panel = CHROOT / "etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"
     require(panel.exists(), "Pannello Xfce StradilabOS assente.", errors)
     if panel.exists():
