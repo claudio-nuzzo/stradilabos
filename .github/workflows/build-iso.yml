@@ -17,7 +17,7 @@ jobs:
     timeout-minutes: 120
     steps:
       - name: Scarica il progetto
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Controlla cataloghi e script
         run: |
@@ -59,7 +59,7 @@ jobs:
           ls -lh "${target}" "${target}.sha256"
 
       - name: Pubblica ISO e checksum
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: stradilabos-live-amd64
           path: |
