@@ -77,7 +77,8 @@ coerente con la ISO, e non il 4.18 dell'host Ubuntu del runner.
 Il test gira **prima** della build e la blocca in caso di errore.
 
 ### 2.6 Workflow di validazione dedicato `validate-wm-trixie.yml`
-Nuovo workflow solo `workflow_dispatch`, **senza costruzione della ISO**, con tre
+Nuovo workflow `workflow_dispatch` e `pull_request` verso `main`, **senza
+costruzione della ISO**, con tre
 job che rendono verdi le voci del gate impossibili da eseguire sul Mac:
 - `validate-amd64`: container `debian:trixie-slim` → `sh -n`, `shellcheck`,
   `validate_debian_packages.sh` (amd64) e `test_window_manager_xvfb.sh`;
@@ -131,6 +132,24 @@ sicurezza: una volta pre-main (validazione), una volta post-main (build).
 preflight non è una garanzia: il gate runtime resta il test Xvfb unitario, la
 conferma definitiva è la prova Live in Parallels.
 
+### 3.1 Esito CI corretto e verificato
+
+La prima esecuzione della PR aveva nascosto un errore intermedio
+(`python3: not found`) perché i container usavano `sh -lc`: il job restava
+verde quando l'ultimo comando riusciva. I commit `5e1fdf7` e `602b8d8` hanno:
+
+- reso fail-fast tutti i container con `sh -euc`;
+- installato e verificato esplicitamente `python3` nei job di validazione;
+- eliminato il word splitting dal parser delle direttive architettura;
+- esteso ShellCheck e i test di regressione;
+- fatto avviare la guardia dal vero autostart Xfce nel preflight, senza lancio
+  manuale che potesse mascherare un percorso XDG errato.
+
+La CI definitiva sul commit `602b8d8` è il run `33166774041`: `validate-amd64`,
+`validate-arm64` e `preflight-xfce` sono tutti riusciti. Nei log compaiono
+esplicitamente la disponibilità dei pacchetti per entrambe le architetture, la
+cornice superiore a zero e il superamento della prova del gestore finestre.
+
 ## 4. Stato finale atteso
 
 La sostituzione preventiva (`xfwm4 --replace --compositor=off`) viene eseguita
@@ -139,24 +158,34 @@ Benvenuto. Dopo l'assestamento esiste un solo processo `xfwm4`, stabile, con
 compositore spento e barra/pulsanti presenti. Il recupero graduato resta attivo
 solo per una successiva scomparsa reale del window manager.
 
-## 5. Prossimi passi
+## 5. Stato dopo merge e build
 
-1. Commit dedicato (es. `Inizializza xfwm4 prima del Benvenuto e verifica in Debian Trixie`).
-2. Push su `main` → build AMD64 automatica.
-3. Avvio manuale del workflow `build-arm64.yml` sullo stesso commit.
-4. Controllare che entrambe eseguano **per primo** il test Debian Trixie.
-5. A successo completo, scaricare la ARM64 in una cartella con l'hash del commit.
-6. Verificare checksum, EFI, `filesystem.squashfs`, `.disk/info`, menu GRUB,
-   guardia/autostart/xfwm4/xprop/notify-send nell'immagine e contenuto esatto
-   della guardia rispetto al commit.
-7. Prova **Live ARM64 in Parallels senza alcun comando manuale**: Thunar e
+- PR `#1` fusa in `main` al commit `f8e36a6`.
+- Build AMD64 `33166946831`: riuscita.
+- Build ARM64 `33166952375`: riuscita.
+- Entrambe hanno eseguito per primo il test Debian Trixie e hanno superato il
+  validatore interno dell'immagine.
+- ISO e checksum scaricati in
+  `/Users/claudionuzzo/Dev/StradilabOS-release-0.2-f8e36a6/`.
+- Checksum verificati localmente:
+  - ARM64 `38b7762bfb640da25a9a94a41aadfc82192478489dbb495bcafc35e73c98cf80`;
+  - AMD64 `c8a02d16d7d3df7c09ea6ec5d2e8241b62ea5f0bf72f0aea1664d15447b285e8`.
+- Verificati localmente: immagine bootable, EFI corretta per architettura,
+  `filesystem.squashfs`, `.disk/info`, menu GRUB, eseguibili richiesti,
+  configurazione xfwm4 e contenuto della guardia identico al commit.
+- L'inventario pacchetti è invariato rispetto alla ISO ARM64 `87fe78e`: nessun
+  pacchetto è stato aggiunto dalla correzione.
+
+## 6. Prossimi passi
+
+1. Prova **Live ARM64 in Parallels senza alcun comando manuale**: Thunar e
    Benvenuto con titolo e tre pulsanti, riduci/massimizza/chiudi e Alt+F4
    funzionanti, comportamento stabile per almeno 2 minuti, una sola
    inizializzazione preventiva nel log, un solo xfwm4.
-8. Solo dopo il successo Live: installazione, rimozione ISO, riavvio e
+2. Solo dopo il successo Live: installazione, rimozione ISO, riavvio e
    ripetizione degli stessi controlli nel sistema installato.
 
-## 6. Cosa NON è stato toccato
+## 7. Cosa NON è stato toccato
 
 Palette, applicazioni didattiche, pacchetti specialistici, sito, Drive, dashboard
 e funzioni non collegate al window manager. Installer resta solo nella Live.
