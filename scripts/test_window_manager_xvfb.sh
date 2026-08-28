@@ -51,8 +51,8 @@ xvfb_pid=$!
 trap 'kill $xvfb_pid 2>/dev/null || true; rm -rf "$XDG_STATE_HOME"' EXIT INT TERM
 sleep 2
 
-export DISPLAY=$display
-export GUARD=$guard
+export DISPLAY="$display"
+export GUARD="$guard"
 
 dbus-run-session -- sh -eu <<'SCRIPT'
 fail() { printf 'ERRORE: %s\n' "$1" >&2; exit 1; }

@@ -28,10 +28,11 @@ jobs:
             --volume "$PWD:/work" \
             --workdir /work \
             debian:trixie-slim \
-            sh -lc '
+            sh -euc '
               sed -i "s/^Components: main$/Components: main contrib non-free non-free-firmware/" /etc/apt/sources.list.d/debian.sources
               apt-get update
               apt-get install --yes --no-install-recommends \
+                python3 \
                 shellcheck \
                 xfwm4 xvfb xfconf dbus-x11 x11-utils x11-apps greybird-gtk-theme
               sh -n config/includes.chroot/usr/local/bin/stradilabos-window-manager-guard
@@ -39,6 +40,8 @@ jobs:
               sh -n scripts/preflight_xfce_session.sh
               shellcheck config/includes.chroot/usr/local/bin/stradilabos-window-manager-guard
               shellcheck scripts/test_window_manager_xvfb.sh
+              shellcheck scripts/preflight_xfce_session.sh
+              shellcheck scripts/validate_debian_packages.sh
               BUILD_ARCH=amd64 sh scripts/validate_debian_packages.sh
               sh scripts/test_window_manager_xvfb.sh
             '
@@ -56,10 +59,11 @@ jobs:
             --volume "$PWD:/work" \
             --workdir /work \
             debian:trixie-slim \
-            sh -lc '
+            sh -euc '
               sed -i "s/^Components: main$/Components: main contrib non-free non-free-firmware/" /etc/apt/sources.list.d/debian.sources
               apt-get update
               apt-get install --yes --no-install-recommends \
+                python3 \
                 xfwm4 xvfb xfconf dbus-x11 x11-utils x11-apps greybird-gtk-theme
               BUILD_ARCH=arm64 sh scripts/validate_debian_packages.sh
               sh scripts/test_window_manager_xvfb.sh
@@ -80,7 +84,7 @@ jobs:
             --volume "$PWD:/work" \
             --workdir /work \
             debian:trixie-slim \
-            sh -lc '
+            sh -euc '
               sed -i "s/^Components: main$/Components: main contrib non-free non-free-firmware/" /etc/apt/sources.list.d/debian.sources
               apt-get update
               apt-get install --yes --no-install-recommends \

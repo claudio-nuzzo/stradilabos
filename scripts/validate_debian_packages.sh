@@ -35,6 +35,11 @@ done
 
 # Anche i pacchetti opzionali del Centro App devono esistere nei repository,
 # pur non essendo incorporati nell'immagine base.
+if ! command -v python3 >/dev/null 2>&1; then
+    printf '%s\n' "Impossibile validare il catalogo pacchetti: python3 non disponibile." >&2
+    exit 1
+fi
+
 catalog_packages="$(python3 - <<'PY'
 import json
 
