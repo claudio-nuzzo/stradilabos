@@ -15,26 +15,31 @@ from gi.repository import Gdk, Gtk, Pango  # noqa: E402
 
 CATALOG = Path("/usr/local/share/stradilabos/apps.json")
 
+# Toni profondi della palette StradiLab (docs/BRAND-STRADILAB.md): leggibili
+# come testo sull'avorio (contrasto >= 5:1) e coerenti con i cinque accenti.
 CATEGORY_COLORS = {
     "StradiLab": "#9b2335",
-    "Scuola": "#2f5d62",
-    "Workspace": "#375a9e",
-    "Orientamento": "#8b5e34",
-    "Moda": "#8e3b67",
+    "Scuola": "#477348",
+    "Workspace": "#3368b5",
+    "Orientamento": "#88621d",
+    "Moda": "#b83864",
 }
 
 CSS = b"""
 window { background: #f6f4ef; }
 .hero { background: #16130f; color: #f6f4ef; padding: 22px; }
 .hero-title { font-size: 28px; font-weight: 700; }
-.hero-copy { color: #d8d2c9; font-size: 14px; }
-.toolbar { padding: 12px 18px; background: #eeeae2; }
+.hero-copy { color: #ded8ce; font-size: 14px; }
+.toolbar { padding: 12px 18px; background: rgba(222, 216, 206, 0.45); }
 .app-card { background: #ffffff; border: 1px solid #ded8ce; border-radius: 14px; padding: 14px; }
-.app-card:hover { border-color: #9b2335; background: #fffdf9; }
+.app-card:hover { border-color: #9b2335; box-shadow: 0 2px 8px rgba(22, 19, 15, 0.08); }
 .app-title { color: #16130f; font-size: 16px; font-weight: 700; }
-.app-copy { color: #5d574f; font-size: 12px; }
-.badge { color: #9b2335; font-size: 11px; font-weight: 700; }
-"""
+.app-copy { color: #645e55; font-size: 13px; }
+.badge { color: #9b2335; font-size: 12px; font-weight: 700; }
+""" + b"".join(
+    f".badge-{name.casefold()} {{ color: {color}; }}\n".encode("utf-8")
+    for name, color in CATEGORY_COLORS.items()
+)
 
 
 class AppCard(Gtk.FlowBoxChild):
@@ -67,6 +72,8 @@ class AppCard(Gtk.FlowBoxChild):
             label=f"{app['category'].upper()}  ·  {audience.upper()}", xalign=0
         )
         badge.get_style_context().add_class("badge")
+        if app["category"] in CATEGORY_COLORS:
+            badge.get_style_context().add_class(f"badge-{app['category'].casefold()}")
 
         box.pack_start(title, False, False, 0)
         box.pack_start(description, True, True, 0)

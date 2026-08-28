@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import struct
 import subprocess
@@ -30,6 +31,13 @@ BRAND_COLORS = {
     "#d4a85a",
     "#ded8ce",
     "#f6f4ef",
+    "#ffffff",
+    # Toni profondi dei cinque accenti, per testo e badge sull'avorio.
+    "#b83864",
+    "#477348",
+    "#88621d",
+    "#3368b5",
+    "#915b33",
 }
 
 
@@ -236,9 +244,26 @@ def validate_branding(errors: list[str]) -> None:
         *(CHROOT / "usr/local/share/icons/hicolor/scalable/apps").glob("*.svg"),
         *(theme / "scalable").glob("**/*.svg"),
         CHROOT / "usr/local/lib/stradilabos/welcome.py",
+        CHROOT / "usr/local/lib/stradilabos/hub.py",
+        CHROOT / "usr/local/lib/stradilabos/app_center.py",
         CHROOT / "etc/skel/.config/gtk-3.0/gtk.css",
         CHROOT / "etc/xdg/gtk-3.0/gtk.css",
+        CHROOT / "etc/skel/.config/gtk-4.0/gtk.css",
+        CHROOT / "etc/xdg/gtk-4.0/gtk.css",
     ]
+    for version in ("3.0", "4.0"):
+        require(
+            (CHROOT / f"etc/skel/.config/gtk-{version}/gtk.css").read_text(encoding="utf-8")
+            == (CHROOT / f"etc/xdg/gtk-{version}/gtk.css").read_text(encoding="utf-8"),
+            f"gtk.css di skel e di /etc/xdg divergono (GTK {version}).",
+            errors,
+        )
+    focus_css = (CHROOT / "etc/skel/.config/gtk-3.0/gtk.css").read_text(encoding="utf-8")
+    require(
+        "outline-color: #9b2335" in focus_css and "#7a9fd4" not in focus_css,
+        "L'anello di fuoco deve essere bordeaux: il blu ha contrasto 2,5:1 sull'avorio.",
+        errors,
+    )
     for path in branded_files:
         colors = {
             color.casefold()
@@ -504,6 +529,38 @@ def validate_system_branding(errors: list[str]) -> None:
     ):
         require(fragment in theme_text, f"Tema dinamico incompleto: {fragment}", errors)
 
+    wm_guard = CHROOT / "usr/local/bin/stradilabos-window-manager-guard"
+    require(wm_guard.exists(), "Guardia del gestore delle finestre assente.", errors)
+    if wm_guard.exists():
+        require(
+            os.access(wm_guard, os.X_OK),
+            "Guardia del gestore delle finestre non eseguibile.",
+            errors,
+        )
+        guard_text = wm_guard.read_text(encoding="utf-8")
+        for fragment in (
+            "--vblank=off",
+            "--compositor=off",
+            "Greybird",
+            "max_attempts=3",
+            "logger -t",
+        ):
+            require(fragment in guard_text, f"Guardia finestre incompleta: {fragment}", errors)
+    wm_autostart = CHROOT / "etc/xdg/autostart/stradilabos-window-manager.desktop"
+    require(wm_autostart.exists(), "Avvio automatico della guardia finestre assente.", errors)
+    if wm_autostart.exists():
+        autostart_text = wm_autostart.read_text(encoding="utf-8")
+        require(
+            "Exec=stradilabos-window-manager-guard" in autostart_text,
+            "La guardia finestre non viene avviata dalla sessione.",
+            errors,
+        )
+        require("OnlyShowIn=XFCE;" in autostart_text, "Guardia finestre non limitata a Xfce.", errors)
+    wm_diagnostics = CHROOT / "usr/local/bin/stradilabos-window-diagnostics"
+    require(wm_diagnostics.exists(), "Diagnostica finestre assente.", errors)
+    wm_test = ROOT / "scripts/test_window_manager_xvfb.sh"
+    require(wm_test.exists(), "Prova runtime del gestore delle finestre assente.", errors)
+
     window_theme = ROOT / "config/hooks/live/012-stradilabos-window-theme.hook.chroot"
     require(window_theme.exists(), "Tema finestre StradiLab assente.", errors)
     if window_theme.exists():
@@ -554,6 +611,8 @@ def validate_system_branding(errors: list[str]) -> None:
         "mate-polkit",
         "usbutils",
         "xfce4-terminal",
+        "x11-utils",
+        "libnotify-bin",
     ):
         require(
             re.search(rf"^{re.escape(package)}$", packages, re.MULTILINE) is not None,

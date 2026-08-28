@@ -1,4 +1,6 @@
-/* StradilabOS: superfici calde e controlli morbidi, senza effetti pesanti. */
+/* StradilabOS: superfici calde e controlli morbidi, senza effetti pesanti.
+   Stesso contenuto di /etc/xdg/gtk-3.0/gtk.css, che l'hook 012 incorpora nel
+   tema StradiLab così vale anche per il login e per gli utenti già esistenti. */
 window,
 dialog {
   color: #16130f;
@@ -68,9 +70,17 @@ selection {
   border-radius: 12px;
 }
 
+/* Anello di fuoco visibile da tastiera: bordeaux sull'avorio (7:1), nero
+   caldo sui controlli già bordeaux. */
 *:focus {
-  outline-color: #7a9fd4;
+  outline-color: #9b2335;
   outline-style: solid;
   outline-width: 2px;
   outline-offset: 1px;
+}
+
+.primary:focus,
+.suggested-action:focus,
+button.suggested-action:focus {
+  outline-color: #16130f;
 }

@@ -31,7 +31,7 @@ list { background: transparent; }
   border-radius: 14px;
   margin: 4px 2px;
 }
-.pack-row:hover { border-color: #b98a92; background: rgba(255, 255, 255, 0.94); }
+.pack-row:hover { border-color: #9b2335; background: rgba(255, 255, 255, 0.94); }
 .primary {
   background: #9b2335;
   color: #f6f4ef;

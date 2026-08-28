@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Finestre StradilabOS
+Comment=Controlla che il gestore delle finestre resti in esecuzione
+Exec=stradilabos-window-manager-guard
+TryExec=stradilabos-window-manager-guard
+Icon=stradilabos
+Terminal=false
+OnlyShowIn=XFCE;
+X-GNOME-Autostart-enabled=true

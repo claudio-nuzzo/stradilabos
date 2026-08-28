@@ -1,3 +1,4 @@
+/* StradilabOS: geometria morbida anche nelle applicazioni GTK 4. */
 button,
 entry,
 dropdown,
@@ -19,4 +20,6 @@ selection {
 
 scrollbar slider {
   border-radius: 8px;
+  min-width: 10px;
+  min-height: 10px;
 }

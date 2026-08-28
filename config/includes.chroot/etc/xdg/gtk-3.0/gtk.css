@@ -1,4 +1,11 @@
-/* Impostazioni GTK comuni; il file utente può estenderle. */
+/* StradilabOS: superfici calde e controlli morbidi, senza effetti pesanti.
+   Stesso contenuto di /etc/xdg/gtk-3.0/gtk.css, che l'hook 012 incorpora nel
+   tema StradiLab così vale anche per il login e per gli utenti già esistenti. */
+window,
+dialog {
+  color: #16130f;
+}
+
 button,
 entry,
 combobox button,
@@ -25,9 +32,14 @@ menu,
   padding: 6px;
 }
 
-tooltip,
+tooltip {
+  border-radius: 8px;
+}
+
 scrollbar slider {
   border-radius: 8px;
+  min-width: 10px;
+  min-height: 10px;
 }
 
 selection {
@@ -56,4 +68,19 @@ selection {
 #XfcePanelWindow button:hover {
   background-color: rgba(222, 216, 206, 0.72);
   border-radius: 12px;
+}
+
+/* Anello di fuoco visibile da tastiera: bordeaux sull'avorio (7:1), nero
+   caldo sui controlli già bordeaux. */
+*:focus {
+  outline-color: #9b2335;
+  outline-style: solid;
+  outline-width: 2px;
+  outline-offset: 1px;
+}
+
+.primary:focus,
+.suggested-action:focus,
+button.suggested-action:focus {
+  outline-color: #16130f;
 }

@@ -34,3 +34,16 @@ cat >> "$target_theme/gtk-3.0/gtk.css" <<'EOF'
 @define-color selected_bg_color #9b2335;
 @define-color selected_fg_color #f6f4ef;
 EOF
+
+# GTK legge solo il gtk.css dell'utente, non /etc/xdg: le regole comuni
+# (raggi, pannello, anello di fuoco) vengono incorporate nel tema, così valgono
+# per il login LightDM, per la sessione Live e per gli utenti già esistenti.
+for version in 3.0 4.0; do
+    common=/etc/xdg/gtk-$version/gtk.css
+    [ -r "$common" ] || continue
+    install -d "$target_theme/gtk-$version"
+    {
+        printf '\n/* Regole comuni StradilabOS (da %s). */\n' "$common"
+        cat "$common"
+    } >> "$target_theme/gtk-$version/gtk.css"
+done

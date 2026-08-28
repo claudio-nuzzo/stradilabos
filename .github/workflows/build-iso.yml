@@ -24,6 +24,13 @@ jobs:
           python3 -m unittest discover -v
           python3 scripts/validate_project.py
 
+      - name: Prova il gestore delle finestre in un X virtuale
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            xfwm4 xvfb xfconf dbus-x11 x11-utils x11-apps greybird-gtk-theme
+          sudo sh scripts/test_window_manager_xvfb.sh
+
       - name: Crea la ISO Debian in ambiente isolato
         run: |
           docker run --rm --privileged \

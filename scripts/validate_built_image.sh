@@ -64,6 +64,12 @@ for path in \
     usr/lib/tmpfiles.d/stradilabos-lightdm.conf \
     usr/share/polkit-1/actions/org.stradilab.stradilabos.policy \
     usr/share/themes/StradiLab/xfwm4/themerc \
+    usr/local/bin/stradilabos-window-manager-guard \
+    usr/local/bin/stradilabos-window-diagnostics \
+    etc/xdg/autostart/stradilabos-window-manager.desktop \
+    usr/bin/xprop \
+    usr/bin/notify-send \
+    usr/bin/xfwm4 \
     etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml \
     usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v2.png \
     usr/share/plymouth/themes/stradilabos/stradilabos.script; do
@@ -104,6 +110,12 @@ printf '%s\n' "$xfwm_config" | grep -q 'value="StradiLab"' || \
     fail "tema finestre StradiLab non selezionato"
 printf '%s\n' "$xfwm_config" | grep -q 'name="borderless_maximize" type="bool" value="false"' || \
     fail "le finestre massimizzate possono perdere i bordi"
+
+wm_autostart=$(unsquashfs -cat \
+    "$squashfs" etc/xdg/autostart/stradilabos-window-manager.desktop \
+    2>/dev/null) || fail "avvio della guardia finestre assente"
+printf '%s\n' "$wm_autostart" | grep -q '^Exec=stradilabos-window-manager-guard$' || \
+    fail "guardia del gestore delle finestre non avviata"
 
 for launcher in \
     xfce4-terminal.desktop \

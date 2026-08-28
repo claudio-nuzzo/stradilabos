@@ -1,0 +1,69 @@
+#!/bin/sh
+# Raccoglie in un solo file le informazioni utili quando le finestre
+# compaiono senza barra del titolo o senza pulsanti. Da eseguire nella
+# sessione grafica: apre il terminale con Alt+F2 e digita
+#   stradilabos-window-diagnostics
+# Il rapporto viene salvato sulla Scrivania e mostrato a schermo.
+set -u
+
+desktop=$(xdg-user-dir DESKTOP 2>/dev/null || printf '%s' "$HOME/Scrivania")
+[ -d "$desktop" ] || desktop=$HOME
+output=$desktop/stradilabos-diagnostica-finestre-$(date '+%Y%m%d-%H%M%S').txt
+
+section() {
+    printf '\n== %s ==\n' "$1"
+}
+
+{
+    section "Versione"
+    cat /usr/local/share/stradilabos/version.json 2>/dev/null || true
+    cat /etc/os-release 2>/dev/null | head -n 3
+
+    section "Sessione"
+    printf 'DISPLAY=%s\nXDG_SESSION_TYPE=%s\nXDG_CURRENT_DESKTOP=%s\nDESKTOP_SESSION=%s\n' \
+        "${DISPLAY:-}" "${XDG_SESSION_TYPE:-}" "${XDG_CURRENT_DESKTOP:-}" "${DESKTOP_SESSION:-}"
+
+    section "Processi"
+    pgrep -a xfwm4 || printf 'xfwm4 NON in esecuzione\n'
+    pgrep -a xfce4-session || printf 'xfce4-session NON in esecuzione\n'
+    pgrep -a -f stradilabos-window-manager-guard || printf 'guardia NON in esecuzione\n'
+    xfwm4 --version 2>/dev/null | head -n 1 || true
+
+    section "Gestore finestre annunciato"
+    if command -v xprop >/dev/null 2>&1; then
+        xprop -root _NET_SUPPORTING_WM_CHECK 2>&1
+        check=$(xprop -root _NET_SUPPORTING_WM_CHECK 2>/dev/null | sed -n 's/.*window id # *//p')
+        [ -n "$check" ] && xprop -id "$check" _NET_WM_NAME 2>&1
+    else
+        printf 'xprop non disponibile\n'
+    fi
+
+    section "Impostazioni xfwm4 lette a runtime"
+    for property in theme button_layout borderless_maximize titleless_maximize \
+        use_compositing vblank_mode; do
+        printf '%s = ' "$property"
+        xfconf-query -c xfwm4 -p "/general/$property" 2>&1 || true
+    done
+
+    section "Tema StradiLab"
+    ls -l /usr/share/themes/StradiLab/xfwm4/themerc 2>&1 || true
+
+    section "Scheda video"
+    lspci 2>/dev/null | grep -i -E 'vga|display|3d' || true
+    ls /dev/dri 2>/dev/null || printf 'nessun dispositivo DRM\n'
+    if [ -r /var/log/Xorg.0.log ]; then
+        grep -E '\(EE\)|\(WW\).*(GLX|DRI|modeset|fbdev)' /var/log/Xorg.0.log | tail -n 20
+    fi
+    grep -E '\(EE\)|GLX|DRI|modeset|fbdev' "$HOME/.local/share/xorg/Xorg.0.log" 2>/dev/null | tail -n 20
+
+    section "Registro della guardia"
+    cat "${XDG_STATE_HOME:-$HOME/.local/state}/stradilabos/window-manager.log" 2>/dev/null || \
+        printf 'nessun intervento registrato\n'
+
+    section "Journal (ultimo avvio)"
+    journalctl --user -b --no-pager 2>/dev/null | grep -Ei 'xfwm|stradilabos-wm-guard|xfce4-session' | tail -n 40
+    journalctl -b --no-pager 2>/dev/null | grep -Ei 'xfwm|stradilabos-wm-guard|lightdm' | tail -n 40
+} >"$output" 2>&1
+
+printf 'Rapporto salvato in: %s\n\n' "$output"
+cat "$output"

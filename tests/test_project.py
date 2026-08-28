@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import re
 import tempfile
 import unittest
@@ -89,6 +90,41 @@ class DesktopDefaultsTests(unittest.TestCase):
             self.assertIn('name="borderless_maximize" type="bool" value="false"', text)
             self.assertIn('name="titleless_maximize" type="bool" value="false"', text)
             self.assertIn('name="theme" type="string" value="StradiLab"', text)
+
+    def test_window_manager_guard_is_installed_and_bounded(self) -> None:
+        guard = CHROOT / "usr/local/bin/stradilabos-window-manager-guard"
+        self.assertTrue(guard.exists())
+        self.assertTrue(os.access(guard, os.X_OK))
+        text = guard.read_text(encoding="utf-8")
+        self.assertIn("--vblank=off", text)
+        self.assertIn("--compositor=off", text)
+        self.assertIn("Greybird", text)
+        self.assertIn("max_attempts=3", text)
+        self.assertIn("logger -t", text)
+        self.assertIn("notify-send", text)
+        autostart = (
+            CHROOT / "etc/xdg/autostart/stradilabos-window-manager.desktop"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Exec=stradilabos-window-manager-guard", autostart)
+        self.assertIn("OnlyShowIn=XFCE;", autostart)
+        packages = (
+            ROOT / "config/package-lists/stradilabos-core.list.chroot"
+        ).read_text(encoding="utf-8")
+        active = set(re.findall(r"^[a-z0-9][a-z0-9+.-]*$", packages, re.M))
+        self.assertIn("x11-utils", active)
+        self.assertIn("libnotify-bin", active)
+
+    def test_window_manager_runtime_check_exists(self) -> None:
+        script = ROOT / "scripts/test_window_manager_xvfb.sh"
+        self.assertTrue(script.exists())
+        text = script.read_text(encoding="utf-8")
+        self.assertIn("_NET_FRAME_EXTENTS", text)
+        self.assertIn("stradilabos-window-manager-guard", text)
+        for workflow in ("build-iso.yml", "build-arm64.yml"):
+            yaml_text = (ROOT / ".github/workflows" / workflow).read_text(
+                encoding="utf-8"
+            )
+            self.assertIn("scripts/test_window_manager_xvfb.sh", yaml_text)
 
     def test_wallpaper_supports_named_monitors(self) -> None:
         script = (CHROOT / "usr/local/bin/stradilabos-apply-theme").read_text(
