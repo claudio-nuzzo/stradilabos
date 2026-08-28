@@ -16,12 +16,22 @@ jobs:
           python3 -m unittest discover -v
           python3 scripts/validate_project.py
 
-      - name: Prova il gestore delle finestre in un X virtuale
+      - name: Prova il gestore delle finestre in X virtuale (Debian Trixie)
         run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends \
-            xfwm4 xvfb xfconf dbus-x11 x11-utils x11-apps greybird-gtk-theme
-          sudo sh scripts/test_window_manager_xvfb.sh
+          # Il test gira dentro lo stesso container Debian Trixie usato per la
+          # build, così usa xfwm4 4.20 dei repository Debian 13 e non quello
+          # dell'host Ubuntu del runner. Se fallisce, la build non parte.
+          docker run --rm \
+            --volume "$PWD:/work" \
+            --workdir /work \
+            debian:trixie-slim \
+            sh -lc '
+              sed -i "s/^Components: main$/Components: main contrib non-free non-free-firmware/" /etc/apt/sources.list.d/debian.sources
+              apt-get update
+              apt-get install --yes --no-install-recommends \
+                xfwm4 xvfb xfconf dbus-x11 x11-utils x11-apps greybird-gtk-theme
+              sh scripts/test_window_manager_xvfb.sh
+            '
 
       - name: Crea la ISO Debian ARM64 in ambiente isolato
         run: |

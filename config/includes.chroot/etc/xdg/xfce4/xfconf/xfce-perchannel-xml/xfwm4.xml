@@ -6,6 +6,7 @@
     <property name="button_layout" type="string" value="O|HMC"/>
     <property name="borderless_maximize" type="bool" value="false"/>
     <property name="titleless_maximize" type="bool" value="false"/>
+    <property name="use_compositing" type="bool" value="false"/>
     <property name="show_frame_shadow" type="bool" value="true"/>
     <property name="inactive_opacity" type="uint" value="96"/>
     <property name="popup_opacity" type="uint" value="96"/>

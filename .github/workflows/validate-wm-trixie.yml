@@ -1,0 +1,83 @@
+name: Valida gestore finestre in Debian Trixie
+
+# Validazione separata e SENZA costruzione della ISO. Serve a rendere verdi le
+# voci del gate pre-build che richiedono un container Debian Trixie (test Xvfb,
+# disponibilita' pacchetti ARM64/AMD64, ShellCheck e preflight della sessione
+# Xfce). Attivabile manualmente su qualsiasi branch.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  validate-amd64:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Scarica il progetto
+        uses: actions/checkout@v5
+
+      - name: Verifica in container Debian Trixie (amd64)
+        run: |
+          docker run --rm \
+            --volume "$PWD:/work" \
+            --workdir /work \
+            debian:trixie-slim \
+            sh -lc '
+              sed -i "s/^Components: main$/Components: main contrib non-free non-free-firmware/" /etc/apt/sources.list.d/debian.sources
+              apt-get update
+              apt-get install --yes --no-install-recommends \
+                shellcheck \
+                xfwm4 xvfb xfconf dbus-x11 x11-utils x11-apps greybird-gtk-theme
+              sh -n config/includes.chroot/usr/local/bin/stradilabos-window-manager-guard
+              sh -n scripts/test_window_manager_xvfb.sh
+              sh -n scripts/preflight_xfce_session.sh
+              shellcheck config/includes.chroot/usr/local/bin/stradilabos-window-manager-guard
+              shellcheck scripts/test_window_manager_xvfb.sh
+              BUILD_ARCH=amd64 sh scripts/validate_debian_packages.sh
+              sh scripts/test_window_manager_xvfb.sh
+            '
+
+  validate-arm64:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    steps:
+      - name: Scarica il progetto
+        uses: actions/checkout@v5
+
+      - name: Verifica in container Debian Trixie (arm64)
+        run: |
+          docker run --rm \
+            --volume "$PWD:/work" \
+            --workdir /work \
+            debian:trixie-slim \
+            sh -lc '
+              sed -i "s/^Components: main$/Components: main contrib non-free non-free-firmware/" /etc/apt/sources.list.d/debian.sources
+              apt-get update
+              apt-get install --yes --no-install-recommends \
+                xfwm4 xvfb xfconf dbus-x11 x11-utils x11-apps greybird-gtk-theme
+              BUILD_ARCH=arm64 sh scripts/validate_debian_packages.sh
+              sh scripts/test_window_manager_xvfb.sh
+            '
+
+  preflight-xfce:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # Il preflight non e' bloccante: un container non riproduce GPU/Parallels.
+    continue-on-error: true
+    steps:
+      - name: Scarica il progetto
+        uses: actions/checkout@v5
+
+      - name: Preflight sessione Xfce (non bloccante)
+        run: |
+          docker run --rm \
+            --volume "$PWD:/work" \
+            --workdir /work \
+            debian:trixie-slim \
+            sh -lc '
+              sed -i "s/^Components: main$/Components: main contrib non-free non-free-firmware/" /etc/apt/sources.list.d/debian.sources
+              apt-get update
+              apt-get install --yes --no-install-recommends \
+                xfwm4 xfce4-session xvfb xfconf dbus-x11 x11-utils x11-apps greybird-gtk-theme
+              sh scripts/preflight_xfce_session.sh
+            '

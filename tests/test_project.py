@@ -89,6 +89,7 @@ class DesktopDefaultsTests(unittest.TestCase):
             self.assertIn('name="button_layout" type="string" value="O|HMC"', text)
             self.assertIn('name="borderless_maximize" type="bool" value="false"', text)
             self.assertIn('name="titleless_maximize" type="bool" value="false"', text)
+            self.assertIn('name="use_compositing" type="bool" value="false"', text)
             self.assertIn('name="theme" type="string" value="StradiLab"', text)
 
     def test_window_manager_guard_is_installed_and_bounded(self) -> None:
@@ -102,6 +103,11 @@ class DesktopDefaultsTests(unittest.TestCase):
         self.assertIn("max_attempts=3", text)
         self.assertIn("logger -t", text)
         self.assertIn("notify-send", text)
+        self.assertIn("inizializzazione preventiva di xfwm4", text)
+        self.assertIn("xfwm4 --replace --compositor=off", text)
+        self.assertIn("startup_grace=${STRADILABOS_WM_GRACE:-2}", text)
+        self.assertIn("disable_compositing", text)
+        self.assertIn("/general/use_compositing", text)
         autostart = (
             CHROOT / "etc/xdg/autostart/stradilabos-window-manager.desktop"
         ).read_text(encoding="utf-8")
