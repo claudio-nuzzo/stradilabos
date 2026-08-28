@@ -10,14 +10,10 @@ for package_list in config/package-lists/*.list.chroot; do
         case "$package" in
             "#if ARCHITECTURES "*)
                 active=false
-                set -- $package
-                shift 2
-                for candidate in "$@"; do
-                    if [ "$candidate" = "$architecture" ]; then
-                        active=true
-                        break
-                    fi
-                done
+                directive_architectures=${package#"#if ARCHITECTURES "}
+                case " $directive_architectures " in
+                    *" $architecture "*) active=true ;;
+                esac
                 continue
                 ;;
             "#endif")
