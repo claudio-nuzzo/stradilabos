@@ -94,6 +94,17 @@ def run():
                 json.dumps(state, ensure_ascii=False, indent=2) + "\n",
                 encoding="utf-8",
             )
+
+        # Il programma di installazione serve solo nella sessione Live. Dopo
+        # la copia sul disco i suoi launcher sarebbero inutili e confondenti.
+        for relative_path in (
+            "usr/share/applications/calamares.desktop",
+            "usr/share/applications/calamares-install-debian.desktop",
+            "usr/local/share/applications/calamares-install-debian.desktop",
+            "etc/skel/Desktop/calamares.desktop",
+            "etc/skel/Desktop/install-debian.desktop",
+        ):
+            (Path(str(root_mount)) / relative_path).unlink(missing_ok=True)
     except OSError as error:
         libcalamares.utils.warning(f"Cannot save StradilabOS profiles: {error}")
         return (

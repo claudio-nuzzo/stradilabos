@@ -93,7 +93,7 @@ INSTITUTIONAL_APPS = [
         "id": "workspace-login",
         "title": "Accedi a Google Workspace",
         "description": "Accesso con l'account istituzionale, condiviso tra tutte le app Google.",
-        "url": "https://accounts.google.com/AccountChooser?continue=https%3A%2F%2Fclassroom.google.com%2F&hd=istitutostradivari.it",
+        "url": "https://accounts.google.com/ServiceLogin?service=classroom&continue=https%3A%2F%2Fclassroom.google.com%2F&hd=istitutostradivari.it&hl=it",
         "audience": ["docenti", "studenti", "personale"],
         "category": "Workspace",
         "source": "google",
@@ -102,7 +102,7 @@ INSTITUTIONAL_APPS = [
         "id": "google-classroom",
         "title": "Google Classroom",
         "description": "Corsi, materiali, compiti e comunicazioni delle classi.",
-        "url": "https://classroom.google.com/",
+        "url": "https://accounts.google.com/ServiceLogin?service=classroom&continue=https%3A%2F%2Fclassroom.google.com%2F&hd=istitutostradivari.it&hl=it",
         "audience": ["docenti", "studenti"],
         "category": "Workspace",
         "source": "google",
@@ -260,10 +260,16 @@ def main() -> int:
         and urlparse(project["url"]).scheme == "https"
     ]
 
-    by_url = {app["url"].rstrip("/"): app for app in INSTITUTIONAL_APPS}
+    # Due launcher istituzionali possono aprire lo stesso servizio con scopi
+    # diversi (per esempio accesso Workspace e Classroom). Si deduplicano solo
+    # i progetti importati rispetto agli URL già presenti, non le voci curate.
+    apps = [dict(app) for app in INSTITUTIONAL_APPS]
+    known_urls = {app["url"].rstrip("/") for app in apps}
     for app in projects:
-        by_url.setdefault(app["url"].rstrip("/"), app)
-    apps = list(by_url.values())
+        normalized_url = app["url"].rstrip("/")
+        if normalized_url not in known_urls:
+            apps.append(app)
+            known_urls.add(normalized_url)
 
     ids: set[str] = set()
     for app in apps:

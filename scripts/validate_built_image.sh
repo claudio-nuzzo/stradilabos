@@ -35,6 +35,15 @@ workspace_policy=$(unsquashfs -cat \
     2>/dev/null) || fail "criterio Workspace assente"
 printf '%s\n' "$workspace_policy" | grep -q '"istitutostradivari.it"' || \
     fail "dominio Workspace errato"
+printf '%s\n' "$workspace_policy" | grep -q '"TranslateEnabled"[[:space:]]*:[[:space:]]*false' || \
+    fail "popup di traduzione non disattivato"
+printf '%s\n' "$workspace_policy" | grep -q '"PasswordManagerEnabled"[[:space:]]*:[[:space:]]*false' || \
+    fail "salvataggio password non disattivato"
+
+app_opener=$(unsquashfs -cat "$squashfs" usr/local/bin/stradilabos-open-app 2>/dev/null) || \
+    fail "avviatore web app assente"
+printf '%s\n' "$app_opener" | grep -q -- '--password-store=basic' || \
+    fail "le web app possono chiedere il portachiavi"
 
 lightdm_hardware=$(unsquashfs -cat \
     "$squashfs" etc/lightdm/lightdm.conf.d/50-stradilabos-hardware.conf \
@@ -50,12 +59,61 @@ printf '%s\n' "$plymouth_config" | grep -q 'Theme=stradilabos' || \
 
 for path in \
     etc/calamares/modules/stradilabos-workspace.conf \
+    etc/xdg/autostart/polkit-mate-authentication-agent-1.desktop \
     etc/lightdm/lightdm-gtk-greeter.conf.d/60-stradilabos.conf \
+    usr/lib/tmpfiles.d/stradilabos-lightdm.conf \
+    usr/share/polkit-1/actions/org.stradilab.stradilabos.policy \
+    usr/share/themes/StradiLab/xfwm4/themerc \
     etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml \
     usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v2.png \
     usr/share/plymouth/themes/stradilabos/stradilabos.script; do
     unsquashfs -cat "$squashfs" "$path" >/dev/null 2>&1 || \
         fail "file interno assente: $path"
+done
+
+greeter_theme=$(unsquashfs -cat \
+    "$squashfs" etc/lightdm/lightdm-gtk-greeter.conf.d/60-stradilabos.conf \
+    2>/dev/null) || fail "tema del login assente"
+printf '%s\n' "$greeter_theme" | grep -q '^theme-name=StradiLab$' || \
+    fail "login fuori dal tema StradiLab"
+
+if unsquashfs -ll "$squashfs" 2>/dev/null | \
+    grep -q 'var/lib/flatpak/app/io\.seamly\.seamly2d/'; then
+    fail "Seamly2D è ancora incorporato nella ISO base"
+fi
+
+fashion_launcher=$(unsquashfs -cat \
+    "$squashfs" usr/local/share/applications/stradilabos-cad-moda.desktop \
+    2>/dev/null) || fail "launcher CAD Moda assente"
+printf '%s\n' "$fashion_launcher" | grep -q '^NoDisplay=true$' || \
+    fail "il CAD Moda appare prima del download"
+
+polkit_autostart=$(unsquashfs -cat \
+    "$squashfs" etc/xdg/autostart/polkit-mate-authentication-agent-1.desktop \
+    2>/dev/null) || fail "avvio dell'agente di autorizzazione assente"
+printf '%s\n' "$polkit_autostart" | grep -q \
+    '^Exec=/usr/libexec/polkit-mate-authentication-agent-1$' || \
+    fail "agente di autorizzazione errato"
+printf '%s\n' "$polkit_autostart" | grep -q '^NotShowIn=GNOME;KDE;$' || \
+    fail "agente di autorizzazione disattivato nelle sessioni grafiche"
+
+xfwm_config=$(unsquashfs -cat \
+    "$squashfs" etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml \
+    2>/dev/null) || fail "configurazione finestre assente"
+printf '%s\n' "$xfwm_config" | grep -q 'value="StradiLab"' || \
+    fail "tema finestre StradiLab non selezionato"
+printf '%s\n' "$xfwm_config" | grep -q 'name="borderless_maximize" type="bool" value="false"' || \
+    fail "le finestre massimizzate possono perdere i bordi"
+
+for launcher in \
+    xfce4-terminal.desktop \
+    xfce4-terminal-settings.desktop \
+    xfce4-terminal-emulator.desktop; do
+    terminal_entry=$(unsquashfs -cat \
+        "$squashfs" "usr/local/share/applications/$launcher" 2>/dev/null) || \
+        fail "override del terminale assente: $launcher"
+    printf '%s\n' "$terminal_entry" | grep -q '^NoDisplay=true$' || \
+        fail "voce terminale ancora visibile: $launcher"
 done
 
 printf '%s\n' "Controlli sull'immagine StradilabOS superati."

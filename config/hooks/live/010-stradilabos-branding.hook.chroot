@@ -100,10 +100,17 @@ if getent passwd lightdm >/dev/null 2>&1; then
     install -d -o lightdm -g lightdm -m 0750 /var/lib/lightdm/data
 fi
 
-# Il terminale rimane disponibile ai tecnici tramite Alt+F2, ma non compare
-# nel menu destinato agli utenti ordinari.
+# Il terminale rimane disponibile ai tecnici tramite Alt+F2, ma nessuna delle
+# sue diverse voci Desktop compare nel menu destinato agli utenti ordinari.
 mkdir -p /usr/local/share/applications
-cat > /usr/local/share/applications/xfce4-terminal.desktop <<'EOF'
+for launcher in \
+    xfce4-terminal.desktop \
+    xfce4-terminal-settings.desktop \
+    xfce4-terminal-emulator.desktop \
+    debian-xterm.desktop \
+    xterm.desktop \
+    uxterm.desktop; do
+    cat > "/usr/local/share/applications/$launcher" <<'EOF'
 [Desktop Entry]
 Type=Application
 Name=Terminale
@@ -111,3 +118,6 @@ Exec=xfce4-terminal
 NoDisplay=true
 Terminal=false
 EOF
+done
+
+update-desktop-database /usr/local/share/applications || true

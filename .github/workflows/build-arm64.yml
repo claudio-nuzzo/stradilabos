@@ -12,7 +12,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Controlla cataloghi e script
-        run: python3 scripts/validate_project.py
+        run: |
+          python3 -m unittest discover -v
+          python3 scripts/validate_project.py
 
       - name: Crea la ISO Debian ARM64 in ambiente isolato
         run: |

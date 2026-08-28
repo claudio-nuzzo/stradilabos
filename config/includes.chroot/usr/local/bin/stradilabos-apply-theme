@@ -6,21 +6,32 @@ wallpaper=/usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v2.png
 command -v xfconf-query >/dev/null 2>&1 || exit 0
 
 state_dir=${XDG_CONFIG_HOME:-"$HOME/.config"}/stradilabos
-marker=$state_dir/theme-applied-v2
+marker=$state_dir/theme-applied-v3
 [ -e "$marker" ] && exit 0
 
 mkdir -p "$state_dir"
 
-xfconf-query -c xsettings -p /Net/ThemeName -n -t string -s Greybird >/dev/null 2>&1 || \
-    xfconf-query -c xsettings -p /Net/ThemeName -s Greybird >/dev/null 2>&1 || true
+set_property() {
+    channel=$1
+    property=$2
+    type=$3
+    value=$4
+    xfconf-query -c "$channel" -p "$property" -s "$value" >/dev/null 2>&1 || \
+        xfconf-query -c "$channel" -p "$property" -n -t "$type" -s "$value" >/dev/null 2>&1 || true
+}
+
+set_property xsettings /Net/ThemeName string StradiLab
 xfconf-query -c xsettings -p /Net/IconThemeName -n -t string -s StradiLab >/dev/null 2>&1 || \
     xfconf-query -c xsettings -p /Net/IconThemeName -s StradiLab >/dev/null 2>&1 || true
 xfconf-query -c xsettings -p /Gtk/FontName -n -t string -s "Noto Sans 10" >/dev/null 2>&1 || \
     xfconf-query -c xsettings -p /Gtk/FontName -s "Noto Sans 10" >/dev/null 2>&1 || true
 
-xfconf-query -c xfwm4 -p /general/theme -s Greybird >/dev/null 2>&1 || true
-xfconf-query -c xfwm4 -p /general/title_font -s "Noto Sans Medium 10" >/dev/null 2>&1 || true
-xfconf-query -c xfwm4 -p /general/show_frame_shadow -s true >/dev/null 2>&1 || true
+set_property xfwm4 /general/theme string StradiLab
+set_property xfwm4 /general/title_font string "Noto Sans Medium 10"
+set_property xfwm4 /general/button_layout string 'O|HMC'
+set_property xfwm4 /general/borderless_maximize bool false
+set_property xfwm4 /general/titleless_maximize bool false
+set_property xfwm4 /general/show_frame_shadow bool true
 
 panel_ids=$(xfconf-query -c xfce4-panel -p /panels 2>/dev/null | sed -n '/^[[:space:]]*[0-9][0-9]*[[:space:]]*$/s/[[:space:]]//gp' || true)
 for panel_id in $panel_ids; do
@@ -40,19 +51,42 @@ while [ "$attempt" -lt 20 ]; do
             xfconf-query -c xfce4-desktop -p "$style_property" -s 5 >/dev/null 2>&1 || \
                 xfconf-query -c xfce4-desktop -p "$style_property" -n -t int -s 5 >/dev/null 2>&1 || true
         done
-        command -v xfdesktop >/dev/null 2>&1 && xfdesktop --reload >/dev/null 2>&1 || true
-        touch "$marker"
-        exit 0
+        break
     fi
     attempt=$((attempt + 1))
     sleep 1
 done
 
-xfconf-query -c xfce4-desktop \
-    -p /backdrop/screen0/monitor0/workspace0/last-image \
-    -n -t string -s "$wallpaper" >/dev/null 2>&1 || true
-xfconf-query -c xfce4-desktop \
-    -p /backdrop/screen0/monitor0/workspace0/image-style \
-    -n -t int -s 5 >/dev/null 2>&1 || true
+# Xfce 4.20 usa il nome reale dell'uscita video (per esempio Virtual-1,
+# eDP-1 o HDMI-1) nel percorso xfconf. Le sole chiavi monitor0/monitor1
+# risultano valide nei file ma possono non essere quelle effettivamente lette.
+outputs=""
+if command -v xrandr >/dev/null 2>&1; then
+    outputs=$(xrandr --query 2>/dev/null | awk '$2 == "connected" { print $1 }' || true)
+fi
+[ -n "$outputs" ] || outputs=0
+
+for output in $outputs; do
+    case "$output" in
+        0) monitor=monitor0 ;;
+        *) monitor=monitor$output ;;
+    esac
+    root=/backdrop/screen0/$monitor
+    workspace=$root/workspace0
+    set_property xfce4-desktop "$root/image-path" string "$wallpaper"
+    set_property xfce4-desktop "$root/image-show" bool true
+    set_property xfce4-desktop "$root/image-style" int 5
+    set_property xfce4-desktop "$workspace/last-image" string "$wallpaper"
+    set_property xfce4-desktop "$workspace/image-style" int 5
+done
+
+# Compatibilità con installazioni Xfce precedenti e con il primo avvio, quando
+# xrandr potrebbe non aver ancora annunciato l'uscita.
+set_property xfce4-desktop /backdrop/screen0/monitor0/image-path string "$wallpaper"
+set_property xfce4-desktop /backdrop/screen0/monitor0/image-show bool true
+set_property xfce4-desktop /backdrop/screen0/monitor0/image-style int 5
+set_property xfce4-desktop /backdrop/screen0/monitor0/workspace0/last-image string "$wallpaper"
+set_property xfce4-desktop /backdrop/screen0/monitor0/workspace0/image-style int 5
+
 command -v xfdesktop >/dev/null 2>&1 && xfdesktop --reload >/dev/null 2>&1 || true
 touch "$marker"

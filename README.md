@@ -95,6 +95,23 @@ Per creare localmente la variante ARM64 su un sistema ARM:
 sudo BUILD_ARCH=arm64 ./auto/build
 ```
 
+## Controlli prima della build
+
+Ogni workflow esegue prima i test di regressione, il controllo dei cataloghi e
+la verifica dei pacchetti Debian per l'architettura richiesta; a ISO terminata
+controlla anche i file effettivamente contenuti nell'immagine. Localmente, i
+controlli che non richiedono Linux si avviano con:
+
+```sh
+python3 -m unittest discover -v
+python3 scripts/validate_project.py
+```
+
+Tra le regressioni coperte ci sono il dominio Workspace, i pulsanti delle
+finestre, lo sfondo sui monitor con nome reale, l'agente grafico delle
+autorizzazioni, la rimozione dell'installatore dal sistema installato e la
+separazione fra dotazione base e raccolte scaricabili.
+
 ## Stato
 
 Progetto in continuo sviluppo: configurazione, profili d'uso in Calamares,

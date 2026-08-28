@@ -13,6 +13,11 @@ from pathlib import Path
 CATALOG = Path("/usr/local/share/stradilabos/packs.json")
 SAFE_PACKAGE = re.compile(r"^[a-z0-9][a-z0-9+.-]*$")
 SAFE_FLATPAK = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+FLATPAK_LAUNCHERS = {
+    "io.seamly.seamly2d": Path(
+        "/usr/local/share/applications/stradilabos-cad-moda.desktop"
+    ),
+}
 
 
 def fail(message: str, code: int = 2) -> int:
@@ -97,6 +102,22 @@ def main(argv: list[str]) -> int:
         )
         if install_flatpak.returncode:
             return fail("Installazione specialistica non completata.", install_flatpak.returncode)
+
+        # I launcher specialistici restano nascosti finché la relativa app non
+        # è davvero presente. Dopo il download diventano normali voci del menu.
+        for app_id in flatpaks:
+            launcher = FLATPAK_LAUNCHERS.get(app_id)
+            if not launcher or not launcher.exists():
+                continue
+            launcher_text = launcher.read_text(encoding="utf-8")
+            launcher.write_text(
+                launcher_text.replace("\nNoDisplay=true\n", "\n"),
+                encoding="utf-8",
+            )
+        subprocess.run(
+            ["update-desktop-database", "/usr/local/share/applications"],
+            check=False,
+        )
 
     print("Applicazioni installate correttamente.", flush=True)
     return 0

@@ -90,7 +90,7 @@
       "id": "workspace-login",
       "title": "Accedi a Google Workspace",
       "description": "Accesso con l'account istituzionale, condiviso tra tutte le app Google.",
-      "url": "https://accounts.google.com/AccountChooser?continue=https%3A%2F%2Fclassroom.google.com%2F&hd=istitutostradivari.it",
+      "url": "https://accounts.google.com/ServiceLogin?service=classroom&continue=https%3A%2F%2Fclassroom.google.com%2F&hd=istitutostradivari.it&hl=it",
       "audience": [
         "docenti",
         "studenti",
@@ -104,7 +104,7 @@
       "id": "google-classroom",
       "title": "Google Classroom",
       "description": "Corsi, materiali, compiti e comunicazioni delle classi.",
-      "url": "https://classroom.google.com/",
+      "url": "https://accounts.google.com/ServiceLogin?service=classroom&continue=https%3A%2F%2Fclassroom.google.com%2F&hd=istitutostradivari.it&hl=it",
       "audience": [
         "docenti",
         "studenti"

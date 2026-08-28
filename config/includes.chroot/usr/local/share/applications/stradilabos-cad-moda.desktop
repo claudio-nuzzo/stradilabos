@@ -11,3 +11,4 @@ Terminal=false
 Categories=Graphics;Education;
 Keywords=moda;CAD;cartamodelli;misure;taglio;Seamly2D;
 StartupNotify=true
+NoDisplay=true

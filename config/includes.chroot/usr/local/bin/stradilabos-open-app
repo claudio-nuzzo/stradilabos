@@ -25,6 +25,7 @@ if command -v chromium >/dev/null 2>&1; then
         ${browser_profile:+"$browser_profile"} \
         --app="$url" \
         --class="StradilabOS-$app_id" \
+        --password-store=basic \
         --start-maximized \
         --no-first-run \
         --disable-session-crashed-bubble

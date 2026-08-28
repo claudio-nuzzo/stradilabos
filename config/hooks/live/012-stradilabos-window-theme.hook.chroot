@@ -1,0 +1,36 @@
+#!/bin/sh
+set -eu
+
+source_theme=/usr/share/themes/Greybird
+target_theme=/usr/share/themes/StradiLab
+
+[ -d "$source_theme/xfwm4" ] || {
+    printf '%s\n' "Tema Greybird non disponibile: impossibile creare StradiLab." >&2
+    exit 1
+}
+
+install -d "$target_theme"
+cp -a "$source_theme/." "$target_theme/"
+
+# Mantiene le forme mature e leggibili di Greybird, ma coordina titolo,
+# selezione e controlli delle finestre con la palette StradiLab.
+find "$target_theme/xfwm4" -type f -name '*.xpm' -exec sed -i \
+    -e 's/#[0-9A-Fa-f]\{6\}\([[:space:]]s active_color_1\)/#9B2335\1/g' \
+    -e 's/#[0-9A-Fa-f]\{6\}\([[:space:]]s active_color_2\)/#F6F4EF\1/g' \
+    {} +
+
+sed -i \
+    -e 's/^active_text_color=.*/active_text_color=#16130F/' \
+    -e 's/^active_text_shadow_color=.*/active_text_shadow_color=#F6F4EF/' \
+    -e 's/^inactive_text_color=.*/inactive_text_color=#645E55/' \
+    -e 's/^inactive_text_shadow_color=.*/inactive_text_shadow_color=#F6F4EF/' \
+    "$target_theme/xfwm4/themerc"
+
+cat >> "$target_theme/gtk-3.0/gtk.css" <<'EOF'
+
+/* Accenti StradiLab: bordeaux, crema e testo ad alto contrasto. */
+@define-color theme_selected_bg_color #9b2335;
+@define-color theme_selected_fg_color #f6f4ef;
+@define-color selected_bg_color #9b2335;
+@define-color selected_fg_color #f6f4ef;
+EOF

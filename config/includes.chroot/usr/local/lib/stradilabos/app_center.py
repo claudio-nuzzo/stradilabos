@@ -12,11 +12,36 @@ from pathlib import Path
 import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import GLib, Gtk  # noqa: E402
+gi.require_version("Gdk", "3.0")
+from gi.repository import Gdk, GLib, Gtk  # noqa: E402
 
 CATALOG = Path("/usr/local/share/stradilabos/packs.json")
 BACKEND = "/usr/local/lib/stradilabos/install_pack.py"
 PROFILE_STATE = Path.home() / ".config/stradilabos/profiles.json"
+
+APP_CENTER_CSS = b"""
+window { background: #f6f4ef; }
+.app-center-wrap { padding: 24px; }
+.app-center-title { color: #9b2335; font-size: 28px; font-weight: 700; }
+.app-center-copy { color: #645e55; font-size: 15px; }
+list { background: transparent; }
+.pack-row {
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid #ded8ce;
+  border-radius: 14px;
+  margin: 4px 2px;
+}
+.pack-row:hover { border-color: #b98a92; background: rgba(255, 255, 255, 0.94); }
+.primary {
+  background: #9b2335;
+  color: #f6f4ef;
+  border-radius: 12px;
+  padding: 8px 14px;
+  box-shadow: 0 3px 10px rgba(155, 35, 53, 0.20);
+}
+.secondary { border-radius: 12px; padding: 8px 12px; }
+check { min-width: 20px; min-height: 20px; }
+"""
 
 
 def is_live() -> bool:
@@ -81,10 +106,17 @@ class AppCenterWindow(Gtk.ApplicationWindow):
         self.live_session = is_live()
         self.checks: dict[str, Gtk.CheckButton] = {}
 
+        provider = Gtk.CssProvider()
+        provider.load_from_data(APP_CENTER_CSS)
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+
         root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         root.set_border_width(20)
+        root.get_style_context().add_class("app-center-wrap")
         title = Gtk.Label(label="App e raccolte StradilabOS", xalign=0)
-        title.set_markup("<span size='xx-large' weight='bold'>App e raccolte StradilabOS</span>")
+        title.get_style_context().add_class("app-center-title")
         role_note = {
             "teacher": "Profilo docente: sono consigliate le raccolte di tutti gli indirizzi.",
             "staff": "Profilo segreteria: nessuna raccolta specialistica è obbligatoria.",
@@ -102,11 +134,12 @@ class AppCenterWindow(Gtk.ApplicationWindow):
             xalign=0,
         )
         copy.set_line_wrap(True)
+        copy.get_style_context().add_class("app-center-copy")
         root.pack_start(title, False, False, 0)
         root.pack_start(copy, False, False, 0)
 
         scroller = Gtk.ScrolledWindow()
-        scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.ALWAYS)
         listing = Gtk.ListBox()
         listing.set_selection_mode(Gtk.SelectionMode.NONE)
         for pack in self.packs:
@@ -117,9 +150,10 @@ class AppCenterWindow(Gtk.ApplicationWindow):
         footer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         self.status = Gtk.Label(label="", xalign=0)
         profile_button = Gtk.Button(label="Cambia profilo d'uso")
+        profile_button.get_style_context().add_class("secondary")
         profile_button.connect("clicked", self.change_profile)
         self.install_button = Gtk.Button(label="Scarica e installa le app selezionate")
-        self.install_button.get_style_context().add_class("suggested-action")
+        self.install_button.get_style_context().add_class("primary")
         self.install_button.connect("clicked", self.start_install)
         self.install_button.set_sensitive(not self.live_session)
         if self.live_session:
@@ -132,6 +166,7 @@ class AppCenterWindow(Gtk.ApplicationWindow):
 
     def pack_row(self, pack: dict) -> Gtk.ListBoxRow:
         row = Gtk.ListBoxRow()
+        row.get_style_context().add_class("pack-row")
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         box.set_border_width(12)
 
@@ -226,6 +261,17 @@ class AppCenterWindow(Gtk.ApplicationWindow):
                 Gtk.MessageType.INFO,
                 "Applicazioni installate",
                 "Le nuove applicazioni sono disponibili nel menu.",
+            )
+        elif code == 126:
+            # pkexec usa 126 quando l'utente chiude la richiesta di password:
+            # non è un guasto di rete né un'installazione fallita.
+            self.status.set_text("Operazione annullata.")
+        elif code == 127:
+            self.status.set_text("Autorizzazione non disponibile.")
+            self.show_message(
+                Gtk.MessageType.ERROR,
+                "Autorizzazione non disponibile",
+                "Riprova e inserisci la password dell'amministratore del computer.",
             )
         else:
             self.status.set_text("Installazione non completata.")

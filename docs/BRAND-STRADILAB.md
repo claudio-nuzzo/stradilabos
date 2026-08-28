@@ -33,6 +33,7 @@ decorazioni intercambiabili, ma elementi del brand StradiLab.
 
 - Sfondo: `/usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v2.png`
 - Tema icone: `/usr/share/icons/StradiLab`
+- Tema GTK e finestre: `/usr/share/themes/StradiLab`
 - Icone delle app: `/usr/local/share/icons/hicolor/scalable/apps`
 - Branding installatore: `/etc/calamares/branding/stradilabos`
 - Menu Live: `/boot/grub/live-theme/theme.txt`

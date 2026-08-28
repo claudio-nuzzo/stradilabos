@@ -1,3 +1,5 @@
 {
-  "AllowedDomainsForApps": "istitutostradivari.it"
+  "AllowedDomainsForApps": "istitutostradivari.it",
+  "PasswordManagerEnabled": false,
+  "TranslateEnabled": false
 }

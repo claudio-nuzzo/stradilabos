@@ -12,7 +12,16 @@ from pathlib import Path
 import gi
 
 gi.require_version("Gtk", "3.0")
+gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk, GLib, Gtk  # noqa: E402
+
+FORCE_PROFILES = "--profiles" in sys.argv
+AUTOSTART_MODE = "--autostart" in sys.argv
+GTK_ARGV = [
+    argument
+    for argument in sys.argv
+    if argument not in {"--profiles", "--autostart"}
+]
 
 CONFIG_DIR = Path.home() / ".config" / "stradilabos"
 WELCOME_STATE = CONFIG_DIR / "welcome-seen"
@@ -27,9 +36,9 @@ ROLE_LABELS = {
     "base": "Installazione base",
 }
 WORKSPACE_LOGIN = (
-    "https://accounts.google.com/AccountChooser?"
+    "https://accounts.google.com/ServiceLogin?service=classroom&"
     "continue=https%3A%2F%2Fclassroom.google.com%2F&"
-    "hd=istitutostradivari.it"
+    "hd=istitutostradivari.it&hl=it"
 )
 
 CSS = b"""
@@ -147,9 +156,10 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         self.stack.add_named(self.build_profile_page(), "profiles")
         self.add(self.stack)
 
-        force_profiles = "--profiles" in sys.argv
         needs_profile = not is_live() and not PROFILE_STATE.exists()
-        self.stack.set_visible_child_name("profiles" if force_profiles or needs_profile else "home")
+        self.stack.set_visible_child_name(
+            "profiles" if FORCE_PROFILES or needs_profile else "home"
+        )
 
     def heading(self, title_text: str, copy_text: str) -> tuple[Gtk.Label, Gtk.Label, Gtk.Label]:
         brand = Gtk.Label(label="STRADILAB · IIS ANTONIO STRADIVARI", xalign=0)
@@ -311,7 +321,8 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         root.pack_start(address_title, False, False, 0)
 
         scroller = Gtk.ScrolledWindow()
-        scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.ALWAYS)
+        scroller.set_min_content_height(220)
         listing = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         for pack in self.packs:
             check = Gtk.CheckButton()
@@ -528,7 +539,7 @@ class WelcomeApplication(Gtk.Application):
 
     def do_activate(self) -> None:
         already_configured = WELCOME_STATE.exists() and PROFILE_STATE.exists()
-        if "--autostart" in sys.argv and already_configured and not is_live():
+        if AUTOSTART_MODE and already_configured and not is_live():
             self.quit()
             return
         window = self.props.active_window or WelcomeWindow(self)
@@ -537,4 +548,4 @@ class WelcomeApplication(Gtk.Application):
 
 
 if __name__ == "__main__":
-    raise SystemExit(WelcomeApplication().run(sys.argv))
+    raise SystemExit(WelcomeApplication().run(GTK_ARGV))

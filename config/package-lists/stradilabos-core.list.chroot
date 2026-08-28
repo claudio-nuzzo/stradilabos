@@ -1,7 +1,21 @@
 # Desktop leggero e sessione live
-task-xfce-desktop
+# I componenti sono espliciti: i metapacchetti task trascinano browser, font e
+# utility duplicati che non servono alla dotazione base.
+xserver-xorg
+xserver-xorg-input-all
+xserver-xorg-video-all
+xfce4
 xfce4-whiskermenu-plugin
+xfce4-power-manager
+xfce4-notifyd
+thunar-volman
+light-locker
+lightdm
 lightdm-gtk-greeter
+greybird-gtk-theme
+dbus-user-session
+mate-polkit
+xfce4-terminal
 plymouth
 plymouth-themes
 plymouth-label
@@ -27,8 +41,9 @@ squashfs-tools
 rsync
 
 # Italiano e accessibilita tipografica
-task-italian
-task-italian-desktop
+locales
+keyboard-configuration
+console-setup
 libreoffice-l10n-it
 hunspell-it
 hyphen-it
@@ -39,7 +54,11 @@ fonts-opendyslexic
 
 # Browser e strumenti comuni
 chromium
-libreoffice
+libreoffice-writer
+libreoffice-calc
+libreoffice-impress
+libreoffice-draw
+libreoffice-math
 libreoffice-gtk3
 evince
 pdfarranger
@@ -49,7 +68,6 @@ file-roller
 thunar-archive-plugin
 gvfs-backends
 ristretto
-parole
 vlc
 mousepad
 
@@ -65,18 +83,30 @@ gnome-disk-utility
 synaptic
 gdebi
 flatpak
-gnome-software
-gnome-software-plugin-flatpak
+usbutils
 
 # Filesystem e firmware per hardware comune
 ntfs-3g
 exfatprogs
-firmware-linux
-firmware-misc-nonfree
+firmware-linux-free
+firmware-atheros
+firmware-brcm80211
 firmware-iwlwifi
+firmware-mediatek
 firmware-realtek
 firmware-amd-graphics
 firmware-sof-signed
+#if ARCHITECTURES amd64
+intel-microcode
+amd64-microcode
+firmware-intel-graphics
+firmware-intel-misc
+firmware-nvidia-graphics
+firmware-ipw2x00
+firmware-bnx2
+firmware-bnx2x
+firmware-qlogic
+#endif
 
 # Runtime delle applicazioni StradilabOS
 python3-gi

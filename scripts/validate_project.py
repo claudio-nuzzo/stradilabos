@@ -71,6 +71,12 @@ def validate_catalog(errors: list[str]) -> None:
                 f"Icona Workspace non coordinata: {app.get('id')}",
                 errors,
             )
+    for login_id in ("workspace-login", "google-classroom"):
+        login = next((app for app in apps if app.get("id") == login_id), {})
+        login_url = login.get("url", "")
+        require("/ServiceLogin?" in login_url, f"Accesso Workspace fragile: {login_id}", errors)
+        require("hd=istitutostradivari.it" in login_url, f"Dominio assente: {login_id}", errors)
+        require("hl=it" in login_url, f"Lingua italiana assente: {login_id}", errors)
 
     generated = list(APPLICATIONS.glob("stradilabos-web-*.desktop"))
     require(len(generated) == len(apps), "Numero launcher diverso dal catalogo.", errors)
@@ -113,6 +119,34 @@ def validate_packs(errors: list[str]) -> None:
     require(
         ADDRESS_PROFILES.issubset(mapped_profiles),
         "Non tutti gli indirizzi hanno una raccolta consigliata.",
+        errors,
+    )
+
+    # Le raccolte specialistiche devono essere scaricate dal Centro App e non
+    # reintrodotte di nascosto da un hook di live-build.
+    for hook in (ROOT / "config/hooks/live").glob("*.hook.chroot"):
+        hook_text = hook.read_text(encoding="utf-8")
+        require(
+            "flatpak install" not in hook_text,
+            f"Flatpak specialistico incorporato nella ISO base: {hook.name}",
+            errors,
+        )
+
+    fashion_launcher = APPLICATIONS / "stradilabos-cad-moda.desktop"
+    require(fashion_launcher.exists(), "Launcher CAD Moda assente.", errors)
+    if fashion_launcher.exists():
+        require(
+            "NoDisplay=true" in fashion_launcher.read_text(encoding="utf-8"),
+            "Il CAD Moda appare prima di essere installato.",
+            errors,
+        )
+    backend = (CHROOT / "usr/local/lib/stradilabos/install_pack.py").read_text(
+        encoding="utf-8"
+    )
+    require(
+        "FLATPAK_LAUNCHERS" in backend
+        and 'replace("\\nNoDisplay=true\\n", "\\n")' in backend,
+        "Il Centro App non rende visibile il CAD Moda dopo l'installazione.",
         errors,
     )
 
@@ -260,6 +294,17 @@ def validate_installer(errors: list[str]) -> None:
     require("packagechooser@device" in hook_text, "Pagina uso del PC non attivata.", errors)
     require("packagechooser@workspace" in hook_text, "Pagina Workspace non attivata.", errors)
     require("stradilabprofiles" in hook_text, "Salvataggio profilo non attivato.", errors)
+    backend_text = (module / "main.py").read_text(encoding="utf-8")
+    for launcher in (
+        "usr/share/applications/calamares.desktop",
+        "usr/share/applications/calamares-install-debian.desktop",
+        "usr/local/share/applications/calamares-install-debian.desktop",
+    ):
+        require(
+            launcher in backend_text,
+            f"Il launcher dell'installatore resta sul sistema: {launcher}",
+            errors,
+        )
 
 
 def png_size(path: Path) -> tuple[int, int] | None:
@@ -317,9 +362,15 @@ def validate_system_branding(errors: list[str]) -> None:
     greeter = CHROOT / "etc/lightdm/lightdm-gtk-greeter.conf.d/60-stradilabos.conf"
     require(greeter.exists(), "Branding della schermata di accesso assente.", errors)
     if greeter.exists():
+        greeter_text = greeter.read_text(encoding="utf-8")
         require(
-            "stradilabos-wallpaper-v2.png" in greeter.read_text(encoding="utf-8"),
+            "stradilabos-wallpaper-v2.png" in greeter_text,
             "Sfondo StradilabOS non applicato alla schermata di accesso.",
+            errors,
+        )
+        require(
+            "theme-name=StradiLab" in greeter_text,
+            "Schermata di accesso fuori dal tema StradiLab.",
             errors,
         )
 
@@ -393,6 +444,103 @@ def validate_system_branding(errors: list[str]) -> None:
                 "Il browser non limita Workspace al dominio scolastico.",
                 errors,
             )
+            require(
+                data.get("TranslateEnabled") is False,
+                "Il popup automatico di traduzione non è disattivato.",
+                errors,
+            )
+            require(
+                data.get("PasswordManagerEnabled") is False,
+                "Il browser può salvare password senza un portachiavi cifrato.",
+                errors,
+            )
+
+    opener = CHROOT / "usr/local/bin/stradilabos-open-app"
+    require(
+        "--password-store=basic" in opener.read_text(encoding="utf-8"),
+        "Le web app possono aprire una richiesta tecnica del portachiavi.",
+        errors,
+    )
+
+    welcome = CHROOT / "usr/local/lib/stradilabos/welcome.py"
+    welcome_text = welcome.read_text(encoding="utf-8")
+    require("GTK_ARGV" in welcome_text, "Le opzioni del Benvenuto arrivano ancora a GTK.", errors)
+    require("AUTOSTART_MODE" in welcome_text, "L'avvio iniziale non è controllabile.", errors)
+    require("Gtk.PolicyType.ALWAYS" in welcome_text, "La lista degli indirizzi non mostra lo scorrimento.", errors)
+
+    app_center_text = (CHROOT / "usr/local/lib/stradilabos/app_center.py").read_text(
+        encoding="utf-8"
+    )
+    require("APP_CENTER_CSS" in app_center_text, "Centro App non coordinato al brand.", errors)
+    require("#9b2335" in app_center_text, "Palette StradiLab assente dal Centro App.", errors)
+    require("code == 126" in app_center_text, "Annullare la password appare come errore.", errors)
+    require("Operazione annullata" in app_center_text, "Messaggio di annullamento assente.", errors)
+
+    polkit_policy = CHROOT / "usr/share/polkit-1/actions/org.stradilab.stradilabos.policy"
+    require(polkit_policy.exists(), "Descrizione grafica dell'autorizzazione assente.", errors)
+    if polkit_policy.exists():
+        try:
+            ET.parse(polkit_policy)
+        except ET.ParseError as error:
+            errors.append(f"PolicyKit non valido: {error}")
+        policy_text = polkit_policy.read_text(encoding="utf-8")
+        require(
+            "org.freedesktop.policykit.exec.path" in policy_text,
+            "Il Centro App non usa la propria richiesta di autorizzazione.",
+            errors,
+        )
+
+    tmpfiles = CHROOT / "usr/lib/tmpfiles.d/stradilabos-lightdm.conf"
+    require(tmpfiles.exists(), "Creazione persistente della directory LightDM assente.", errors)
+
+    theme_script = CHROOT / "usr/local/bin/stradilabos-apply-theme"
+    theme_text = theme_script.read_text(encoding="utf-8")
+    for fragment in (
+        "xrandr --query",
+        "monitor$output",
+        "/general/button_layout",
+        "/general/borderless_maximize",
+        "/general/titleless_maximize",
+    ):
+        require(fragment in theme_text, f"Tema dinamico incompleto: {fragment}", errors)
+
+    window_theme = ROOT / "config/hooks/live/012-stradilabos-window-theme.hook.chroot"
+    require(window_theme.exists(), "Tema finestre StradiLab assente.", errors)
+    if window_theme.exists():
+        text = window_theme.read_text(encoding="utf-8")
+        require("/usr/share/themes/StradiLab" in text, "Tema finestre non installato.", errors)
+        require("active_color_1" in text, "Accento bordeaux delle finestre assente.", errors)
+
+    for relative in (
+        "etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml",
+        "etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml",
+        "etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml",
+        "etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml",
+    ):
+        path = CHROOT / relative
+        try:
+            ET.parse(path)
+        except ET.ParseError as error:
+            errors.append(f"Configurazione tema non valida ({relative}): {error}")
+        text = path.read_text(encoding="utf-8")
+        require('value="StradiLab"' in text, f"Tema StradiLab non scelto: {relative}", errors)
+    xfwm_defaults = (
+        CHROOT
+        / "etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
+    ).read_text(encoding="utf-8")
+    require('name="borderless_maximize" type="bool" value="false"' in xfwm_defaults,
+            "Le finestre massimizzate possono perdere i bordi.", errors)
+    require('name="titleless_maximize" type="bool" value="false"' in xfwm_defaults,
+            "Le finestre massimizzate possono perdere il titolo.", errors)
+
+    branding_hook = ROOT / "config/hooks/live/010-stradilabos-branding.hook.chroot"
+    branding_text = branding_hook.read_text(encoding="utf-8")
+    for launcher in (
+        "xfce4-terminal.desktop",
+        "xfce4-terminal-settings.desktop",
+        "xfce4-terminal-emulator.desktop",
+    ):
+        require(launcher in branding_text, f"Voce terminale non nascosta: {launcher}", errors)
 
     packages = (ROOT / "config/package-lists/stradilabos-core.list.chroot").read_text(
         encoding="utf-8"
@@ -402,10 +550,29 @@ def validate_system_branding(errors: list[str]) -> None:
         "plymouth",
         "plymouth-themes",
         "plymouth-label",
+        "greybird-gtk-theme",
+        "mate-polkit",
+        "usbutils",
+        "xfce4-terminal",
     ):
         require(
             re.search(rf"^{re.escape(package)}$", packages, re.MULTILINE) is not None,
             f"Pacchetto grafico obbligatorio assente: {package}.",
+            errors,
+        )
+    for forbidden in (
+        "task-xfce-desktop",
+        "task-italian",
+        "task-italian-desktop",
+        "libreoffice",
+        "gnome-software",
+        "gnome-software-plugin-flatpak",
+        "firmware-linux",
+        "firmware-misc-nonfree",
+    ):
+        require(
+            re.search(rf"^{re.escape(forbidden)}$", packages, re.MULTILINE) is None,
+            f"Metapacchetto pesante ancora nella base: {forbidden}.",
             errors,
         )
 
