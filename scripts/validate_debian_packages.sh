@@ -10,14 +10,10 @@ for package_list in config/package-lists/*.list.chroot; do
         case "$package" in
             "#if ARCHITECTURES "*)
                 active=false
-                set -- $package
-                shift 2
-                for candidate in "$@"; do
-                    if [ "$candidate" = "$architecture" ]; then
-                        active=true
-                        break
-                    fi
-                done
+                directive_architectures=${package#"#if ARCHITECTURES "}
+                case " $directive_architectures " in
+                    *" $architecture "*) active=true ;;
+                esac
                 continue
                 ;;
             "#endif")
@@ -35,6 +31,11 @@ done
 
 # Anche i pacchetti opzionali del Centro App devono esistere nei repository,
 # pur non essendo incorporati nell'immagine base.
+if ! command -v python3 >/dev/null 2>&1; then
+    printf '%s\n' "Impossibile validare il catalogo pacchetti: python3 non disponibile." >&2
+    exit 1
+fi
+
 catalog_packages="$(python3 - <<'PY'
 import json
 

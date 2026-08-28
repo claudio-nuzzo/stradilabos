@@ -89,6 +89,7 @@ class DesktopDefaultsTests(unittest.TestCase):
             self.assertIn('name="button_layout" type="string" value="O|HMC"', text)
             self.assertIn('name="borderless_maximize" type="bool" value="false"', text)
             self.assertIn('name="titleless_maximize" type="bool" value="false"', text)
+            self.assertIn('name="use_compositing" type="bool" value="false"', text)
             self.assertIn('name="theme" type="string" value="StradiLab"', text)
 
     def test_window_manager_guard_is_installed_and_bounded(self) -> None:
@@ -102,6 +103,11 @@ class DesktopDefaultsTests(unittest.TestCase):
         self.assertIn("max_attempts=3", text)
         self.assertIn("logger -t", text)
         self.assertIn("notify-send", text)
+        self.assertIn("inizializzazione preventiva di xfwm4", text)
+        self.assertIn("xfwm4 --replace --compositor=off", text)
+        self.assertIn("startup_grace=${STRADILABOS_WM_GRACE:-2}", text)
+        self.assertIn("disable_compositing", text)
+        self.assertIn("/general/use_compositing", text)
         autostart = (
             CHROOT / "etc/xdg/autostart/stradilabos-window-manager.desktop"
         ).read_text(encoding="utf-8")
@@ -125,6 +131,32 @@ class DesktopDefaultsTests(unittest.TestCase):
                 encoding="utf-8"
             )
             self.assertIn("scripts/test_window_manager_xvfb.sh", yaml_text)
+
+    def test_container_workflows_fail_on_intermediate_errors(self) -> None:
+        workflows = ROOT / ".github/workflows"
+        for name in ("build-iso.yml", "build-arm64.yml", "validate-wm-trixie.yml"):
+            text = (workflows / name).read_text(encoding="utf-8")
+            with self.subTest(workflow=name):
+                self.assertNotIn("sh -lc '", text)
+                self.assertIn("sh -euc '", text)
+
+        validation = (workflows / "validate-wm-trixie.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertGreaterEqual(validation.count("python3"), 2)
+
+        package_validator = (
+            ROOT / "scripts/validate_debian_packages.sh"
+        ).read_text(encoding="utf-8")
+        self.assertIn("command -v python3", package_validator)
+
+    def test_xfce_preflight_uses_the_real_autostart_path(self) -> None:
+        text = (ROOT / "scripts/preflight_xfce_session.sh").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('"$config_home/autostart"', text)
+        self.assertIn("la guardia non è stata avviata dall'autostart Xfce", text)
+        self.assertNotIn('"$GUARD" &', text)
 
     def test_wallpaper_supports_named_monitors(self) -> None:
         script = (CHROOT / "usr/local/bin/stradilabos-apply-theme").read_text(

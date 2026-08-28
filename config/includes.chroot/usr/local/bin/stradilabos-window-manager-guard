@@ -24,7 +24,7 @@ state_dir=${XDG_STATE_HOME:-"$HOME/.local/state"}/stradilabos
 mkdir -p "$state_dir" 2>/dev/null || true
 report=$state_dir/window-manager.log
 max_attempts=3
-startup_grace=${STRADILABOS_WM_GRACE:-8}
+startup_grace=${STRADILABOS_WM_GRACE:-2}
 check_interval=${STRADILABOS_WM_INTERVAL:-15}
 confirmations=3
 
@@ -64,6 +64,15 @@ set_fallback_theme() {
         xfconf-query -c xfwm4 -p /general/theme -n -t string -s Greybird >/dev/null 2>&1 || true
 }
 
+disable_compositing() {
+    command -v xfconf-query >/dev/null 2>&1 || return 0
+    # Persiste la scelta nelle preferenze di xfwm4: il flag --compositor=off
+    # vale solo per l'istanza lanciata, mentre scrivendo qui il valore resta
+    # spento anche a un eventuale riavvio successivo senza flag.
+    xfconf-query -c xfwm4 -p /general/use_compositing -s false >/dev/null 2>&1 || \
+        xfconf-query -c xfwm4 -p /general/use_compositing -n -t bool -s false >/dev/null 2>&1 || true
+}
+
 start_wm() {
     attempt=$1
     case "$attempt" in
@@ -86,6 +95,31 @@ start_wm() {
 }
 
 sleep "$startup_grace"
+
+# In Parallels ARM64 xfwm4 può risultare presente e annunciarsi correttamente
+# tramite EWMH, ma restare in uno stato incompleto: le finestre sono gestite
+# senza barra del titolo né pulsanti. Il solo controllo del processo produce
+# quindi un falso positivo. Una sostituzione preventiva, identica alla prova
+# manuale riuscita durante il collaudo del 28/8/2026, ricrea il window manager
+# una volta sola con il compositore disattivato.
+#
+# La grazia iniziale è breve (2 secondi di default): l'autostart Xfce viene
+# eseguito quando la sessione grafica è già disponibile, quindi la sostituzione
+# può partire senza lunghe attese. Deve avvenire prima della schermata
+# Benvenuto, che apre dopo circa 4 secondi, così l'utente non vede mai finestre
+# prive di controlli. La preventiva è lineare, fuori dal ciclo: viene eseguita
+# esattamente una volta per avvio di sessione; il ciclo successivo resta di solo
+# monitoraggio e recupero graduato.
+log "inizio inizializzazione preventiva di xfwm4 senza compositore"
+disable_compositing
+setsid xfwm4 --replace --compositor=off >/dev/null 2>&1 &
+sleep 5
+if wm_running; then
+    log "inizializzazione preventiva di xfwm4 completata"
+else
+    log "inizializzazione preventiva non riuscita: attivo il recupero graduato"
+fi
+
 attempt=0
 while :; do
     if wm_missing_confirmed; then

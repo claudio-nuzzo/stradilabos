@@ -544,6 +544,9 @@ def validate_system_branding(errors: list[str]) -> None:
             "Greybird",
             "max_attempts=3",
             "logger -t",
+            "inizializzazione preventiva di xfwm4",
+            "disable_compositing",
+            "/general/use_compositing",
         ):
             require(fragment in guard_text, f"Guardia finestre incompleta: {fragment}", errors)
     wm_autostart = CHROOT / "etc/xdg/autostart/stradilabos-window-manager.desktop"
@@ -589,6 +592,8 @@ def validate_system_branding(errors: list[str]) -> None:
             "Le finestre massimizzate possono perdere i bordi.", errors)
     require('name="titleless_maximize" type="bool" value="false"' in xfwm_defaults,
             "Le finestre massimizzate possono perdere il titolo.", errors)
+    require('name="use_compositing" type="bool" value="false"' in xfwm_defaults,
+            "Il compositore di xfwm4 può riattivarsi anche se la guardia lo spegne.", errors)
 
     branding_hook = ROOT / "config/hooks/live/010-stradilabos-branding.hook.chroot"
     branding_text = branding_hook.read_text(encoding="utf-8")
