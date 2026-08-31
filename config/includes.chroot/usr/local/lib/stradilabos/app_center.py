@@ -235,6 +235,7 @@ class AppCenterWindow(Gtk.ApplicationWindow):
         thread.start()
 
     def install_worker(self, selected: list[str]) -> None:
+        self.last_installed = selected
         try:
             process = subprocess.Popen(
                 ["pkexec", BACKEND, *selected],
@@ -257,11 +258,7 @@ class AppCenterWindow(Gtk.ApplicationWindow):
         self.install_button.set_sensitive(True)
         if code == 0:
             self.status.set_text("Installazione completata.")
-            self.show_message(
-                Gtk.MessageType.INFO,
-                "Applicazioni installate",
-                "Le nuove applicazioni sono disponibili nel menu.",
-            )
+            self.show_install_success()
         elif code == 126:
             # pkexec usa 126 quando l'utente chiude la richiesta di password:
             # non è un guasto di rete né un'installazione fallita.
@@ -281,6 +278,44 @@ class AppCenterWindow(Gtk.ApplicationWindow):
                 detail or "Controlla la connessione Internet e riprova.",
             )
         return False
+
+    def show_install_success(self) -> None:
+        # La sezione delle guide da aprire corrisponde all'indirizzo della
+        # prima raccolta installata (es. "moda", "arredo"). Le raccolte senza
+        # una sezione dedicata ricadono sugli strumenti comuni.
+        guide_sections = {
+            "artistico", "scenografia", "video", "musicale",
+            "liuteria", "moda", "arredo",
+        }
+        section = "base"
+        for pack_id in getattr(self, "last_installed", []):
+            if pack_id in guide_sections:
+                section = pack_id
+                break
+
+        dialog = Gtk.Dialog(
+            title="Applicazioni installate",
+            transient_for=self,
+            modal=True,
+        )
+        dialog.add_button("Chiudi", Gtk.ResponseType.CLOSE)
+        dialog.add_button("Apri la guida", Gtk.ResponseType.ACCEPT)
+        box = dialog.get_content_area()
+        label = Gtk.Label(
+            label="Le nuove applicazioni sono disponibili nel menu. "
+            "Apri la guida per imparare i primi passi."
+        )
+        label.set_line_wrap(True)
+        label.set_max_width_chars(56)
+        box.pack_start(label, True, True, 14)
+        box.show_all()
+        response = dialog.run()
+        dialog.destroy()
+        if response == Gtk.ResponseType.ACCEPT:
+            try:
+                subprocess.Popen(["stradilabos-guide", section])
+            except OSError:
+                pass
 
     def show_message(self, message_type, title: str, detail: str) -> None:
         dialog = Gtk.MessageDialog(

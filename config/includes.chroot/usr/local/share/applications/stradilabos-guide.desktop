@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Guide StradilabOS
+Comment=Impara a usare le app della tua area
+Exec=stradilabos-guide
+TryExec=stradilabos-guide
+Icon=stradilabos
+Terminal=false
+Categories=Education;Utility;
+StartupNotify=true

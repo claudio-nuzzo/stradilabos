@@ -1,0 +1,70 @@
+/* Guide StradilabOS: leggere, in italiano, leggibili anche offline. */
+:root {
+  --bordeaux: #9b2335;
+  --navy: #1b3a6b;
+  --crema: #f6f4ef;
+  --avorio: #ffffff;
+  --inchiostro: #16130f;
+  --testo: #645e55;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Noto Sans", "Liberation Sans", sans-serif;
+  background: var(--crema);
+  color: var(--inchiostro);
+  line-height: 1.5;
+}
+.testata {
+  background: var(--navy);
+  color: var(--avorio);
+  padding: 26px 30px;
+}
+.testata .occhiello {
+  margin: 0;
+  color: #ded8ce;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.testata h1 { margin: 4px 0 6px; font-size: 30px; }
+.testata .sottotitolo { margin: 0; color: #ded8ce; }
+.indice {
+  padding: 14px 30px;
+  background: rgba(222, 216, 206, 0.45);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.indice a {
+  color: var(--bordeaux);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--avorio);
+}
+.indice a:hover { background: var(--bordeaux); color: var(--avorio); }
+.pagina { max-width: 820px; margin: 0 auto; padding: 26px 30px 40px; }
+.pagina .intro { font-size: 18px; color: var(--inchiostro); }
+.pagina h2 {
+  color: var(--bordeaux);
+  font-size: 20px;
+  margin-top: 26px;
+  border-bottom: 2px solid var(--bordeaux);
+  padding-bottom: 4px;
+}
+.pagina a { color: var(--bordeaux); font-weight: 700; }
+.pagina li { margin-bottom: 6px; }
+.indirizzo { margin-top: 22px; }
+.indirizzo ul { margin: 6px 0 0; }
+.pie {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 14px 30px 34px;
+  color: var(--testo);
+  font-size: 14px;
+}
+.pie a { color: var(--bordeaux); font-weight: 700; }
