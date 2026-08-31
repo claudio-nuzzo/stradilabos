@@ -1,0 +1,190 @@
+Continua il lavoro su StradilabOS leggendo INTEGRALMENTE, prima di agire, questo handoff:
+
+/Users/claudionuzzo/Dev/stradilabos/docs/HANDOFF-NUOVA-CHAT-STRADILABOS-2026-08-28.md
+
+Repository:
+
+/Users/claudionuzzo/Dev/stradilabos
+
+Cartella unica di controllo:
+
+/Users/claudionuzzo/Dev/StradilabOS-CONTROLLO-0.2-2026-08-28
+
+OBIETTIVO
+
+Concludere in modo definitivo la correzione delle finestre senza barra del titolo e senza pulsanti, evitando un'altra build inutile. Non introdurre altre modifiche grafiche o funzionali. La nuova ISO deve essere costruita una sola volta, soltanto dopo un gate pre-build completo e documentato.
+
+DATO REALE CONFERMATO IN PARALLELS
+
+Nella Live ARM64 del commit 87fe78e:
+
+- selezionare il tema Greybird non ha risolto;
+- `xfwm4 --replace --compositor=off` ha ripristinato immediatamente titolo, riduci, massimizza e chiudi;
+- quindi il tema non è la causa;
+- xfwm4 risulta presente ma può essere inizializzato male;
+- la guardia pubblicata in 87fe78e produce un falso positivo perché controlla processo ed EWMH, non l'effettiva inizializzazione utile della sessione.
+
+REGOLE INIZIALI OBBLIGATORIE
+
+1. Prima di modificare qualsiasi file, esegui `git status -sb`, `git diff --stat` e leggi il diff completo.
+2. Non scartare, ripristinare o sovrascrivere le modifiche locali dell'utente.
+3. Sono già presenti quattro modifiche locali non committate: guardia xfwm4, test Xvfb, validatore e unit test. Considerale una bozza da revisionare, non una soluzione già approvata.
+4. Usa `apply_patch` per gli interventi sui file.
+5. Non cambiare palette, applicazioni, pacchetti didattici, sito, Drive o funzioni non collegate al window manager.
+6. Non aggiornare la pagina pubblica e non cancellare ISO o release precedenti.
+7. Non dichiarare il problema risolto finché una nuova Live ARM64 non supera la prova reale in Parallels senza comandi manuali.
+
+CORREZIONE DA COMPLETARE
+
+La sessione deve eseguire una sola volta, automaticamente, l'equivalente di:
+
+xfwm4 --replace --compositor=off
+
+La sostituzione deve partire prima della schermata Benvenuto. Dopo la sostituzione, la guardia deve limitarsi al monitoraggio e al recupero in caso di vera scomparsa del window manager.
+
+Controlla con particolare attenzione:
+
+- ridurre `startup_grace` dagli attuali 8 secondi a un valore motivato, probabilmente 1–2 secondi;
+- avviare la sostituzione prima del Benvenuto, che parte dopo circa 4 secondi;
+- eseguire la sostituzione preventiva esattamente una volta per sessione;
+- assicurare che, dopo l'assestamento, esista un solo processo `xfwm4`;
+- impedire loop di `--replace`, duplicazioni, notifiche ripetute o crescita continua del log;
+- mantenere il compositore disattivato: la stabilità su vecchi PC e Parallels ha priorità sugli effetti;
+- lasciare intatto il recupero graduato soltanto per un successivo arresto reale;
+- registrare nel log in modo non ambiguo inizio, riuscita o fallimento della sostituzione preventiva;
+- usare un marker per sessione solo se serve davvero e senza impedire il ripristino dopo logout/login.
+
+CORREGGI IL TEST CHE PRIMA HA DATO FALSA SICUREZZA
+
+Il test Xvfb attuale gira sul sistema Ubuntu del runner e non riproduce la sessione Debian Trixie della ISO. Non considerarlo sufficiente.
+
+Prima della build devi:
+
+1. rendere `scripts/test_window_manager_xvfb.sh` indipendente da log precedenti usando una `XDG_STATE_HOME` creata con `mktemp -d` e rimossa nel trap;
+2. verificare il PID di xfwm4 prima e dopo la sostituzione preventiva;
+3. verificare che il PID cambi davvero;
+4. verificare che dopo l'assestamento esista un solo processo xfwm4;
+5. verificare `_NET_SUPPORTING_WM_CHECK`, `_NET_WM_NAME` e `_NET_FRAME_EXTENTS` con estensione superiore a zero;
+6. lasciare la guardia in esecuzione per almeno due intervalli e verificare che il PID resti stabile: nessuna seconda sostituzione;
+7. contare nel log una sola inizializzazione preventiva completata;
+8. uccidere poi xfwm4 e verificare separatamente il recupero durante la sessione;
+9. verificare nuovamente cornice e singolo processo dopo il recupero;
+10. evitare `pgrep | head` come unica prova se possono esistere più processi: controlla esplicitamente il conteggio.
+
+TESTA CON LE STESSE VERSIONI DELLA ISO
+
+Modifica i workflow affinché il test del window manager venga eseguito dentro un container `debian:trixie-slim`, installando lì xfwm4, Xvfb, xfconf, dbus-x11, x11-utils, x11-apps, greybird-gtk-theme e gli altri requisiti reali. Non usare soltanto xfwm4 4.18 dell'host Ubuntu del runner quando la ISO usa i pacchetti Debian 13.
+
+Se praticabile senza costruire l'intera ISO, aggiungi un preflight che avvii sotto Xvfb e D-Bus una vera sessione Xfce Debian Trixie, con l'autostart StradilabOS e il tema generato dal repository. Apri almeno una finestra reale e verifica automaticamente barra/cornice, singolo xfwm4 e stabilità del PID. Se non è praticabile, documenta precisamente il limite e non trasformare un test parziale in una garanzia.
+
+GATE PRE-BUILD: NESSUNA BUILD FINCHÉ TUTTO NON È VERDE
+
+Esegui e registra l'esito di tutti questi controlli:
+
+1. Revisione del diff
+   - ogni riga deve essere pertinente alla sola correzione xfwm4;
+   - nessun file dell'utente deve essere perso;
+   - `git diff --check` deve passare;
+   - controllare permessi eseguibili di guardia, diagnostica e test.
+
+2. Test Python e validatori
+   - `python3 -m unittest discover -v`;
+   - `python3 scripts/validate_project.py`;
+   - `python3 -m py_compile` su tutti gli script Python modificati e sulle tre app StradilabOS;
+   - validare JSON, XML e YAML del progetto;
+   - verificare che il catalogo generato sia idempotente;
+   - verificare assenza di segreti o credenziali nel diff.
+
+3. Test shell
+   - `sh -n` su tutti gli script shell modificati, sui hook, sulla guardia, sulla diagnostica e sui validatori build;
+   - eseguire ShellCheck se disponibile; se non lo è, dichiararlo esplicitamente;
+   - verificare quoting, trap, directory temporanee e cleanup;
+   - verificare che `setsid`, `pgrep`, `xprop`, `xfconf-query` e `notify-send` siano garantiti dai pacchetti dell'immagine.
+
+4. Pacchetti e architetture
+   - eseguire il controllo di disponibilità dei pacchetti Debian Trixie;
+   - verificare ARM64 e AMD64 separatamente;
+   - nessun nuovo pacchetto pesante o metapacchetto desktop;
+   - nessuna applicazione specialistica deve tornare incorporata nella ISO base.
+
+5. Test runtime leggero prima della ISO
+   - test Xvfb nel container Debian Trixie riuscito;
+   - sostituzione preventiva verificata;
+   - un solo processo xfwm4;
+   - PID stabile dopo almeno due intervalli;
+   - cornice presente prima e dopo il recupero;
+   - log pulito e non ripetitivo;
+   - nessun fallback Greybird attivato nel percorso normale.
+
+6. Controlli di regressione
+   - LightDM e avvio grafico su Parallels ARM64 non devono essere alterati;
+   - pannello, sfondo, icone, Benvenuto, profili, Workspace e Centro App invariati;
+   - pulsanti delle finestre configurati come `O|HMC`;
+   - `borderless_maximize=false` e `titleless_maximize=false`;
+   - autostart limitato a Xfce;
+   - nessun terminale reso visibile all'utente ordinario;
+   - installer ancora disponibile soltanto nella Live.
+
+Prima del commit produci un breve rapporto “GATE PRE-BUILD” con ogni voce verde e la prova corrispondente. Se anche una sola voce è incerta o rossa, fermati: non fare commit, push o build e spiega il punto preciso.
+
+COMMIT E BUILD, SOLO DOPO IL GATE
+
+Se e soltanto se il gate è interamente verde:
+
+1. crea un commit dedicato, con messaggio chiaro, senza includere file estranei;
+2. verifica subito `git status` e il contenuto del commit;
+3. fai push su `main`;
+4. la build AMD64 parte automaticamente;
+5. avvia manualmente il workflow ARM64 `build-arm64.yml` sullo stesso commit;
+6. controlla che entrambe eseguano per primo il test Debian Trixie corretto;
+7. se un test fallisce, non rilanciare alla cieca: leggi il log e correggi la causa;
+8. attendi il successo completo di entrambe le build e della validazione dentro l'immagine;
+9. verifica che gli artifact appartengano esattamente allo stesso commit.
+
+CONTROLLO DELLE ISO DOPO LA BUILD
+
+Scarica prima la ARM64 in una nuova cartella che includa l'hash del commit. Non sovrascrivere le ISO precedenti.
+
+Verifica:
+
+- checksum SHA-256 dell'artifact;
+- tipo ISO bootable;
+- volume `STRADILABOS`;
+- file EFI ARM64 o AMD64 corretti;
+- presenza di `live/filesystem.squashfs`;
+- `.disk/info` con StradilabOS 0.2 in sviluppo;
+- menu GRUB corretto per architettura;
+- presenza nell'immagine della guardia aggiornata, dell'autostart, di xfwm4, xprop e notify-send;
+- contenuto esatto della guardia estratta dall'immagine, confrontato col commit;
+- permessi eseguibili dentro l'immagine;
+- assenza di launcher installer nel sistema installato;
+- dimensione ragionevole e nessun pacchetto specialistico incorporato per errore.
+
+PROVA REALE FINALE IN PARALLELS
+
+Consegna il percorso preciso della nuova ISO ARM64 e chiedi di provarla prima in modalità Live, non installarla subito.
+
+La Live è valida solo se, senza Alt+F2 e senza alcun comando manuale:
+
+- entro pochi secondi Thunar mostra titolo e tre pulsanti;
+- Benvenuto mostra titolo e pulsante di chiusura;
+- micro-app Chromium e sito scuola mostrano controlli utilizzabili;
+- riduci, massimizza e chiudi funzionano;
+- Option/Alt + F4 funziona;
+- non compaiono e scompaiono barre ripetutamente;
+- dopo almeno due minuti il comportamento resta stabile;
+- nel log esiste una sola inizializzazione preventiva riuscita;
+- esiste un solo xfwm4.
+
+Solo dopo il successo Live procedere con installazione, rimozione ISO, riavvio e ripetizione degli stessi controlli nel sistema installato.
+
+DIVIETI FINALI
+
+- Non pubblicare ancora su Drive.
+- Non aggiornare i link della pagina StradilabOS.
+- Non creare ZIP pubblici definitivi.
+- Non cancellare vecchie release o artifact locali.
+- Non aggiornare la Dashboard IA come “risolto” prima della prova Parallels installata.
+- Non dire che il problema è chiuso basandoti soltanto su CI, Xvfb o struttura dell'ISO.
+
+Questa deve essere l'ultima ricostruzione tentata: privilegia prove verificabili, controlli incrociati e una modifica minima rispetto alla velocità.

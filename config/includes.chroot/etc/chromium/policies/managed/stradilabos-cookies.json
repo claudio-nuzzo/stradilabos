@@ -1,0 +1,8 @@
+{
+  "BlockThirdPartyCookies": false,
+  "CookiesAllowedForUrls": [
+    "https://[*.]google.com",
+    "https://[*.]googleusercontent.com",
+    "https://[*.]gstatic.com"
+  ]
+}

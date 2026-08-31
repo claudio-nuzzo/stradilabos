@@ -1,0 +1,11 @@
+[Unit]
+Description=Controllo periodico aggiornamenti StradilabOS
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=7d
+RandomizedDelaySec=30min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
