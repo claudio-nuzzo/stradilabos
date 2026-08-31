@@ -49,24 +49,24 @@ selection {
 
 .xfce4-panel,
 #XfcePanelWindow {
-  background-color: rgba(246, 244, 239, 0.94);
-  color: #16130f;
+  background-color: #1b3a6b;
+  color: #f6f4ef;
 }
 
 #whiskermenu-window {
-  background-color: rgba(246, 244, 239, 0.98);
+  background-color: rgba(22, 19, 15, 0.98);
   border-radius: 14px;
 }
 
 #whiskermenu-button {
-  color: #9b2335;
+  color: #f6f4ef;
   font-weight: 700;
   padding: 4px 12px;
 }
 
 .xfce4-panel button:hover,
 #XfcePanelWindow button:hover {
-  background-color: rgba(222, 216, 206, 0.72);
+  background-color: rgba(255, 255, 255, 0.14);
   border-radius: 12px;
 }
 

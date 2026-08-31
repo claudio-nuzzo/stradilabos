@@ -38,6 +38,10 @@ BRAND_COLORS = {
     "#88621d",
     "#3368b5",
     "#915b33",
+    # Blu navy della palette StradiLab (docs/BRAND-STRADILAB.md), usato per
+    # il pannello scuro del requisito D.
+    "#1b3a6b",
+    "#2c4a6e",
 }
 
 
@@ -224,7 +228,7 @@ def validate_branding(errors: list[str]) -> None:
                 f"Icona del tema assente nella presentazione: {name}",
                 errors,
             )
-    wallpaper = CHROOT / "usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v2.png"
+    wallpaper = CHROOT / "usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v3.png"
     require(wallpaper.exists(), "Sfondo StradilabOS assente.", errors)
     theme = CHROOT / "usr/share/icons/StradiLab"
     require((theme / "index.theme").exists(), "Tema icone StradilabOS assente.", errors)
@@ -362,7 +366,7 @@ def validate_system_branding(errors: list[str]) -> None:
     if binary_hook.exists():
         text = binary_hook.read_text(encoding="utf-8")
         require("Prova StradilabOS" in text, "Menu Live non rinominato.", errors)
-        require("StradilabOS 0.2" in text, "Metadati ISO non personalizzati.", errors)
+        require("StradilabOS 0.3" in text, "Metadati ISO non personalizzati.", errors)
     live_theme = ROOT / "config/branding/grub-live-theme.txt"
     require(live_theme.exists(), "Tema del menu Live assente.", errors)
     if live_theme.exists():
@@ -389,7 +393,7 @@ def validate_system_branding(errors: list[str]) -> None:
     if greeter.exists():
         greeter_text = greeter.read_text(encoding="utf-8")
         require(
-            "stradilabos-wallpaper-v2.png" in greeter_text,
+            "stradilabos-wallpaper-v3.png" in greeter_text,
             "Sfondo StradilabOS non applicato alla schermata di accesso.",
             errors,
         )

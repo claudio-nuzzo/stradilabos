@@ -6,7 +6,7 @@ Presentation {
     titleColor: "#9b2335"
     textColor: "#16130f"
     fontFamily: "Noto Sans"
-    property string wallpaper: "file:///usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v2.png"
+    property string wallpaper: "file:///usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v3.png"
     property string appIcons: "file:///usr/local/share/icons/hicolor/scalable/apps/"
     property string themeIcons: "file:///usr/share/icons/StradiLab/scalable/"
 

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=LibreOffice Writer
+Comment=Scrivi testi e documenti
+Exec=libreoffice --writer
+Icon=libreoffice-writer
+Terminal=false

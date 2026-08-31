@@ -1,4 +1,4 @@
-desktop-image: "/usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v2.png"
+desktop-image: "/usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v3.png"
 desktop-color: "#f6f4ef"
 title-text: "StradilabOS"
 title-color: "#16130f"

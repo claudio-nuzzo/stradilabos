@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Browser
+Comment=Apri il browser per navigare
+Exec=chromium
+Icon=chromium
+Terminal=false

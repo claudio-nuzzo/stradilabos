@@ -20,7 +20,7 @@ cmp -s config/branding/stradilabos-boot-800x600.png "$grub_dir/splash.png" || \
     fail "lo sfondo GRUB non è quello StradilabOS"
 grep -q "Prova StradilabOS" "$grub_dir/grub.cfg" || \
     fail "il menu Live conserva il nome Debian"
-grep -q "StradilabOS 0.2" "$binary_dir/.disk/info" || \
+grep -q "StradilabOS 0.3" "$binary_dir/.disk/info" || \
     fail "il supporto non si identifica come StradilabOS"
 
 os_release=$(unsquashfs -cat "$squashfs" usr/lib/os-release 2>/dev/null) || \
@@ -71,7 +71,11 @@ for path in \
     usr/bin/notify-send \
     usr/bin/xfwm4 \
     etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml \
-    usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v2.png \
+    usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v3.png \
+    usr/local/share/stradilabos/guide/index.html \
+    usr/local/share/stradilabos/guide/css/guida.css \
+    usr/local/bin/stradilabos-guide \
+    usr/local/share/applications/stradilabos-guide.desktop \
     usr/share/plymouth/themes/stradilabos/stradilabos.script; do
     unsquashfs -cat "$squashfs" "$path" >/dev/null 2>&1 || \
         fail "file interno assente: $path"
