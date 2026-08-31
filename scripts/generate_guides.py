@@ -76,7 +76,7 @@ APPS = [
         "Al Liceo Artistico e Moda serve per disegnare, colorare e preparare immagini e figurini.",
         "Menu StradiLab → «Krita», oppure dal Centro App dopo aver installato la raccolta.",
         ["Apri Krita e crea un nuovo disegno con «Nuovo file».", "Scegli un pennello dal pannello a destra.", "Disegna sulla tela trascinando il mouse o la penna.", "Cambia colore dal selettore in alto a destra.", "Salva con Ctrl+S e poi esporta in PNG con «File → Esporta»."],
-        ["Non sento più i livelli: apri il pannello «Livelli» a destra.", "Il pennello non disegna: controlla che il livello non sia bloccato.", "Il file è pesante: usa «Immagine → Ridimensiona» prima di esportare."],
+        ["Non vedo più i livelli: apri il pannello «Livelli» a destra.", "Il pennello non disegna: controlla che il livello non sia bloccato.", "Il file è pesante: usa «Immagine → Ridimensiona» prima di esportare."],
         "https://docs.krita.org", "Manuale di Krita",
     ),
     (

@@ -61,8 +61,21 @@ sync_0_3_interface() {
     return 1
   fi
 
+  # Il client di aggiornamento si sostituirebbe da solo mentre e' in
+  # esecuzione: mai riscriverlo con cp sullo stesso inode. Lo togliamo
+  # dall'albero e lo installiamo alla fine con un file nuovo + mv atomico,
+  # cosi' il processo in corso continua a leggere la vecchia copia.
+  client_new="$source_root/config/includes.chroot/usr/local/bin/stradilabos-update"
+  if [ -f "$client_new" ]; then
+    mv "$client_new" "$update_tmpdir/stradilabos-update.new"
+  fi
+
   # File applicativi e guide: tutti sotto /usr/local sono di StradilabOS.
   copy_tree "$source_root/config/includes.chroot/usr/local" /usr/local || return 1
+  if [ -f "$update_tmpdir/stradilabos-update.new" ]; then
+    install -m 0755 "$update_tmpdir/stradilabos-update.new" /usr/local/bin/stradilabos-update.nuovo || return 1
+    mv -f /usr/local/bin/stradilabos-update.nuovo /usr/local/bin/stradilabos-update || return 1
+  fi
   copy_tree "$source_root/config/includes.chroot/usr/share/themes/WhiteSur-Light" /usr/share/themes/WhiteSur-Light || return 1
   copy_tree "$source_root/config/includes.chroot/usr/share/themes/WhiteSur-Dark" /usr/share/themes/WhiteSur-Dark || return 1
   copy_tree "$source_root/config/includes.chroot/usr/share/icons/WhiteSur" /usr/share/icons/WhiteSur || return 1
@@ -72,14 +85,20 @@ sync_0_3_interface() {
   install -d /etc/apt/apt.conf.d /usr/share/polkit-1/actions || return 1
   for file in 20auto-upgrades 50unattended-upgrades; do
     source_file="$source_root/config/includes.chroot/etc/apt/apt.conf.d/$file"
-    [ -f "$source_file" ] && install -m 0644 "$source_file" "/etc/apt/apt.conf.d/$file" || return 1
+    if [ -f "$source_file" ]; then
+      install -m 0644 "$source_file" "/etc/apt/apt.conf.d/$file" || return 1
+    fi
   done
   source_file="$source_root/config/includes.chroot/usr/share/polkit-1/actions/org.stradilab.stradilabos.policy"
-  [ -f "$source_file" ] && install -m 0644 "$source_file" /usr/share/polkit-1/actions/org.stradilab.stradilabos.policy || return 1
+  if [ -f "$source_file" ]; then
+    install -m 0644 "$source_file" /usr/share/polkit-1/actions/org.stradilab.stradilabos.policy || return 1
+  fi
 
   for unit in stradilabos-update.service stradilabos-update.timer; do
     source_file="$source_root/config/includes.chroot/etc/systemd/system/$unit"
-    [ -f "$source_file" ] && install -m 0644 "$source_file" "/etc/systemd/system/$unit" || return 1
+    if [ -f "$source_file" ]; then
+      install -m 0644 "$source_file" "/etc/systemd/system/$unit" || return 1
+    fi
   done
 
   if command -v update-desktop-database >/dev/null 2>&1; then
@@ -110,7 +129,7 @@ install_security_updates() {
 }
 
 echo "— Serie 2: aggiornamento cumulativo StradilabOS 0.3 —"
-install_cookie_policy
+install_cookie_policy || exit 1
 sync_0_3_interface || exit 1
 install_security_updates || exit 1
 echo "Aggiornamento cumulativo completato: nessuna reinstallazione necessaria."
