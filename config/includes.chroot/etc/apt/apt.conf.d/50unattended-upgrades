@@ -1,0 +1,16 @@
+// StradilabOS — politica degli aggiornamenti automatici.
+// Si applicano soltanto gli aggiornamenti della suite di sicurezza Debian
+// (Trixie-Security): le nuove versioni di pacchetto richiedono scelte umane e
+// non vengono installate da sole. Nessun riavvio automatico, nessun prompt.
+Unattended-Upgrade::Allowed-Origins {
+	"Debian-Security:${distro_codename}-security";
+	"Debian:${distro_codename}-security";
+};
+
+Unattended-Upgrade::Automatic-Reboot "false";
+Unattended-Upgrade::Automatic-Reboot-Time "02:00";
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+Unattended-Upgrade::DevRelease "false";
+Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+Unattended-Upgrade::Verbose "false";

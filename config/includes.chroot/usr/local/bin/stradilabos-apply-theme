@@ -1,12 +1,14 @@
 #!/bin/sh
 set -eu
 
-wallpaper=/usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v2.png
+wallpaper=/usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v3.png
 [ -r "$wallpaper" ] || exit 0
 command -v xfconf-query >/dev/null 2>&1 || exit 0
 
 state_dir=${XDG_CONFIG_HOME:-"$HOME/.config"}/stradilabos
-marker=$state_dir/theme-applied-v3
+# V4 forza una sola riconfigurazione sugli utenti che arrivano alla grafica
+# WhiteSur tramite il canale aggiornamenti, senza toccare i loro documenti.
+marker=$state_dir/theme-applied-v4
 [ -e "$marker" ] && exit 0
 
 mkdir -p "$state_dir"
@@ -20,15 +22,15 @@ set_property() {
         xfconf-query -c "$channel" -p "$property" -n -t "$type" -s "$value" >/dev/null 2>&1 || true
 }
 
-set_property xsettings /Net/ThemeName string StradiLab
-xfconf-query -c xsettings -p /Net/IconThemeName -n -t string -s StradiLab >/dev/null 2>&1 || \
-    xfconf-query -c xsettings -p /Net/IconThemeName -s StradiLab >/dev/null 2>&1 || true
+set_property xsettings /Net/ThemeName string WhiteSur-Light
+xfconf-query -c xsettings -p /Net/IconThemeName -n -t string -s WhiteSur >/dev/null 2>&1 || \
+    xfconf-query -c xsettings -p /Net/IconThemeName -s WhiteSur >/dev/null 2>&1 || true
 xfconf-query -c xsettings -p /Gtk/FontName -n -t string -s "Noto Sans 10" >/dev/null 2>&1 || \
     xfconf-query -c xsettings -p /Gtk/FontName -s "Noto Sans 10" >/dev/null 2>&1 || true
 
-set_property xfwm4 /general/theme string StradiLab
+set_property xfwm4 /general/theme string WhiteSur-Light
 set_property xfwm4 /general/title_font string "Noto Sans Medium 10"
-set_property xfwm4 /general/button_layout string 'O|HMC'
+set_property xfwm4 /general/button_layout string 'CHM|O'
 set_property xfwm4 /general/borderless_maximize bool false
 set_property xfwm4 /general/titleless_maximize bool false
 set_property xfwm4 /general/show_frame_shadow bool true

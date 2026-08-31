@@ -15,6 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CHROOT = ROOT / "config/includes.chroot"
 SHARE = CHROOT / "usr/local/share/stradilabos"
+GUIDE = SHARE / "guide"
 APPLICATIONS = CHROOT / "usr/local/share/applications"
 PACKAGE_RE = re.compile(r"^[a-z0-9][a-z0-9+.-]*$")
 FLATPAK_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
@@ -38,6 +39,10 @@ BRAND_COLORS = {
     "#88621d",
     "#3368b5",
     "#915b33",
+    # Blu navy della palette StradiLab (docs/BRAND-STRADILAB.md), usato per
+    # il pannello scuro del requisito D.
+    "#1b3a6b",
+    "#2c4a6e",
 }
 
 
@@ -159,6 +164,82 @@ def validate_packs(errors: list[str]) -> None:
     )
 
 
+def validate_guides(errors: list[str]) -> None:
+    """Verifica che le guide offline restino navigabili e coprano le app GUI."""
+    index = GUIDE / "index.html"
+    require(index.exists(), "Indice delle guide assente.", errors)
+    if index.exists():
+        index_text = index.read_text(encoding="utf-8")
+        require("['<section" not in index_text, "Indice guide con una lista Python visibile.", errors)
+        for section in (
+            "base",
+            "artistico",
+            "scenografia",
+            "video",
+            "musicale",
+            "liuteria",
+            "moda",
+            "arredo",
+            "accessibilita",
+        ):
+            require(
+                f'id="{section}"' in index_text,
+                f"Sezione guide assente: {section}.",
+                errors,
+            )
+
+    # I due pacchetti seguenti non espongono un'app grafica autonoma: sono
+    # rispettivamente una banca suoni e il motore di sintesi usato da Orca.
+    aliases = {"musescore3": "musescore", "io.seamly.seamly2d": "seamly2d"}
+    technical = {"fluid-soundfont-gm", "espeak-ng"}
+    packs = json.loads((SHARE / "packs.json").read_text(encoding="utf-8"))["packs"]
+    expected = {
+        aliases.get(name, name)
+        for pack in packs
+        for name in [*pack["packages"], *pack.get("flatpaks", [])]
+        if name not in technical
+    }
+    for app_id in expected:
+        path = GUIDE / f"{app_id}.html"
+        require(path.exists(), f"Guida mancante per l'app: {app_id}.", errors)
+        if path.exists():
+            text = path.read_text(encoding="utf-8")
+            for heading in (
+                "A cosa serve a scuola",
+                "Come si apre",
+                "I primi 5 passi",
+                "Tre problemi comuni",
+                "Per imparare di più",
+            ):
+                require(heading in text, f"Formato incompleto nella guida {app_id}: {heading}.", errors)
+
+
+def validate_updates(errors: list[str]) -> None:
+    """Il canale deve aggiornare anche un PC già installato, senza una ISO."""
+    client = CHROOT / "usr/local/bin/stradilabos-update"
+    mirror = ROOT / "updates/stradilabos-update"
+    require(client.exists() and mirror.exists(), "Client aggiornamenti o copia canale assente.", errors)
+    if client.exists() and mirror.exists():
+        require(
+            client.read_text(encoding="utf-8") == mirror.read_text(encoding="utf-8"),
+            "Client aggiornamenti e copia nel canale non sono identici.",
+            errors,
+        )
+    version = ROOT / "updates/version.txt"
+    require(version.read_text(encoding="utf-8").strip().isdigit(), "Serie aggiornamenti non numerica.", errors)
+    payload = ROOT / "updates/update.sh"
+    require(payload.exists(), "Payload aggiornamenti assente.", errors)
+    if payload.exists():
+        text = payload.read_text(encoding="utf-8")
+        for fragment in (
+            "sync_0_3_interface",
+            "SOURCE_ARCHIVE_URL",
+            "install_security_updates",
+            "nessuna reinstallazione necessaria",
+        ):
+            require(fragment in text, f"Payload cumulativo incompleto: {fragment}.", errors)
+
+
 def validate_code(errors: list[str]) -> None:
     python_files = [
         *ROOT.glob("scripts/*.py"),
@@ -224,7 +305,7 @@ def validate_branding(errors: list[str]) -> None:
                 f"Icona del tema assente nella presentazione: {name}",
                 errors,
             )
-    wallpaper = CHROOT / "usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v2.png"
+    wallpaper = CHROOT / "usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v3.png"
     require(wallpaper.exists(), "Sfondo StradilabOS assente.", errors)
     theme = CHROOT / "usr/share/icons/StradiLab"
     require((theme / "index.theme").exists(), "Tema icone StradilabOS assente.", errors)
@@ -236,6 +317,28 @@ def validate_branding(errors: list[str]) -> None:
     require(
         (CHROOT / "usr/local/share/icons/hicolor/scalable/apps/stradilabos-workspace.svg").exists(),
         "Icona Workspace StradilabOS assente.",
+        errors,
+    )
+    brand_icons = {
+        "stradilabos.svg",
+        "stradilabos-app-center.svg",
+        "stradilabos-workspace.svg",
+        "stradilabos-guide.svg",
+        "stradilabos-welcome.svg",
+        "stradilabos-scuola.svg",
+        "stradilabos-orientamento.svg",
+        "stradilabos-update.svg",
+    }
+    brand_icon_dir = CHROOT / "usr/local/share/icons/hicolor/scalable/apps"
+    icon_contents = []
+    for name in brand_icons:
+        path = brand_icon_dir / name
+        require(path.exists(), f"Icona StradiLab assente: {name}", errors)
+        if path.exists():
+            icon_contents.append(path.read_text(encoding="utf-8"))
+    require(
+        len(icon_contents) == len(set(icon_contents)),
+        "Le icone principali StradiLab non sono visivamente differenziate.",
         errors,
     )
     branded_files = [
@@ -362,7 +465,7 @@ def validate_system_branding(errors: list[str]) -> None:
     if binary_hook.exists():
         text = binary_hook.read_text(encoding="utf-8")
         require("Prova StradilabOS" in text, "Menu Live non rinominato.", errors)
-        require("StradilabOS 0.2" in text, "Metadati ISO non personalizzati.", errors)
+        require("StradilabOS 0.3" in text, "Metadati ISO non personalizzati.", errors)
     live_theme = ROOT / "config/branding/grub-live-theme.txt"
     require(live_theme.exists(), "Tema del menu Live assente.", errors)
     if live_theme.exists():
@@ -389,7 +492,7 @@ def validate_system_branding(errors: list[str]) -> None:
     if greeter.exists():
         greeter_text = greeter.read_text(encoding="utf-8")
         require(
-            "stradilabos-wallpaper-v2.png" in greeter_text,
+            "stradilabos-wallpaper-v3.png" in greeter_text,
             "Sfondo StradilabOS non applicato alla schermata di accesso.",
             errors,
         )
@@ -570,6 +673,23 @@ def validate_system_branding(errors: list[str]) -> None:
         text = window_theme.read_text(encoding="utf-8")
         require("/usr/share/themes/StradiLab" in text, "Tema finestre non installato.", errors)
         require("active_color_1" in text, "Accento bordeaux delle finestre assente.", errors)
+        require(
+            "WhiteSur-Light" in text and "WhiteSur-Dark" in text,
+            "Il tema WhiteSur non riceve le regole StradiLab al build.",
+            errors,
+        )
+
+    for variant in ("WhiteSur-Light", "WhiteSur-Dark"):
+        theme = CHROOT / "usr/share/themes" / variant
+        require((theme / "index.theme").exists(), f"Tema {variant} assente.", errors)
+        require((theme / "xfwm4/themerc").exists(), f"Tema xfwm4 {variant} assente.", errors)
+        require((theme / "LICENSE.WhiteSur").exists(), f"Licenza {variant} assente.", errors)
+    whitesur_icons = CHROOT / "usr/share/icons/WhiteSur"
+    require((whitesur_icons / "index.theme").exists(), "Tema icone WhiteSur assente.", errors)
+    if (whitesur_icons / "index.theme").exists():
+        icons_text = (whitesur_icons / "index.theme").read_text(encoding="utf-8")
+        require("Inherits=StradiLab," in icons_text, "WhiteSur non eredita le icone StradiLab.", errors)
+    require((whitesur_icons / "COPYING").exists(), "Licenza WhiteSur Icon Theme assente.", errors)
 
     for relative in (
         "etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml",
@@ -583,7 +703,13 @@ def validate_system_branding(errors: list[str]) -> None:
         except ET.ParseError as error:
             errors.append(f"Configurazione tema non valida ({relative}): {error}")
         text = path.read_text(encoding="utf-8")
-        require('value="StradiLab"' in text, f"Tema StradiLab non scelto: {relative}", errors)
+        require('value="WhiteSur-Light"' in text, f"Tema WhiteSur non scelto: {relative}", errors)
+    for relative in (
+        "etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml",
+        "etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml",
+    ):
+        text = (CHROOT / relative).read_text(encoding="utf-8")
+        require('value="WhiteSur"' in text, f"Icone WhiteSur non scelte: {relative}", errors)
     xfwm_defaults = (
         CHROOT
         / "etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml"
@@ -594,6 +720,8 @@ def validate_system_branding(errors: list[str]) -> None:
             "Le finestre massimizzate possono perdere il titolo.", errors)
     require('name="use_compositing" type="bool" value="false"' in xfwm_defaults,
             "Il compositore di xfwm4 può riattivarsi anche se la guardia lo spegne.", errors)
+    require('name="button_layout" type="string" value="CHM|O"' in xfwm_defaults,
+            "I controlli semaforo non sono a sinistra.", errors)
 
     branding_hook = ROOT / "config/hooks/live/010-stradilabos-branding.hook.chroot"
     branding_text = branding_hook.read_text(encoding="utf-8")
@@ -645,6 +773,8 @@ def main() -> int:
     errors: list[str] = []
     validate_catalog(errors)
     validate_packs(errors)
+    validate_guides(errors)
+    validate_updates(errors)
     validate_code(errors)
     validate_branding(errors)
     validate_installer(errors)

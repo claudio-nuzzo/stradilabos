@@ -120,8 +120,7 @@ class HubWindow(Gtk.ApplicationWindow):
         root.pack_start(scroller, True, True, 0)
         self.add(root)
 
-    @staticmethod
-    def _hero() -> Gtk.Widget:
+    def _hero(self) -> Gtk.Widget:
         hero = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         hero.get_style_context().add_class("hero")
         title = Gtk.Label(label="STRADILAB", xalign=0)
@@ -131,9 +130,30 @@ class HubWindow(Gtk.ApplicationWindow):
             xalign=0,
         )
         copy.get_style_context().add_class("hero-copy")
+
+        guide = Gtk.Button(label="Guide — impara a usare le app della tua area")
+        guide.set_relief(Gtk.ReliefStyle.NONE)
+        guide.set_halign(Gtk.Align.START)
+        guide.connect("clicked", self.open_guides)
         hero.pack_start(title, False, False, 0)
         hero.pack_start(copy, False, False, 0)
+        hero.pack_start(guide, False, False, 6)
         return hero
+
+    def open_guides(self, *_args) -> None:
+        try:
+            subprocess.Popen(["stradilabos-guide"])
+        except OSError as error:
+            dialog = Gtk.MessageDialog(
+                transient_for=self,
+                modal=True,
+                message_type=Gtk.MessageType.ERROR,
+                buttons=Gtk.ButtonsType.CLOSE,
+                text="Impossibile aprire le guide",
+            )
+            dialog.format_secondary_text(str(error))
+            dialog.run()
+            dialog.destroy()
 
     def _filters(self) -> Gtk.Widget:
         toolbar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)

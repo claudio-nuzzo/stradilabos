@@ -1,0 +1,4 @@
+# I file WhiteSur sono dipendenze di terze parti mantenute byte-for-byte rispetto
+# alla distribuzione upstream. Il loro stile di whitespace non è del progetto.
+config/includes.chroot/usr/share/icons/WhiteSur/** -whitespace
+config/includes.chroot/usr/share/themes/WhiteSur-*/** -whitespace

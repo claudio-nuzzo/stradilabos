@@ -5,7 +5,7 @@ recuperare PC a 64 bit non più adatti ai sistemi operativi moderni. L'obiettivo
 è offrire un ambiente semplice, in italiano e utilizzabile senza terminale,
 centrato sull'ecosistema StradiLab dell'IIS «Antonio Stradivari» di Cremona.
 
-Questo repository contiene la versione `0.2` in sviluppo. Le immagini vengono
+Questo repository contiene la versione `0.3` in sviluppo. Le immagini vengono
 costruite e controllate automaticamente per AMD64 e ARM64; prima dell'uso a
 scuola resta necessario il collaudo su hardware reale.
 

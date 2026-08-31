@@ -1,0 +1,7 @@
+// StradilabOS — attiva gli aggiornamenti automatici di sicurezza Debian.
+// La frequenza è dettata dal timer systemd di APT: il sistema controlla ogni
+// giorno e applica da solo le sole patch della suite Trixie-Security (vedi
+// 50unattended-upgrades). Nessuna richiesta di password, nessun riavvio.
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::AutocleanInterval "7";

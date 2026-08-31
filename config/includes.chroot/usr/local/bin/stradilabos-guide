@@ -1,0 +1,22 @@
+#!/bin/sh
+# Apre le guide delle app StradilabOS in una finestra Chromium dedicata.
+# Uso: stradilabos-guide [sezione]   (sezione opzionale, es. "moda")
+set -eu
+
+base="file:///usr/local/share/stradilabos/guide/index.html"
+url=$base
+if [ -n "${1:-}" ]; then
+    url="$base#$1"
+fi
+
+if command -v chromium >/dev/null 2>&1; then
+    exec chromium \
+        --app="$url" \
+        --class="StradilabOS-guide" \
+        --password-store=basic \
+        --start-maximized \
+        --no-first-run \
+        --disable-session-crashed-bubble
+fi
+
+exec xdg-open "$url"

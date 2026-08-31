@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Guide
+Comment=Impara a usare le app della tua area
+Exec=stradilabos-guide
+Icon=stradilabos-guide
+Terminal=false

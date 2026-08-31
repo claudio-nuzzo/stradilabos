@@ -3,8 +3,9 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
-import re
+import subprocess
 import tempfile
+import re
 import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -86,11 +87,66 @@ class DesktopDefaultsTests(unittest.TestCase):
             "etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml",
         ):
             text = (CHROOT / relative).read_text(encoding="utf-8")
-            self.assertIn('name="button_layout" type="string" value="O|HMC"', text)
+            self.assertIn('name="button_layout" type="string" value="CHM|O"', text)
             self.assertIn('name="borderless_maximize" type="bool" value="false"', text)
             self.assertIn('name="titleless_maximize" type="bool" value="false"', text)
             self.assertIn('name="use_compositing" type="bool" value="false"', text)
-            self.assertIn('name="theme" type="string" value="StradiLab"', text)
+            self.assertIn('name="theme" type="string" value="WhiteSur-Light"', text)
+
+    def test_built_image_validator_tracks_the_current_desktop_theme(self) -> None:
+        text = (ROOT / "scripts/validate_built_image.sh").read_text(encoding="utf-8")
+        self.assertIn("usr/share/themes/WhiteSur-Light/xfwm4/themerc", text)
+        self.assertIn("usr/share/themes/WhiteSur-Light/gtk-3.0/gtk.css", text)
+        self.assertIn("usr/share/icons/WhiteSur/index.theme", text)
+        self.assertIn('value="WhiteSur-Light"', text)
+        self.assertNotIn("usr/share/themes/StradiLab/xfwm4/themerc", text)
+
+    def test_update_client_applies_a_local_series_once(self) -> None:
+        """Un PC già installato applica una serie senza ricostruire una ISO."""
+        client = CHROOT / "usr/local/bin/stradilabos-update"
+        mirror = ROOT / "updates/stradilabos-update"
+        self.assertEqual(client.read_text(encoding="utf-8"), mirror.read_text(encoding="utf-8"))
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            channel = root / "channel"
+            channel.mkdir()
+            (channel / "version.txt").write_text("42\n", encoding="utf-8")
+            marker = root / "payload-runs"
+            (channel / "update.sh").write_text(
+                '#!/bin/sh\nprintf "ok\\n" >> "$STRADILABOS_TEST_MARKER"\n',
+                encoding="utf-8",
+            )
+            fake_bin = root / "bin"
+            fake_bin.mkdir()
+            fake_id = fake_bin / "id"
+            fake_id.write_text("#!/bin/sh\nprintf '0\\n'\n", encoding="utf-8")
+            fake_id.chmod(0o755)
+            state = root / "state"
+            log = root / "update.log"
+            environment = {
+                **os.environ,
+                "PATH": f"{fake_bin}:{os.environ['PATH']}",
+                "STRADILABOS_UPDATE_BASE_URL": channel.as_uri(),
+                "STRADILABOS_UPDATE_STATE_DIR": str(state),
+                "STRADILABOS_UPDATE_LOG": str(log),
+                "STRADILABOS_TEST_MARKER": str(marker),
+            }
+            first = subprocess.run(["bash", str(client)], env=environment, check=False)
+            second = subprocess.run(["bash", str(client)], env=environment, check=False)
+
+            self.assertEqual(first.returncode, 0)
+            self.assertEqual(second.returncode, 0)
+            self.assertEqual((state / "update-serial").read_text(encoding="utf-8").strip(), "42")
+            self.assertEqual(marker.read_text(encoding="utf-8").splitlines(), ["ok"])
+
+            # Un payload non riuscito non deve avanzare la serie: il timer lo
+            # ritenterà senza chiedere di reinstallare il sistema.
+            (channel / "version.txt").write_text("43\n", encoding="utf-8")
+            (channel / "update.sh").write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+            failed = subprocess.run(["bash", str(client)], env=environment, check=False)
+            self.assertNotEqual(failed.returncode, 0)
+            self.assertEqual((state / "update-serial").read_text(encoding="utf-8").strip(), "42")
 
     def test_window_manager_guard_is_installed_and_bounded(self) -> None:
         guard = CHROOT / "usr/local/bin/stradilabos-window-manager-guard"

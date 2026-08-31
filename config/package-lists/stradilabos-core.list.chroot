@@ -111,6 +111,11 @@ firmware-bnx2x
 firmware-qlogic
 #endif
 
+# Aggiornamenti di sicurezza Debian: solo la suite Trixie-Security, senza
+# riavvii automatici né richieste di password (configurazione in
+# config/includes.chroot/etc/apt/apt.conf.d/).
+unattended-upgrades
+
 # Runtime delle applicazioni StradilabOS
 python3-gi
 python3-yaml

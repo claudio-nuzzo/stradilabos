@@ -18,5 +18,7 @@ ln -sf drive-removable-media.svg "$theme/scalable/devices/media-flash.svg"
 ln -sf system-file-manager.svg "$theme/scalable/apps/file-manager.svg"
 
 if command -v gtk-update-icon-cache >/dev/null 2>&1; then
-    gtk-update-icon-cache -f "$theme" || true
+    for cache_theme in "$theme" /usr/share/icons/WhiteSur; do
+        [ -d "$cache_theme" ] && gtk-update-icon-cache -f "$cache_theme" || true
+    done
 fi

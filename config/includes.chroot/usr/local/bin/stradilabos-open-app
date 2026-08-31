@@ -13,16 +13,23 @@ case "$url" in
 esac
 
 if command -v chromium >/dev/null 2>&1; then
-    browser_profile=""
-    profile_state=${XDG_CONFIG_HOME:-"$HOME/.config"}/stradilabos/profiles.json
+    config_dir=${XDG_CONFIG_HOME:-"$HOME/.config"}/stradilabos
+    profile_state=$config_dir/profiles.json
     runtime_dir=${XDG_RUNTIME_DIR:-/tmp}
+
+    # Una sola directory di profilo per tutte le micro-app: su PC personale è
+    # persistente (la stessa usata dal passo Google del Benvenuto), su PC
+    # condiviso o sessione live è temporanea e scompare all'uscita.
     if [ -e /run/live/medium ] \
         || grep -qw 'boot=live' /proc/cmdline 2>/dev/null \
         || grep -q '"device_mode"[[:space:]]*:[[:space:]]*"shared"' "$profile_state" 2>/dev/null; then
-        browser_profile="--user-data-dir=$runtime_dir/stradilabos-browser-session"
+        user_data_dir="$runtime_dir/stradilabos-browser-session"
+    else
+        user_data_dir="$config_dir/browser"
     fi
+
     exec chromium \
-        ${browser_profile:+"$browser_profile"} \
+        --user-data-dir="$user_data_dir" \
         --app="$url" \
         --class="StradilabOS-$app_id" \
         --password-store=basic \

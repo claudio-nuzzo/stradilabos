@@ -1,0 +1,65 @@
+#!/bin/bash
+# stradilabos-update — scarica ed esegue gli aggiornamenti StradilabOS
+# Canale: https://raw.githubusercontent.com/claudio-nuzzo/stradilabos/main/updates
+# Uso: sudo stradilabos-update [--force]
+set -u
+
+BASE_URL="${STRADILABOS_UPDATE_BASE_URL:-https://raw.githubusercontent.com/claudio-nuzzo/stradilabos/main/updates}"
+STATE_DIR="${STRADILABOS_UPDATE_STATE_DIR:-/var/lib/stradilabos}"
+STATE_FILE="$STATE_DIR/update-serial"
+LOG="${STRADILABOS_UPDATE_LOG:-/var/log/stradilabos-update.log}"
+
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Eseguire come amministratore: sudo stradilabos-update" >&2
+  exit 1
+fi
+
+mkdir -p "$STATE_DIR"
+touch "$LOG"
+
+log() { echo "[$(date '+%F %T')] $*" | tee -a "$LOG"; }
+
+fetch() {
+  # $1 = url, $2 = destinazione
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL --connect-timeout 15 -o "$2" "$1"
+  else
+    wget -q --timeout=15 -O "$2" "$1"
+  fi
+}
+
+update_tmpdir=$(mktemp -d)
+trap 'rm -rf "$update_tmpdir"' EXIT
+
+if ! fetch "$BASE_URL/version.txt" "$update_tmpdir/version.txt"; then
+  log "rete non raggiungibile: riprovo alla prossima accensione"
+  exit 0
+fi
+
+REMOTE=$(tr -cd '0-9' < "$update_tmpdir/version.txt")
+LOCAL=$(cat "$STATE_FILE" 2>/dev/null || echo 0)
+case "$LOCAL" in (*[!0-9]*|'') LOCAL=0;; esac
+
+if [ -z "$REMOTE" ]; then
+  log "version.txt non valido, nessun aggiornamento eseguito"
+  exit 0
+fi
+
+if [ "$REMOTE" -le "$LOCAL" ] && [ "${1:-}" != "--force" ]; then
+  log "nessun aggiornamento: questo PC ha gia' la serie $LOCAL"
+  exit 0
+fi
+
+if ! fetch "$BASE_URL/update.sh" "$update_tmpdir/update.sh"; then
+  log "download di update.sh fallito"
+  exit 0
+fi
+
+log "eseguo aggiornamento serie $REMOTE (locale: $LOCAL)"
+if bash "$update_tmpdir/update.sh" >>"$LOG" 2>&1; then
+  echo "$REMOTE" > "$STATE_FILE"
+  log "aggiornamento serie $REMOTE completato"
+else
+  log "ERRORE durante l'aggiornamento serie $REMOTE (vedi sopra)"
+  exit 1
+fi
