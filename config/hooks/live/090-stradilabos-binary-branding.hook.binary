@@ -27,5 +27,5 @@ if [ -d "$grub_dir" ]; then
 fi
 
 if [ -d binary/.disk ]; then
-    printf '%s\n' "StradilabOS 0.2 (in sviluppo) - Debian 13 base" > binary/.disk/info
+    printf '%s\n' "StradilabOS 0.3 (in sviluppo) - Debian 13 base" > binary/.disk/info
 fi
