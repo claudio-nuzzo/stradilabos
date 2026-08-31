@@ -93,7 +93,7 @@ INSTITUTIONAL_APPS = [
         "id": "workspace-login",
         "title": "Accedi a Google Workspace",
         "description": "Accesso con l'account istituzionale, condiviso tra tutte le app Google.",
-        "url": "https://accounts.google.com/ServiceLogin?service=classroom&continue=https%3A%2F%2Fclassroom.google.com%2F&hd=istitutostradivari.it&hl=it",
+        "url": "https://accounts.google.com/ServiceLogin?service=mail&continue=https%3A%2F%2Fmail.google.com%2F&hd=istitutostradivari.it&hl=it",
         "audience": ["docenti", "studenti", "personale"],
         "category": "Workspace",
         "source": "google",

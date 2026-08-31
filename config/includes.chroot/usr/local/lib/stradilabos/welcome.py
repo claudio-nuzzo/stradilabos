@@ -15,6 +15,11 @@ gi.require_version("Gtk", "3.0")
 gi.require_version("Gdk", "3.0")
 from gi.repository import Gdk, GLib, Gtk  # noqa: E402
 
+try:
+    import system_status  # noqa: E402  (stesso albero di StradilabOS)
+except ImportError:  # pragma: no cover - difesa in ambienti minimi
+    system_status = None
+
 FORCE_PROFILES = "--profiles" in sys.argv
 AUTOSTART_MODE = "--autostart" in sys.argv
 GTK_ARGV = [
@@ -24,7 +29,7 @@ GTK_ARGV = [
 ]
 
 CONFIG_DIR = Path.home() / ".config" / "stradilabos"
-WELCOME_STATE = CONFIG_DIR / "welcome-seen"
+FIRST_RUN_DONE = CONFIG_DIR / "first-run-done"
 PROFILE_STATE = CONFIG_DIR / "profiles.json"
 PACKS_CATALOG = Path("/usr/local/share/stradilabos/packs.json")
 ADDRESS_IDS = ("artistico", "musicale", "liuteria", "moda", "arredo")
@@ -35,9 +40,12 @@ ROLE_LABELS = {
     "staff": "Personale di segreteria",
     "base": "Installazione base",
 }
+# L'accesso guidato di Google Workspace apre Gmail (non Classroom): è il
+# rilievo n. 2 del collaudo. Il dominio resta vincolato dall'URL e dalla policy
+# Chromium AllowedDomainsForApps=istitutostradivari.it.
 WORKSPACE_LOGIN = (
-    "https://accounts.google.com/ServiceLogin?service=classroom&"
-    "continue=https%3A%2F%2Fclassroom.google.com%2F&"
+    "https://accounts.google.com/ServiceLogin?service=mail&"
+    "continue=https%3A%2F%2Fmail.google.com%2F&"
     "hd=istitutostradivari.it&hl=it"
 )
 
@@ -47,6 +55,8 @@ window { background: #f6f4ef; }
 .brand { color: #9b2335; font-size: 13px; font-weight: 700; }
 .title { color: #16130f; font-size: 32px; font-weight: 700; }
 .copy { color: #645e55; font-size: 15px; }
+.status { color: #645e55; font-size: 13px; }
+.offline { color: #9b2335; font-weight: 700; }
 .action {
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid #ded8ce;
@@ -175,21 +185,29 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         root.get_style_context().add_class("wrap")
         live_session = is_live()
+        connected = self.nm_is_connected()
         brand, title, copy = self.heading(
             "Prova o installa StradilabOS" if live_session else "Benvenuto in StradilabOS",
             (
                 "Puoi provarlo senza modificare il computer oppure avviare subito "
                 "l'installazione grafica."
                 if live_session
-                else "Accedi con l'account @istitutostradivari.it, poi scegli le app "
-                "utili per il tuo ruolo."
+                else "Collega il computer a Internet, accedi con l'account "
+                "@istitutostradivari.it e scegli le app utili per il tuo ruolo."
             ),
         )
         self.profile_summary = Gtk.Label(xalign=0)
         self.profile_summary.get_style_context().add_class("brand")
         self.update_profile_summary()
 
-        for widget in (brand, title, copy, self.profile_summary):
+        self.status_line = Gtk.Label(label=self.status_text(), xalign=0)
+        self.status_line.get_style_context().add_class("status")
+        if not connected:
+            self.status_line.set_markup(
+                f'<span color="#9b2335">{GLib.markup_escape_text(self.status_text())}</span>'
+            )
+
+        for widget in (brand, title, copy, self.profile_summary, self.status_line):
             root.pack_start(widget, False, False, 0)
 
         if live_session and shutil.which("calamares-install-debian"):
@@ -197,7 +215,7 @@ class WelcomeWindow(Gtk.ApplicationWindow):
                 self.action(
                     "Installa StradilabOS sul computer",
                     "Scegli Studente, Docente, Segreteria o la sola installazione base",
-                    ["calamares-install-debian"],
+                    self.install_and_check,
                     primary=True,
                 ),
                 False,
@@ -205,14 +223,45 @@ class WelcomeWindow(Gtk.ApplicationWindow):
                 3,
             )
 
+        # Passo 1 della prima accensione: la rete. È primaria quando manca la
+        # connessione, così l'utente non può avviare nulla di inutile.
+        if not connected:
+            root.pack_start(
+                self.action(
+                    "1 · Prima cosa: collegati a Internet",
+                    "Senza rete Google Workspace e le app non funzionano",
+                    self.open_network_center,
+                    primary=True,
+                ),
+                False,
+                False,
+                3,
+            )
+        else:
+            root.pack_start(
+                self.action(
+                    "Rete: connesso",
+                    "Puoi cambiare o configurare una rete in ogni momento",
+                    self.open_network_center,
+                ),
+                False,
+                False,
+                3,
+            )
+
+        # Passo 2 della prima accensione: Google Workspace, se scelto in
+        # installazione e solo a rete attiva.
+        google_primary = (
+            not live_session
+            and self.workspace_onboarding == "first-boot"
+            and connected
+        )
         root.pack_start(
             self.action(
-                "Accedi a Google Workspace",
-                "Solo account @istitutostradivari.it · Classroom, Drive, Gmail, Meet e le altre app",
-                ["stradilabos-open-app", WORKSPACE_LOGIN, "workspace-login"],
-                primary=(
-                    not live_session and self.workspace_onboarding == "first-boot"
-                ),
+                "2 · Accedi a Google Workspace",
+                "Solo account @istitutostradivari.it · posta, Classroom, Drive, Meet e le altre app",
+                self.open_workspace,
+                primary=google_primary,
             ),
             False,
             False,
@@ -221,10 +270,10 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         if not live_session:
             root.pack_start(
                 self.action(
-                    "Scarica le app consigliate",
+                    "3 · Scarica le app consigliate",
                     "Il Centro App segue il profilo scelto; per il download serve Internet",
                     ["stradilabos-app-center"],
-                    primary=self.workspace_onboarding == "later",
+                    primary=self.workspace_onboarding == "later" and connected,
                 ),
                 False,
                 False,
@@ -232,12 +281,6 @@ class WelcomeWindow(Gtk.ApplicationWindow):
             )
         root.pack_start(
             self.action("Apri StradiLab", "Web app e servizi della scuola", ["stradilabos-hub"]),
-            False,
-            False,
-            0,
-        )
-        root.pack_start(
-            self.action("Connettiti a Internet", "Scegli o configura una rete Wi-Fi", ["nm-connection-editor"]),
             False,
             False,
             0,
@@ -271,11 +314,14 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         )
 
         footer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        self.skip = Gtk.CheckButton(label="Non mostrare questa schermata al prossimo accesso")
-        self.skip.set_sensitive(not live_session)
+        self.status_footer = Gtk.Label(label=self.status_text(), xalign=0)
+        self.status_footer.get_style_context().add_class("status")
+        check_now = Gtk.Button(label="Controlla aggiornamenti")
+        check_now.connect("clicked", self.check_updates)
         close = Gtk.Button(label="Continua senza installare" if live_session else "Chiudi")
         close.connect("clicked", self.close_and_save)
-        footer.pack_start(self.skip, True, True, 0)
+        footer.pack_start(self.status_footer, True, True, 0)
+        footer.pack_start(check_now, False, False, 0)
         footer.pack_end(close, False, False, 0)
         root.pack_end(footer, False, False, 3)
         return root
@@ -481,14 +527,10 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         self.stack.set_visible_child_name("home")
 
     def action(
-        self, title: str, subtitle: str, command: list[str], primary: bool = False
+        self, title: str, subtitle: str, command, primary: bool = False
     ) -> Gtk.Button:
-        return self.callback_action(
-            title,
-            subtitle,
-            lambda *_args: self.launch(command),
-            primary=primary,
-        )
+        callback = command if callable(command) else (lambda *_args, c=command: self.launch(c))
+        return self.callback_action(title, subtitle, callback, primary=primary)
 
     def callback_action(self, title: str, subtitle: str, callback, primary: bool = False) -> Gtk.Button:
         button = Gtk.Button()
@@ -514,6 +556,88 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         except OSError as error:
             self.message("Impossibile avviare l'applicazione", str(error))
 
+    def nm_is_connected(self) -> bool:
+        """Verifica la connettività di rete senza privilegi, a ogni comparsa."""
+        if not shutil.which("nmcli"):
+            # Senza nmcli non possiamo verificare: non blocchiamo nulla.
+            return True
+        try:
+            result = subprocess.run(
+                ["nmcli", "-t", "-f", "STATE", "general"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                check=False,
+                timeout=5,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return False
+        return result.stdout.strip() == "connected"
+
+    def open_network_center(self, *_args) -> None:
+        # Editor connessioni esistente di NetworkManager: non scriviamo un
+        # gestore Wi-Fi da zero.
+        self.launch(["nm-connection-editor"])
+
+    def open_workspace(self, *_args) -> None:
+        if not self.nm_is_connected():
+            open_nets = self.choice(
+                "Prima collega il computer a Internet",
+                "Per accedere a Google Workspace serve una connessione. Collega il "
+                "computer e poi riprova: la verifica della rete avviene ogni volta.",
+                "Apri la scelta della rete",
+                "Salta, configuro dopo",
+            )
+            if open_nets:
+                self.launch(["nm-connection-editor"])
+            return
+        self.launch(["stradilabos-open-app", WORKSPACE_LOGIN, "workspace-login"])
+
+    def install_and_check(self, *_args) -> None:
+        if not shutil.which("calamares-install-debian"):
+            self.message(
+                "Funzione non disponibile",
+                "Non trovo l'installatore in questo sistema.",
+            )
+            return
+        if self.nm_is_connected():
+            self.launch(["calamares-install-debian"])
+            return
+        proceed = self.choice(
+            "Collega prima il computer a Internet",
+            "L'installazione di StradilabOS ha bisogno di Internet: senza rete "
+            "può fermarsi a metà e non potrà proporre l'accesso a Google Workspace.\n\n"
+            "Puoi continuare senza rete: potrai collegarti al primo avvio del "
+            "sistema installato.",
+            "Procedi senza rete",
+            "Configura la rete",
+        )
+        if proceed:
+            self.launch(["calamares-install-debian"])
+        else:
+            self.launch(["nm-connection-editor"])
+
+    def check_updates(self, *_args) -> None:
+        if not shutil.which("pkexec") or not shutil.which("stradilabos-update"):
+            self.message(
+                "Funzione non disponibile",
+                "Il controllo degli aggiornamenti non è disponibile in questo sistema.",
+            )
+            return
+        try:
+            subprocess.Popen(["pkexec", "stradilabos-update"])
+        except OSError as error:
+            self.message("Impossibile avviare la verifica", str(error))
+
+    def status_text(self) -> str:
+        base = "StradilabOS 0.3"
+        if system_status is not None:
+            try:
+                return system_status.status_label()
+            except Exception:  # difesa: la riga di stato non blocca il Benvenuto
+                pass
+        return base
+
     def message(self, title: str, detail: str, message_type=Gtk.MessageType.ERROR) -> None:
         dialog = Gtk.MessageDialog(
             transient_for=self,
@@ -526,10 +650,24 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         dialog.run()
         dialog.destroy()
 
+    def choice(self, title: str, detail: str, ok_label: str, cancel_label: str) -> bool:
+        dialog = Gtk.Dialog(title=title, transient_for=self, modal=True)
+        dialog.add_button(cancel_label, Gtk.ResponseType.CANCEL)
+        dialog.add_button(ok_label, Gtk.ResponseType.OK)
+        box = dialog.get_content_area()
+        label = Gtk.Label(label=detail)
+        label.set_line_wrap(True)
+        label.set_max_width_chars(62)
+        box.pack_start(label, True, True, 14)
+        box.show_all()
+        response = dialog.run()
+        dialog.destroy()
+        return response == Gtk.ResponseType.OK
+
     def close_and_save(self, *_args) -> None:
-        if self.skip.get_active() and not is_live():
-            WELCOME_STATE.parent.mkdir(parents=True, exist_ok=True)
-            WELCOME_STATE.touch()
+        if not is_live():
+            FIRST_RUN_DONE.parent.mkdir(parents=True, exist_ok=True)
+            FIRST_RUN_DONE.touch()
         self.close()
 
 
@@ -538,7 +676,7 @@ class WelcomeApplication(Gtk.Application):
         super().__init__(application_id="org.stradilab.StradilabOS.Welcome")
 
     def do_activate(self) -> None:
-        already_configured = WELCOME_STATE.exists() and PROFILE_STATE.exists()
+        already_configured = FIRST_RUN_DONE.exists() and PROFILE_STATE.exists()
         if AUTOSTART_MODE and already_configured and not is_live():
             self.quit()
             return

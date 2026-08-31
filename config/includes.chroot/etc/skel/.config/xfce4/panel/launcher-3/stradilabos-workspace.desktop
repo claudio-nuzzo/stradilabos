@@ -2,6 +2,6 @@
 Type=Application
 Name=Google Workspace
 Comment=Accedi con l'account @istitutostradivari.it
-Exec=stradilabos-open-app "https://accounts.google.com/AccountChooser?continue=https%%3A%%2F%%2Fclassroom.google.com%%2F&hd=istitutostradivari.it" "workspace-login"
+Exec=stradilabos-open-app "https://accounts.google.com/ServiceLogin?service=mail&continue=https%%3A%%2F%%2Fmail.google.com%%2F&hd=istitutostradivari.it&hl=it" "workspace-login"
 Icon=stradilabos-workspace
 Terminal=false
