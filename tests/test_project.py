@@ -93,6 +93,14 @@ class DesktopDefaultsTests(unittest.TestCase):
             self.assertIn('name="use_compositing" type="bool" value="false"', text)
             self.assertIn('name="theme" type="string" value="WhiteSur-Light"', text)
 
+    def test_built_image_validator_tracks_the_current_desktop_theme(self) -> None:
+        text = (ROOT / "scripts/validate_built_image.sh").read_text(encoding="utf-8")
+        self.assertIn("usr/share/themes/WhiteSur-Light/xfwm4/themerc", text)
+        self.assertIn("usr/share/themes/WhiteSur-Light/gtk-3.0/gtk.css", text)
+        self.assertIn("usr/share/icons/WhiteSur/index.theme", text)
+        self.assertIn('value="WhiteSur-Light"', text)
+        self.assertNotIn("usr/share/themes/StradiLab/xfwm4/themerc", text)
+
     def test_update_client_applies_a_local_series_once(self) -> None:
         """Un PC già installato applica una serie senza ricostruire una ISO."""
         client = CHROOT / "usr/local/bin/stradilabos-update"
