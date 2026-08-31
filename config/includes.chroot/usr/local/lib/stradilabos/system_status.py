@@ -61,7 +61,14 @@ def read_last_check() -> str:
     """Data dell'ultimo controllo aggiornamenti, o stringa vuota."""
     try:
         result = subprocess.run(
-            ["systemctl", "show", TIMER_UNIT, "--property=LastTriggerUSec"],
+            [
+                "systemctl",
+                "show",
+                TIMER_UNIT,
+                "--property=LastTriggerUSec",
+                "--value",
+                "--timestamp=unix",
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             text=True,
@@ -71,7 +78,7 @@ def read_last_check() -> str:
     except (OSError, subprocess.SubprocessError):
         result = None
     if result is not None and result.returncode == 0:
-        match = re.search(r"LastTriggerUSec=(\d+)", result.stdout)
+        match = re.search(r"@?(\d+)(?:\.\d+)?", result.stdout)
         if match:
             stamp = _last_trigger(match.group(1))
             if stamp:

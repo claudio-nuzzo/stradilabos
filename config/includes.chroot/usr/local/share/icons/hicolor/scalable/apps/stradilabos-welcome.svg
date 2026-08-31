@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <title>StradiLab — Benvenuto</title>
+  <rect width="128" height="128" rx="30" fill="#f6f4ef"/>
+  <path d="M30 96V61c0-20 15-35 34-35s34 15 34 35v35z" fill="#1b3a6b"/>
+  <path d="M43 62c0-12 9-22 21-22s21 10 21 22" fill="none" stroke="#d4a85a" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="64" cy="70" r="12" fill="#d4839f"/>
+  <path d="M51 95c3-10 10-15 13-15s10 5 13 15" fill="#9b2335"/>
+  <path d="M27 100h74" stroke="#7dab7e" stroke-width="8" stroke-linecap="round"/>
+</svg>

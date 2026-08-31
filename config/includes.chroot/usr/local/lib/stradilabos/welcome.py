@@ -237,6 +237,16 @@ class WelcomeWindow(Gtk.ApplicationWindow):
                 False,
                 3,
             )
+            root.pack_start(
+                self.callback_action(
+                    "Salta, configuro dopo",
+                    "Potrai continuare, ma Google Workspace e il Centro App resteranno inattivi finché non ti colleghi.",
+                    self.skip_network,
+                ),
+                False,
+                False,
+                0,
+            )
         else:
             root.pack_start(
                 self.action(
@@ -579,6 +589,18 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         # gestore Wi-Fi da zero.
         self.launch(["nm-connection-editor"])
 
+    def skip_network(self, *_args) -> None:
+        """Conferma il rinvio senza memorizzare uno stato permanente.
+
+        La rete viene verificata a ogni nuova apertura del Benvenuto, come
+        richiesto: il rinvio vale soltanto per questa scelta dell'utente.
+        """
+        self.message(
+            "Puoi configurare la rete più tardi",
+            "Continua pure con le altre attività. Quando vorrai usare Google Workspace o scaricare le app, apri il pulsante «Collegati a Internet».",
+            Gtk.MessageType.INFO,
+        )
+
     def open_workspace(self, *_args) -> None:
         if not self.nm_is_connected():
             open_nets = self.choice(
@@ -618,14 +640,15 @@ class WelcomeWindow(Gtk.ApplicationWindow):
             self.launch(["nm-connection-editor"])
 
     def check_updates(self, *_args) -> None:
-        if not shutil.which("pkexec") or not shutil.which("stradilabos-update"):
+        update_client = shutil.which("stradilabos-update")
+        if not shutil.which("pkexec") or not update_client:
             self.message(
                 "Funzione non disponibile",
                 "Il controllo degli aggiornamenti non è disponibile in questo sistema.",
             )
             return
         try:
-            subprocess.Popen(["pkexec", "stradilabos-update"])
+            subprocess.Popen(["pkexec", update_client])
         except OSError as error:
             self.message("Impossibile avviare la verifica", str(error))
 

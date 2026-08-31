@@ -32,6 +32,7 @@ INDIRIZZI = {
     "liuteria": "Liuteria",
     "moda": "Moda",
     "arredo": "Arredo e Architettura",
+    "accessibilita": "Accessibilità",
     "base": "Tutti · strumenti comuni",
 }
 
@@ -167,6 +168,36 @@ APPS = [
         ["Apri Kdenlive e crea un nuovo progetto.", "Importa i filmati con «Progetto → Aggiungi clip».", "Trascina le clip sulla timeline in basso.", "Taglia con il rasoio (C) e sposta i pezzi.", "Esporta il filmato con «Progetto → Renderizza»."],
         ["La timeline è vuota: trascina le clip dal pannello a sinistra.", "Il video è a scatti: riduci la qualità di anteprima.", "Manca l'audio: controlla che la traccia audio non sia muta."],
         "https://kdenlive.org", "Sito di Kdenlive",
+    ),
+    (
+        "darktable", "Darktable",
+        ["video"],
+        "Un programma per ordinare e migliorare fotografie digitali, soprattutto quelle scattate in formato RAW.",
+        "Serve per scegliere, correggere e preparare fotografie per video, mostre e lavori di comunicazione.",
+        "Menu StradiLab → «Darktable», oppure dal Centro App dopo aver installato la raccolta Video e comunicazione.",
+        ["Apri Darktable e importa le fotografie dal pulsante Importa.", "Nella vista Tavolo luminoso scegli le immagini che vuoi usare.", "Apri Camera oscura per regolare luce, colori e ritaglio.", "Confronta prima e dopo con il tasto di confronto.", "Esporta le foto in JPG nella cartella Documenti o Immagini."],
+        ["Non vedo le foto: importa la cartella in cui le hai salvate.", "L'immagine è troppo scura: aumenta l'esposizione poco alla volta.", "L'esportazione è lenta: scegli una dimensione più piccola per le foto."],
+        "https://www.darktable.org/usermanual/", "Manuale di Darktable",
+    ),
+    (
+        "handbrake", "HandBrake",
+        ["video"],
+        "Un programma per convertire un video in un formato più comodo da inviare, caricare o conservare.",
+        "Serve per ridurre file video troppo pesanti e preparare filmati compatibili con la consegna online.",
+        "Menu StradiLab → «HandBrake», oppure dal Centro App dopo aver installato la raccolta Video e comunicazione.",
+        ["Apri HandBrake e scegli il video con «Apri sorgente».", "Scegli il formato MP4 nella sezione Riepilogo.", "Usa un preset semplice, per esempio «Fast 1080p30».", "Indica dove salvare il nuovo file con Sfoglia.", "Premi Avvia codifica e attendi la fine della barra di avanzamento."],
+        ["Il file è ancora grande: scegli un preset 720p invece di 1080p.", "Il video non parte: prova il formato MP4 e il codec H.264.", "Manca l'audio: controlla che la traccia audio sia selezionata prima di avviare."],
+        "https://handbrake.fr/docs/", "Guida di HandBrake",
+    ),
+    (
+        "obs-studio", "OBS Studio",
+        ["video"],
+        "Un programma per registrare lo schermo, una lezione o una presentazione con voce e webcam.",
+        "Serve per creare tutorial, registrare prove e preparare contenuti video per la scuola.",
+        "Menu StradiLab → «OBS Studio», oppure dal Centro App dopo aver installato la raccolta Video e comunicazione.",
+        ["Apri OBS Studio e guarda il riquadro Anteprima.", "In Fonti premi + e scegli «Cattura schermo» oppure «Dispositivo video».", "Controlla che la barra del microfono si muova quando parli.", "Apri Impostazioni → Uscita e scegli dove salvare le registrazioni.", "Premi «Avvia la registrazione» e poi «Ferma la registrazione» quando hai finito."],
+        ["Lo schermo è nero: prova «Cattura finestra» invece di «Cattura schermo».", "Non si sente la voce: seleziona il microfono giusto nelle Impostazioni audio.", "Il video è a scatti: chiudi le app pesanti e registra a 720p."],
+        "https://obsproject.com/kb/", "Guida di OBS Studio",
     ),
     (
         "musescore", "MuseScore",
@@ -358,6 +389,26 @@ APPS = [
         ["Non trovo un simbolo: cerca nella libreria per nome.", "I fili non si collegano: usa lo strumento Filo.", "Lo schema è disordinato: usa la griglia per allineare."],
         "https://qelectrotech.org", "Sito di QElectroTech",
     ),
+    (
+        "orca", "Orca",
+        ["accessibilita"],
+        "Un lettore di schermo che legge ad alta voce pulsanti, finestre e testi per rendere il computer più accessibile.",
+        "Serve a chi usa il computer con difficoltà visive o preferisce essere guidato dalla voce.",
+        "Menu StradiLab → «Orca». Se serve, chiedi all'insegnante o al tecnico di attivarlo insieme a te.",
+        ["Apri Orca dal menu StradiLab.", "Nella finestra iniziale lascia attivo il lettore di schermo.", "Usa Tab per passare da un pulsante all'altro.", "Ascolta il nome dell'elemento selezionato.", "Per chiudere Orca usa il suo menu oppure chiedi supporto al docente."],
+        ["Non sento la voce: controlla volume e uscita audio dal pannello in alto.", "Legge troppo veloce: riduci la velocità nelle Preferenze di Orca.", "Non so dove sono: premi Tab lentamente e ascolta l'elemento selezionato."],
+        "https://help.gnome.org/users/orca/stable/", "Guida di Orca",
+    ),
+    (
+        "onboard", "Tastiera a schermo",
+        ["accessibilita"],
+        "Una tastiera grande sullo schermo, utile per scrivere con mouse, touch screen o dispositivi alternativi.",
+        "Serve quando la tastiera fisica è difficile da usare o non è disponibile.",
+        "Menu StradiLab → «Tastiera a schermo» (Onboard).",
+        ["Apri Tastiera a schermo dal menu StradiLab.", "Fai clic nel punto in cui vuoi scrivere.", "Premi le lettere sulla tastiera che appare sullo schermo.", "Usa Maiusc per le maiuscole e il tasto con la freccia per cancellare.", "Trascina il bordo della finestra per rendere la tastiera più grande o più piccola."],
+        ["Non scrive: fai prima clic nella casella di testo del programma.", "La tastiera copre il testo: spostala trascinando la barra in alto.", "I tasti sono piccoli: allarga la finestra della tastiera."],
+        "https://onscreenkeyboard.github.io/", "Sito di Onboard",
+    ),
 ]
 
 
@@ -422,7 +473,7 @@ def index_page() -> str:
         for name in indirizzi:
             groups.setdefault(name, []).append((title, f"{app_id}.html"))
 
-    order = ["base", "artistico", "scenografia", "video", "musicale", "liuteria", "moda", "arredo"]
+    order = ["base", "artistico", "scenografia", "video", "musicale", "liuteria", "moda", "arredo", "accessibilita"]
     sections = []
     for key in order:
         items = groups.get(key)
@@ -458,7 +509,7 @@ def index_page() -> str:
 </header>
 <nav class="indice">{nav}</nav>
 <main class="pagina">
-{sections}
+{''.join(sections)}
 </main>
 <footer class="pie">Guide StradilabOS · leggibili anche senza connessione</footer>
 <script>

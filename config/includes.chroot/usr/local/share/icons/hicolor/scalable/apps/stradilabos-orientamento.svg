@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <title>StradiLab — Orientamento</title>
+  <rect width="128" height="128" rx="30" fill="#1b3a6b"/>
+  <circle cx="64" cy="64" r="42" fill="#f6f4ef"/>
+  <circle cx="64" cy="64" r="31" fill="none" stroke="#2c4a6e" stroke-width="5"/>
+  <path d="m75 42 11 33-33 11 11-33z" fill="#9b2335"/>
+  <path d="m53 86-11-33 33-11-11 33z" fill="#7a9fd4"/>
+  <circle cx="64" cy="64" r="5" fill="#d4a85a"/>
+</svg>

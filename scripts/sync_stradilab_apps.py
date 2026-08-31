@@ -23,6 +23,14 @@ DESKTOP_DIR = (
     / "config/includes.chroot/usr/local/share/applications"
 )
 
+CATEGORY_ICONS = {
+    "StradiLab": "stradilabos",
+    "Orientamento": "stradilabos-orientamento",
+    "Scuola": "stradilabos-scuola",
+    "Workspace": "stradilabos-workspace",
+    "Moda": "fashion-cad",
+}
+
 INSTITUTIONAL_APPS = [
     {
         "id": "stradilab-home",
@@ -194,6 +202,7 @@ INSTITUTIONAL_APPS = [
 for app in INSTITUTIONAL_APPS:
     if app.get("source") == "google":
         app["icon"] = "stradilabos-workspace"
+    app.setdefault("icon", CATEGORY_ICONS.get(app["category"], "stradilabos"))
 
 
 def slugify(value: str) -> str:
@@ -210,15 +219,16 @@ def desktop_quote(value: str) -> str:
 
 
 def project_to_app(project: dict) -> dict:
+    category = "Orientamento" if project.get("colore") == "vetrina" else "StradiLab"
     return {
         "id": slugify(project["titolo"]),
         "title": project["titolo"],
         "description": project.get("breve") or project.get("desc") or "App StradiLab",
         "url": project["url"],
         "audience": [project.get("destinatari", "tutti")],
-        "category": "Orientamento" if project.get("colore") == "vetrina" else "StradiLab",
+        "category": category,
         "source": "stradilab",
-        "icon": "stradilabos",
+        "icon": CATEGORY_ICONS[category],
         "access": project.get("accesso", "libero"),
         "updated": project.get("aggiornato"),
     }

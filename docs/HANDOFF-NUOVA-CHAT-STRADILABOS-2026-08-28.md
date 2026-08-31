@@ -1,7 +1,7 @@
 # Handoff per nuova chat — StradilabOS
 
-**Data:** 28 agosto 2026  
-**Repository:** `/Users/claudionuzzo/Dev/stradilabos`  
+**Data:** 28 agosto 2026
+**Repository:** `/Users/claudionuzzo/Dev/stradilabos`
 **Obiettivo:** completare e verificare la correzione dell'avvio di `xfwm4`, poi costruire una sola nuova release di prova.
 
 ## 1. Punto essenziale

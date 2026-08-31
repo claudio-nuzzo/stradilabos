@@ -21,8 +21,13 @@ Per i PC gia' installati con la 0.2 (una tantum, da terminale):
 
   sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/claudio-nuzzo/stradilabos/main/updates/install-updater.sh)"
 
+La serie 2 è cumulativa: aggiorna un PC 0.2/0.3 già installato a componenti
+grafici, guide, policy Chromium e configurazione degli aggiornamenti 0.3. Non
+cancella documenti o profili utente e non richiede una nuova ISO; scarica dal
+repository solo i file di sistema gestiti da StradilabOS.
+
 File del canale:
-- update.sh            payload cumulativo (serie corrente)
+- update.sh            payload cumulativo (serie corrente: 2)
 - version.txt          numero di serie corrente
 - install-updater.sh   installazione una tantum su PC 0.2
 - stradilabos-update, stradilabos-update.service, stradilabos-update.timer

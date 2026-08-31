@@ -3,5 +3,5 @@ Type=Application
 Name=Guide
 Comment=Impara a usare le app della tua area
 Exec=stradilabos-guide
-Icon=stradilabos
+Icon=stradilabos-guide
 Terminal=false

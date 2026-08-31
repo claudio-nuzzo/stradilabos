@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <title>StradiLab — Guide</title>
+  <rect width="128" height="128" rx="30" fill="#1b3a6b"/>
+  <path d="M27 31c16-6 31-3 37 5v58c-8-8-23-10-37-5z" fill="#f6f4ef"/>
+  <path d="M101 31c-16-6-31-3-37 5v58c8-8 23-10 37-5z" fill="#ffffff"/>
+  <path d="M64 36v58" stroke="#9b2335" stroke-width="6"/>
+  <path d="M40 49h14M40 62h14M74 49h14M74 62h14" stroke="#2c4a6e" stroke-width="5" stroke-linecap="round"/>
+  <path d="M81 28v22l7-5 7 5V28z" fill="#d4a85a"/>
+</svg>
