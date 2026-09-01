@@ -66,6 +66,31 @@ class CatalogTests(unittest.TestCase):
 
 
 class DesktopDefaultsTests(unittest.TestCase):
+    def test_release_metadata_and_artifacts_are_consistently_0_4(self) -> None:
+        os_release = (CHROOT / "usr/lib/os-release").read_text(encoding="utf-8")
+        self.assertIn('PRETTY_NAME="StradiLabOS 0.4"', os_release)
+        self.assertIn('VERSION_ID="0.4"', os_release)
+        version = json.loads(
+            (CHROOT / "usr/local/share/stradilabos/version.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(version["version"], "0.4.0")
+        self.assertIn(
+            "StradiLabOS 0.4",
+            (ROOT / "config/hooks/live/090-stradilabos-binary-branding.hook.binary").read_text(
+                encoding="utf-8"
+            ),
+        )
+        expected = {
+            "build-iso.yml": "StradiLabOS-0.4-amd64.hybrid.iso",
+            "build-arm64.yml": "StradiLabOS-0.4-arm64.hybrid.iso",
+        }
+        for workflow, artifact in expected.items():
+            with self.subTest(workflow=workflow):
+                self.assertIn(
+                    artifact,
+                    (ROOT / ".github/workflows" / workflow).read_text(encoding="utf-8"),
+                )
+
     def test_all_installed_stradilabos_commands_are_executable(self) -> None:
         commands = list((CHROOT / "usr/local/bin").glob("stradilabos-*"))
         self.assertTrue(commands)

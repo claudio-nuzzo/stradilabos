@@ -66,7 +66,7 @@ jobs:
             exit 1
           fi
 
-          target="stradilabos-live-arm64.hybrid.iso"
+          target="StradiLabOS-0.4-arm64.hybrid.iso"
           if [[ "${iso_files[0]}" != "./${target}" ]]; then
             mv "${iso_files[0]}" "${target}"
           fi
@@ -77,9 +77,9 @@ jobs:
       - name: Pubblica ISO e checksum
         uses: actions/upload-artifact@v6
         with:
-          name: stradilabos-live-arm64
+          name: StradiLabOS-0.4-arm64
           path: |
-            stradilabos-live-arm64.hybrid.iso
-            stradilabos-live-arm64.hybrid.iso.sha256
+            StradiLabOS-0.4-arm64.hybrid.iso
+            StradiLabOS-0.4-arm64.hybrid.iso.sha256
           if-no-files-found: error
           retention-days: 1

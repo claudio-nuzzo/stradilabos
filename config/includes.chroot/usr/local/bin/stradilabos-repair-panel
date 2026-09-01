@@ -1,5 +1,5 @@
 #!/bin/sh
-# Installa il layout 0.3 a barra unica e ripara configurazioni incomplete.
+# Installa il layout a barra unica e ripara configurazioni incomplete.
 # Conserva sempre una copia recuperabile del profilo personale precedente.
 set -u
 

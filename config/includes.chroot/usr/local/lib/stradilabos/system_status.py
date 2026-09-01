@@ -22,7 +22,7 @@ TIMER_UNIT = "stradilabos-update.timer"
 
 
 def read_version() -> str:
-    """Versione leggibile di StradilabOS (es. 0.3.0-dev)."""
+    """Versione leggibile di StradiLabOS (es. 0.4.0)."""
     try:
         data = json.loads(VERSION_FILE.read_text(encoding="utf-8"))
         version = data.get("version")
@@ -30,7 +30,7 @@ def read_version() -> str:
             return str(version)
     except (OSError, TypeError, json.JSONDecodeError):
         pass
-    return "0.3"
+    return "0.4"
 
 
 def read_serial() -> str:
