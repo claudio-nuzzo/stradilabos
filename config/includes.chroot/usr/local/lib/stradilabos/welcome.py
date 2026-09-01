@@ -192,6 +192,8 @@ class WelcomeWindow(Gtk.ApplicationWindow):
 
         self.stack = Gtk.Stack()
         self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
+        self.stack.set_hhomogeneous(False)
+        self.stack.set_vhomogeneous(False)
         self.stack.add_named(self.build_home_page(), "home")
         self.stack.add_named(self.build_profile_page(), "profiles")
         self.add(self.stack)
@@ -499,8 +501,17 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         save.get_style_context().add_class("suggested-action")
         save.connect("clicked", self.save_profiles)
         footer.pack_end(save, False, False, 0)
-        root.pack_end(footer, False, False, 0)
-        return root
+        footer.set_margin_start(32)
+        footer.set_margin_end(32)
+        footer.set_margin_top(8)
+        footer.set_margin_bottom(18)
+        profile_scroller = Gtk.ScrolledWindow()
+        profile_scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        profile_scroller.add(root)
+        page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        page.pack_start(profile_scroller, True, True, 0)
+        page.pack_end(footer, False, False, 0)
+        return page
 
     def update_profile_summary(self) -> None:
         titles = {pack["id"]: pack["title"] for pack in self.packs}

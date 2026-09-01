@@ -30,10 +30,13 @@ fi
 # Chrome usa il proprio profilo nativo sul PC personale: accesso Google,
 # cookie e sincronizzazione vengono così ereditati da tutte le web app. Su PC
 # condiviso o in Live il profilo resta invece nella directory temporanea.
-for chrome in google-chrome-stable google-chrome; do
-    if ! command -v "$chrome" >/dev/null 2>&1; then
-        continue
-    fi
+chrome=""
+if command -v google-chrome-stable >/dev/null 2>&1; then
+    chrome=google-chrome-stable
+elif command -v google-chrome >/dev/null 2>&1; then
+    chrome=google-chrome
+fi
+if [ -n "$chrome" ]; then
     if [ "$user_data_dir" = "$config_dir/browser" ]; then
         if [ -n "$url" ]; then
             exec "$chrome" --start-maximized "$url"
@@ -51,7 +54,7 @@ for chrome in google-chrome-stable google-chrome; do
         --user-data-dir="$user_data_dir" \
         --profile-directory=Default \
         --start-maximized
-done
+fi
 
 if command -v chromium >/dev/null 2>&1; then
     if [ -n "$url" ]; then

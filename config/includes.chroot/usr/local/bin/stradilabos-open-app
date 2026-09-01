@@ -30,10 +30,13 @@ if [ -e /run/live/medium ] \
     user_data_dir="$runtime_dir/stradilabos-browser-session"
 fi
 
-for chrome in google-chrome-stable google-chrome; do
-    if ! command -v "$chrome" >/dev/null 2>&1; then
-        continue
-    fi
+chrome=""
+if command -v google-chrome-stable >/dev/null 2>&1; then
+    chrome=google-chrome-stable
+elif command -v google-chrome >/dev/null 2>&1; then
+    chrome=google-chrome
+fi
+if [ -n "$chrome" ]; then
     if [ "$temporary_profile" = true ]; then
         exec "$chrome" \
             --user-data-dir="$user_data_dir" \
@@ -46,7 +49,7 @@ for chrome in google-chrome-stable google-chrome; do
         --app="$url" \
         --class="StradilabOS-$app_id" \
         --start-maximized
-done
+fi
 
 if command -v chromium >/dev/null 2>&1; then
     # Ripiego Chromium: usa una directory coerente fra le micro-app. Chrome,
