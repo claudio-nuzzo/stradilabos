@@ -228,8 +228,8 @@ def validate_updates(errors: list[str]) -> None:
     version = ROOT / "updates/version.txt"
     require(version.read_text(encoding="utf-8").strip().isdigit(), "Serie aggiornamenti non numerica.", errors)
     require(
-        version.read_text(encoding="utf-8").strip() == "5",
-        "Lo stato Workspace del Benvenuto deve essere pubblicato nella serie 5.",
+        version.read_text(encoding="utf-8").strip() == "6",
+        "La configurazione guidata di Google Chrome deve essere pubblicata nella serie 6.",
         errors,
     )
     payload = ROOT / "updates/update.sh"
@@ -249,6 +249,7 @@ def validate_updates(errors: list[str]) -> None:
             "xfce4-pulseaudio-plugin",
             "stradilabos-wallpaper-contrast --once",
             "usr/share/backgrounds/stradilabos",
+            "stradilabos-install-chrome",
             "nessuna reinstallazione necessaria",
         ):
             require(fragment in text, f"Payload cumulativo incompleto: {fragment}.", errors)
@@ -784,7 +785,19 @@ def validate_system_branding(errors: list[str]) -> None:
     require("GTK_ARGV" in welcome_text, "Le opzioni del Benvenuto arrivano ancora a GTK.", errors)
     require("AUTOSTART_MODE" in welcome_text, "L'avvio iniziale non è controllabile.", errors)
     require("Gtk.PolicyType.ALWAYS" in welcome_text, "La lista degli indirizzi non mostra lo scorrimento.", errors)
+    require("monitor.get_workarea()" in welcome_text, "Il Benvenuto ignora l'area utile dello schermo.", errors)
+    require("home_scroller" in welcome_text, "Il Benvenuto non scorre sugli schermi piccoli.", errors)
     require("stradilabos-wifi" in welcome_text, "Il Benvenuto apre ancora l'editor Wi-Fi tecnico.", errors)
+    require("2 · Scarica Chrome e accedi" in welcome_text, "Installazione Chrome assente dal Benvenuto.", errors)
+    require("Attiva la sincronizzazione" in welcome_text, "Guida alla sincronizzazione Chrome assente.", errors)
+    require("CHROME_SETUP_DONE.exists()" in welcome_text, "Il Benvenuto conferma Chrome senza verifica utente.", errors)
+    chrome_installer = CHROOT / "usr/local/bin/stradilabos-install-chrome"
+    require(chrome_installer.exists(), "Installatore guidato di Google Chrome assente.", errors)
+    require(os.access(chrome_installer, os.X_OK), "Installatore Google Chrome non eseguibile.", errors)
+    if chrome_installer.exists():
+        chrome_installer_text = chrome_installer.read_text(encoding="utf-8")
+        for fragment in ("amd64", "arm64", "dl.google.com", "dpkg-deb", "apt-get install"):
+            require(fragment in chrome_installer_text, f"Installatore Chrome incompleto: {fragment}.", errors)
     wifi = CHROOT / "usr/local/bin/stradilabos-wifi"
     require(wifi.exists(), "Selettore Wi-Fi StradiLabOS assente.", errors)
     require(os.access(wifi, os.X_OK), "Selettore Wi-Fi StradiLabOS non eseguibile.", errors)
@@ -808,6 +821,11 @@ def validate_system_branding(errors: list[str]) -> None:
         require(
             "org.freedesktop.policykit.exec.path" in policy_text,
             "Il Centro App non usa la propria richiesta di autorizzazione.",
+            errors,
+        )
+        require(
+            "/usr/local/bin/stradilabos-install-chrome" in policy_text,
+            "Installazione Chrome priva di autorizzazione PolicyKit dedicata.",
             errors,
         )
 

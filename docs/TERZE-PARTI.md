@@ -11,13 +11,23 @@ icone e sfondi; non usa loghi, immagini o sfondi proprietari Apple.
 | WhiteSur Icon Theme | tag `2026-08-11`, commit `555a4505920475482f62afd02366441a53669c30` | [vinceliuice/WhiteSur-icon-theme](https://github.com/vinceliuice/WhiteSur-icon-theme) | GPL-3.0 | Variante standard `WhiteSur` in `usr/share/icons/`; eredita le icone originali StradiLab per i launcher del progetto. Copia della licenza inclusa. |
 | Xfce Panel | Xfce 4.20 (Debian 13) | Debian | GPL-2.0+ | Secondo pannello inferiore con barra icone: è l'alternativa leggera a Plank prevista dalla specifica, senza un demone ulteriore. |
 
+## Componente proprietario opzionale
+
+Google Chrome non è incorporato né ridistribuito nella ISO o nel repository.
+Sul sistema installato, il pulsante «Scarica Chrome e accedi» informa l'utente
+del download, richiede consenso e autorizzazione amministrativa, quindi scarica
+il pacchetto stabile AMD64 o ARM64 direttamente da `dl.google.com`. Al primo
+avvio l'utente esamina e accetta i Termini di servizio Google. Il pacchetto
+aggiunge il canale APT ufficiale Google per i successivi aggiornamenti di
+sicurezza. Chromium, proveniente da Debian, resta disponibile come ripiego.
+
 ## Scelte di integrazione
 
 - La sessione usa `WhiteSur-Light` e `WhiteSur`; le varianti chiare/scure del
   tema GTK sono entrambe incluse per accessibilità e future preferenze, mentre
   la variante standard delle icone evita decine di combinazioni non usate.
-- Il pannello superiore navy mantiene icone simboliche chiare e leggibili; la
-  barra inferiore raccoglie Chromium, StradiLab, File, LibreOffice e Guide.
+- La barra inferiore raccoglie il browser predefinito, StradiLab, File,
+  LibreOffice e Guide.
 - I pulsanti di xfwm4 sono a sinistra nell'ordine chiudi/riduci/massimizza,
   con ombre leggere e il compositore disabilitato per i PC meno recenti.
 - Gli sfondi `stradilabos-wallpaper-v3.*` sono originali, generati da

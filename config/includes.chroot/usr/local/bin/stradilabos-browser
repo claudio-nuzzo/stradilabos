@@ -1,5 +1,5 @@
 #!/bin/sh
-# Apre Chromium completo usando lo stesso profilo delle web app StradilabOS.
+# Apre il browser completo usando lo stesso profilo delle web app StradilabOS.
 set -eu
 
 url=${1:-}
@@ -26,6 +26,32 @@ if [ -e /run/live/medium ] \
 else
     user_data_dir="$config_dir/browser"
 fi
+
+# Chrome usa il proprio profilo nativo sul PC personale: accesso Google,
+# cookie e sincronizzazione vengono così ereditati da tutte le web app. Su PC
+# condiviso o in Live il profilo resta invece nella directory temporanea.
+for chrome in google-chrome-stable google-chrome; do
+    if ! command -v "$chrome" >/dev/null 2>&1; then
+        continue
+    fi
+    if [ "$user_data_dir" = "$config_dir/browser" ]; then
+        if [ -n "$url" ]; then
+            exec "$chrome" --start-maximized "$url"
+        fi
+        exec "$chrome" --start-maximized
+    fi
+    if [ -n "$url" ]; then
+        exec "$chrome" \
+            --user-data-dir="$user_data_dir" \
+            --profile-directory=Default \
+            --start-maximized \
+            "$url"
+    fi
+    exec "$chrome" \
+        --user-data-dir="$user_data_dir" \
+        --profile-directory=Default \
+        --start-maximized
+done
 
 if command -v chromium >/dev/null 2>&1; then
     if [ -n "$url" ]; then

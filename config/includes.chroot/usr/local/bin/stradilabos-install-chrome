@@ -1,0 +1,63 @@
+#!/bin/bash
+# Installa Google Chrome stabile dal download ufficiale per Debian/Ubuntu.
+# Viene eseguito esclusivamente tramite PolicyKit, dopo il consenso dell'utente.
+set -euo pipefail
+
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Eseguire come amministratore." >&2
+  exit 1
+fi
+
+if command -v google-chrome-stable >/dev/null 2>&1 \
+    || command -v google-chrome >/dev/null 2>&1; then
+  echo "Google Chrome è già installato."
+  exit 0
+fi
+
+case "$(dpkg --print-architecture)" in
+  amd64) chrome_arch=amd64 ;;
+  arm64) chrome_arch=arm64 ;;
+  *)
+    echo "Google Chrome non è disponibile per questa architettura." >&2
+    exit 2
+    ;;
+esac
+
+chrome_url="https://dl.google.com/linux/direct/google-chrome-stable_current_${chrome_arch}.deb"
+install_tmpdir=$(mktemp -d)
+trap 'rm -rf "$install_tmpdir"' EXIT
+chrome_deb="$install_tmpdir/google-chrome-stable.deb"
+
+echo "Scarico Google Chrome stabile per ${chrome_arch}…"
+if command -v curl >/dev/null 2>&1; then
+  curl --fail --location --silent --show-error \
+    --proto '=https' --tlsv1.2 --connect-timeout 20 \
+    --output "$chrome_deb" "$chrome_url"
+elif command -v wget >/dev/null 2>&1; then
+  wget --https-only --quiet --timeout=20 --output-document="$chrome_deb" "$chrome_url"
+else
+  echo "Manca un programma sicuro per il download (curl o wget)." >&2
+  exit 3
+fi
+
+# Non affidarsi soltanto al nome del file: il pacchetto deve dichiarare nome e
+# architettura attesi prima che apt possa eseguirne gli script di installazione.
+package_name=$(dpkg-deb --field "$chrome_deb" Package 2>/dev/null || true)
+package_arch=$(dpkg-deb --field "$chrome_deb" Architecture 2>/dev/null || true)
+if [ "$package_name" != "google-chrome-stable" ] \
+    || [ "$package_arch" != "$chrome_arch" ]; then
+  echo "Il download di Chrome non contiene il pacchetto ufficiale atteso." >&2
+  exit 4
+fi
+
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -qq
+apt-get install -y "$chrome_deb"
+
+if ! command -v google-chrome-stable >/dev/null 2>&1 \
+    && ! command -v google-chrome >/dev/null 2>&1; then
+  echo "Installazione terminata, ma Google Chrome non è avviabile." >&2
+  exit 5
+fi
+
+echo "Google Chrome è stato installato."
