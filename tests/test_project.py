@@ -378,6 +378,24 @@ class DesktopDefaultsTests(unittest.TestCase):
             fake_id = fake_bin / "id"
             fake_id.write_text("#!/bin/sh\nprintf '0\\n'\n", encoding="utf-8")
             fake_id.chmod(0o755)
+            fake_curl = fake_bin / "curl"
+            fake_curl.write_text(
+                """#!/bin/sh
+destination=
+url=
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        -o) destination=$2; shift 2 ;;
+        --connect-timeout) shift 2 ;;
+        -*) shift ;;
+        *) url=$1; shift ;;
+    esac
+done
+cp "${url#file://}" "$destination"
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
             state = root / "state"
             log = root / "update.log"
             environment = {
