@@ -82,6 +82,11 @@ for path in \
     usr/bin/xfwm4 \
     etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml \
     usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v3.png \
+    usr/share/backgrounds/stradilabos/StradiLabOS-Liceo-Artistico.jpg \
+    usr/share/backgrounds/stradilabos/StradiLabOS-Liceo-Musicale.jpg \
+    usr/share/backgrounds/stradilabos/StradiLabOS-Liuteria.jpg \
+    usr/share/backgrounds/stradilabos/StradiLabOS-Moda.jpg \
+    usr/share/backgrounds/stradilabos/StradiLabOS-Arredo-e-Architettura.jpg \
     usr/local/share/stradilabos/guide/index.html \
     usr/local/share/stradilabos/guide/css/guida.css \
     usr/local/bin/stradilabos-guide \

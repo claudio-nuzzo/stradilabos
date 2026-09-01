@@ -56,7 +56,8 @@ if ! fetch "$BASE_URL/update.sh" "$update_tmpdir/update.sh"; then
 fi
 
 log "eseguo aggiornamento serie $REMOTE (locale: $LOCAL)"
-if bash "$update_tmpdir/update.sh" >>"$LOG" 2>&1; then
+if STRADILABOS_UPDATE_LOCAL_SERIAL="$LOCAL" \
+    bash "$update_tmpdir/update.sh" >>"$LOG" 2>&1; then
   echo "$REMOTE" > "$STATE_FILE"
   log "aggiornamento serie $REMOTE completato"
 else

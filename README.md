@@ -22,6 +22,9 @@ scuola resta necessario il collaudo su hardware reale.
 - tema morbido e accessibile coordinato alla palette StradiLab, senza effetti
   pesanti per i computer meno recenti, esteso a menu di avvio, caricamento,
   schermata di accesso, pannello e sistema installato;
+- cinque sfondi originali StradiLabOS, uno per Liceo Artistico, Liceo
+  Musicale, Liuteria, Moda e Arredo/Architettura, con area scura dedicata alla
+  leggibilità delle icone e peso complessivo contenuto per gli aggiornamenti;
 - Google Chrome installabile con consenso dal Benvenuto, impostato come browser
   predefinito e configurato con un solo profilo Google sincronizzato;
 - micro-app per Classroom, Drive, Gmail, Meet, Calendar, Documenti, Fogli,
