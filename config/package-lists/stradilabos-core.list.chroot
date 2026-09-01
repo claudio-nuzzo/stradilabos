@@ -7,6 +7,8 @@ xserver-xorg-video-all
 xfce4
 xfce4-whiskermenu-plugin
 xfce4-power-manager
+xfce4-power-manager-plugins
+xfce4-pulseaudio-plugin
 xfce4-notifyd
 thunar-volman
 light-locker

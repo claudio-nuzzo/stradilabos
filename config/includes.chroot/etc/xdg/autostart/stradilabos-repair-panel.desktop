@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Ripristino pannelli StradiLabOS
+Comment=Verifica la barra superiore e la barra applicazioni inferiore
+Exec=stradilabos-repair-panel
+OnlyShowIn=XFCE;
+NoDisplay=true
+Terminal=false
+StartupNotify=false

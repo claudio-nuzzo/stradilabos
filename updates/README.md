@@ -21,13 +21,21 @@ Per i PC gia' installati con la 0.2 (una tantum, da terminale):
 
   sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/claudio-nuzzo/stradilabos/main/updates/install-updater.sh)"
 
-La serie 2 è cumulativa: aggiorna un PC 0.2/0.3 già installato a componenti
-grafici, guide, policy Chromium e configurazione degli aggiornamenti 0.3. Non
-cancella documenti o profili utente e non richiede una nuova ISO; scarica dal
-repository solo i file di sistema gestiti da StradilabOS.
+La serie 3 è cumulativa: aggiorna un PC 0.2/0.3 già installato a componenti
+grafici, guide, policy Chromium e configurazione degli aggiornamenti 0.3. La
+serie corregge anche tema GRUB, messaggi ACPI a console, pannello superiore,
+barra applicazioni inferiore e selezione guidata della rete Wi-Fi. Non cancella
+documenti o profili utente e non richiede una nuova ISO; scarica dal repository
+solo i file di sistema gestiti da StradilabOS. La riparazione delle due barre
+viene applicata automaticamente al successivo accesso a Xfce.
+
+Dopo una nuova connessione Wi-Fi, il selettore StradiLabOS propone di scaricare
+e installare subito gli aggiornamenti sul sistema installato. Si può anche usare
+in qualunque momento il pulsante «Controlla aggiornamenti» nel Benvenuto; se si
+rimanda, il timer di sistema continua a eseguire i controlli periodici.
 
 File del canale:
-- update.sh            payload cumulativo (serie corrente: 2)
+- update.sh            payload cumulativo (serie corrente: 3)
 - version.txt          numero di serie corrente
 - install-updater.sh   installazione una tantum su PC 0.2
 - stradilabos-update, stradilabos-update.service, stradilabos-update.timer

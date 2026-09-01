@@ -1,0 +1,109 @@
+#!/bin/sh
+# Ripara una sola volta il layout pannelli 0.3 scritto con gli ID nell'ordine
+# non accettato da xfce4-panel 4.20. Conserva sempre una copia recuperabile.
+set -u
+
+config_root=${XDG_CONFIG_HOME:-"$HOME/.config"}
+panel_config="$config_root/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"
+panel_default=${STRADILABOS_PANEL_DEFAULT:-/etc/xdg/xfce4/panel/default.xml}
+marker_dir="$config_root/stradilabos"
+marker="$marker_dir/panel-layout-v3"
+
+[ -e "$marker" ] && exit 0
+[ -f "$panel_default" ] || exit 0
+
+mkdir -p "$marker_dir"
+
+# Se l'utente non ha ancora una configurazione personale, Xfce caricherà il
+# default corretto da /etc/xdg: non serve interrompere la sessione.
+if [ ! -f "$panel_config" ]; then
+    : > "$marker"
+    exit 0
+fi
+
+panel_needs_repair() {
+    python3 - "$panel_config" <<'PY'
+import sys
+import xml.etree.ElementTree as ET
+
+try:
+    root = ET.parse(sys.argv[1]).getroot()
+    panels = root.find("./property[@name='panels']")
+    plugins = root.find("./property[@name='plugins']")
+    if panels is None or plugins is None:
+        raise ValueError("sezioni pannello assenti")
+
+    children = list(panels)
+    panel_ids = [
+        child.get("value")
+        for child in children
+        if child.tag == "value" and child.get("type") == "int"
+    ]
+    value_positions = [index for index, child in enumerate(children) if child.tag == "value"]
+    panel_positions = [
+        index
+        for index, child in enumerate(children)
+        if child.tag == "property" and child.get("name", "").startswith("panel-")
+    ]
+    ordered = bool(value_positions and panel_positions) and max(value_positions) < min(panel_positions)
+
+    definitions = {
+        child.get("name"): child.get("value")
+        for child in plugins
+        if child.tag == "property"
+    }
+    referenced = []
+    for panel_id in panel_ids:
+        panel = panels.find(f"./property[@name='panel-{panel_id}']")
+        if panel is None:
+            raise ValueError("pannello referenziato ma non definito")
+        ids = panel.find("./property[@name='plugin-ids']")
+        if ids is None:
+            raise ValueError("lista plugin assente")
+        referenced.extend(value.get("value") for value in ids.findall("./value"))
+
+    complete = all(definitions.get(f"plugin-{plugin_id}") for plugin_id in referenced)
+    valid = panel_ids == ["1", "2"] and ordered and complete
+except (ET.ParseError, OSError, ValueError):
+    valid = False
+
+# Zero significa "serve la riparazione" per il chiamante shell.
+raise SystemExit(1 if valid else 0)
+PY
+}
+
+if ! panel_needs_repair; then
+    : > "$marker"
+    exit 0
+fi
+
+backup="$panel_config.stradilabos-backup"
+if [ ! -e "$backup" ]; then
+    cp -p "$panel_config" "$backup" || exit 1
+fi
+
+# Ferma soltanto i componenti della sessione dell'utente corrente, sostituisce
+# il file non valido e riavvia le due barre. Il backup resta accanto al file.
+xfce4-panel --quit >/dev/null 2>&1 || true
+xfconf-query -c xfce4-panel -p / -r -R >/dev/null 2>&1 || true
+xfconfd_command=${STRADILABOS_XFCONFD:-}
+if [ -z "$xfconfd_command" ]; then
+    if command -v xfconfd >/dev/null 2>&1; then
+        xfconfd_command=$(command -v xfconfd)
+    else
+        for candidate in /usr/lib/*/xfce4/xfconf/xfconfd /usr/lib/xfce4/xfconf/xfconfd; do
+            if [ -x "$candidate" ]; then
+                xfconfd_command=$candidate
+                break
+            fi
+        done
+    fi
+fi
+if [ -n "$xfconfd_command" ]; then
+    "$xfconfd_command" --terminate >/dev/null 2>&1 || true
+fi
+sleep "${STRADILABOS_PANEL_RESTART_DELAY:-1}"
+mkdir -p "$(dirname "$panel_config")"
+install -m 0644 "$panel_default" "$panel_config" || exit 1
+xfce4-panel --disable-wm-check >/dev/null 2>&1 &
+: > "$marker"

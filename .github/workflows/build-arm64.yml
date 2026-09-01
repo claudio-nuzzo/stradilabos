@@ -29,8 +29,13 @@ jobs:
               sed -i "s/^Components: main$/Components: main contrib non-free non-free-firmware/" /etc/apt/sources.list.d/debian.sources
               apt-get update
               apt-get install --yes --no-install-recommends \
-                xfwm4 xvfb xfconf dbus-x11 x11-utils x11-apps greybird-gtk-theme
-              sh scripts/test_window_manager_xvfb.sh
+                python3 python3-gi gir1.2-gtk-3.0 \
+                xfwm4 xfce4-panel xfce4-whiskermenu-plugin xfce4-notifyd \
+                xfce4-power-manager xfce4-pulseaudio-plugin \
+                xvfb xfconf dbus-x11 x11-utils x11-apps greybird-gtk-theme
+              timeout 90s sh scripts/test_window_manager_xvfb.sh
+              timeout 60s sh scripts/test_panel_xvfb.sh
+              timeout 60s sh scripts/test_wifi_xvfb.sh
             '
 
       - name: Crea la ISO Debian ARM64 in ambiente isolato

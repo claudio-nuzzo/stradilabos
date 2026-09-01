@@ -20,6 +20,8 @@ cmp -s config/branding/stradilabos-boot-800x600.png "$grub_dir/splash.png" || \
     fail "lo sfondo GRUB non è quello StradilabOS"
 grep -q "Prova StradilabOS" "$grub_dir/grub.cfg" || \
     fail "il menu Live conserva il nome Debian"
+grep -q "quiet splash loglevel=3" "$grub_dir/grub.cfg" || \
+    fail "il menu Live non filtra i messaggi firmware non critici"
 grep -q "StradilabOS 0.3" "$binary_dir/.disk/info" || \
     fail "il supporto non si identifica come StradilabOS"
 
@@ -68,7 +70,12 @@ for path in \
     usr/share/icons/WhiteSur/index.theme \
     usr/local/bin/stradilabos-window-manager-guard \
     usr/local/bin/stradilabos-window-diagnostics \
+    usr/local/bin/stradilabos-repair-panel \
+    usr/local/bin/stradilabos-wifi \
+    etc/default/grub.d/60-stradilabos.cfg \
+    usr/share/grub/themes/stradilabos/theme.txt \
     etc/xdg/autostart/stradilabos-window-manager.desktop \
+    etc/xdg/autostart/stradilabos-repair-panel.desktop \
     usr/bin/xprop \
     usr/bin/notify-send \
     usr/bin/xfwm4 \
@@ -82,6 +89,20 @@ for path in \
     unsquashfs -cat "$squashfs" "$path" >/dev/null 2>&1 || \
         fail "file interno assente: $path"
 done
+
+installed_grub=$(unsquashfs -cat \
+    "$squashfs" etc/default/grub.d/60-stradilabos.cfg \
+    2>/dev/null) || fail "configurazione GRUB installata assente"
+printf '%s\n' "$installed_grub" | grep -q \
+    'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3"' || \
+    fail "il sistema installato non filtra i messaggi firmware non critici"
+
+installed_grub_theme=$(unsquashfs -cat \
+    "$squashfs" usr/share/grub/themes/stradilabos/theme.txt \
+    2>/dev/null) || fail "tema GRUB installato assente"
+if printf '%s\n' "$installed_grub_theme" | grep -q 'terminal-box: "0"'; then
+    fail "il tema GRUB contiene il pattern pixmap non valido"
+fi
 
 greeter_theme=$(unsquashfs -cat \
     "$squashfs" etc/lightdm/lightdm-gtk-greeter.conf.d/60-stradilabos.conf \
