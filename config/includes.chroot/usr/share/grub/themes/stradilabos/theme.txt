@@ -1,6 +1,6 @@
 desktop-image: "/usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v3.png"
 desktop-color: "#f6f4ef"
-title-text: "StradilabOS"
+title-text: "StradiLabOS"
 title-color: "#16130f"
 title-font: "Unifont Regular 24"
 message-color: "#645e55"

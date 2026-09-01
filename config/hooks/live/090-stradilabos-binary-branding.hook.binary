@@ -17,7 +17,7 @@ if [ -d "$grub_dir" ]; then
     for menu in "$grub_dir/grub.cfg" "$grub_dir/loopback.cfg"; do
         [ -f "$menu" ] || continue
         sed -i \
-            -e 's/Live system (/Prova StradilabOS (/g' \
+            -e 's/Live system (/Prova StradiLabOS (/g' \
             -e 's/fail-safe mode/modalità compatibilità/g' \
             -e "s/submenu 'Utilities\.\.\.'/submenu 'Strumenti…'/g" \
             -e 's/UEFI Firmware Settings/Impostazioni firmware UEFI/g' \
@@ -27,5 +27,5 @@ if [ -d "$grub_dir" ]; then
 fi
 
 if [ -d binary/.disk ]; then
-    printf '%s\n' "StradilabOS 0.3 (in sviluppo) - Debian 13 base" > binary/.disk/info
+    printf '%s\n' "StradiLabOS 0.3 (in sviluppo) - Debian 13 base" > binary/.disk/info
 fi

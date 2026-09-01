@@ -1,0 +1,61 @@
+#!/bin/sh
+# Apre Chromium completo usando lo stesso profilo delle web app StradilabOS.
+set -eu
+
+url=${1:-}
+if [ -n "$url" ]; then
+    case "$url" in
+        https://*) ;;
+        *)
+            printf '%s\n' "StradiLabOS apre soltanto indirizzi HTTPS." >&2
+            exit 2
+            ;;
+    esac
+fi
+
+config_dir=${XDG_CONFIG_HOME:-"$HOME/.config"}/stradilabos
+profile_state=$config_dir/profiles.json
+runtime_dir=${XDG_RUNTIME_DIR:-/tmp}
+
+# Sul PC personale il profilo è persistente. Sul PC condiviso e in Live resta
+# dentro /run/user e viene eliminato alla chiusura della sessione.
+if [ -e /run/live/medium ] \
+    || grep -qw 'boot=live' /proc/cmdline 2>/dev/null \
+    || grep -q '"device_mode"[[:space:]]*:[[:space:]]*"shared"' "$profile_state" 2>/dev/null; then
+    user_data_dir="$runtime_dir/stradilabos-browser-session"
+else
+    user_data_dir="$config_dir/browser"
+fi
+
+if command -v chromium >/dev/null 2>&1; then
+    if [ -n "$url" ]; then
+        exec chromium \
+            --user-data-dir="$user_data_dir" \
+            --profile-directory=Default \
+            --password-store=basic \
+            --start-maximized \
+            --no-first-run \
+            --disable-session-crashed-bubble \
+            "$url"
+    fi
+    exec chromium \
+        --user-data-dir="$user_data_dir" \
+        --profile-directory=Default \
+        --password-store=basic \
+        --start-maximized \
+        --no-first-run \
+        --disable-session-crashed-bubble
+fi
+
+if command -v firefox-esr >/dev/null 2>&1; then
+    if [ -n "$url" ]; then
+        exec firefox-esr --new-window "$url"
+    fi
+    exec firefox-esr
+fi
+
+if [ -n "$url" ]; then
+    exec xdg-open "$url"
+fi
+printf '%s\n' "Nessun browser disponibile." >&2
+exit 127

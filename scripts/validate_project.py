@@ -228,8 +228,8 @@ def validate_updates(errors: list[str]) -> None:
     version = ROOT / "updates/version.txt"
     require(version.read_text(encoding="utf-8").strip().isdigit(), "Serie aggiornamenti non numerica.", errors)
     require(
-        version.read_text(encoding="utf-8").strip() == "4",
-        "La migrazione dei profili pannello deve essere pubblicata nella serie 4.",
+        version.read_text(encoding="utf-8").strip() == "5",
+        "Lo stato Workspace del Benvenuto deve essere pubblicato nella serie 5.",
         errors,
     )
     payload = ROOT / "updates/update.sh"
@@ -247,9 +247,24 @@ def validate_updates(errors: list[str]) -> None:
             "update-grub",
             "xfce4-power-manager-plugins",
             "xfce4-pulseaudio-plugin",
+            "stradilabos-wallpaper-contrast --once",
+            "usr/share/backgrounds/stradilabos",
             "nessuna reinstallazione necessaria",
         ):
             require(fragment in text, f"Payload cumulativo incompleto: {fragment}.", errors)
+    update_ui = CHROOT / "usr/local/bin/stradilabos-update-ui"
+    update_desktop = CHROOT / "usr/local/share/applications/stradilabos-update.desktop"
+    require(update_ui.exists(), "Interfaccia grafica degli aggiornamenti assente.", errors)
+    require(os.access(update_ui, os.X_OK), "Interfaccia aggiornamenti non eseguibile.", errors)
+    require(update_desktop.exists(), "Voce Aggiornamenti nel menu principale assente.", errors)
+    if update_desktop.exists():
+        desktop_text = update_desktop.read_text(encoding="utf-8")
+        require(
+            "Name=Aggiornamenti StradiLabOS" in desktop_text
+            and "Exec=stradilabos-update-ui" in desktop_text,
+            "Voce Aggiornamenti nel menu non valida.",
+            errors,
+        )
 
 
 def validate_code(errors: list[str]) -> None:
@@ -262,6 +277,11 @@ def validate_code(errors: list[str]) -> None:
         path for path in (CHROOT / "usr/local/bin").glob("*") if path.is_file()
     ]
     for path in local_commands:
+        require(
+            os.access(path, os.X_OK),
+            f"Comando installato senza permesso di esecuzione: {path}.",
+            errors,
+        )
         try:
             with path.open(encoding="utf-8") as command_file:
                 first_line = command_file.readline()
@@ -335,6 +355,16 @@ def validate_branding(errors: list[str]) -> None:
             )
     wallpaper = CHROOT / "usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v3.png"
     require(wallpaper.exists(), "Sfondo StradilabOS assente.", errors)
+    for visible_name, target in (
+        ("StradiLabOS-Crema.png", "stradilabos-wallpaper-v2.png"),
+        ("StradiLabOS-Onde.png", "stradilabos-wallpaper-v3.png"),
+    ):
+        alias = wallpaper.parent / visible_name
+        require(
+            alias.is_symlink() and os.readlink(alias) == target,
+            f"Nome visibile dello sfondo non valido: {visible_name}.",
+            errors,
+        )
     theme = CHROOT / "usr/share/icons/StradiLab"
     require((theme / "index.theme").exists(), "Tema icone StradilabOS assente.", errors)
     require(
@@ -478,7 +508,7 @@ def validate_system_branding(errors: list[str]) -> None:
     require(os_release.exists(), "Identità StradilabOS in os-release assente.", errors)
     if os_release.exists():
         text = os_release.read_text(encoding="utf-8")
-        require('NAME="StradilabOS"' in text, "Nome OS non personalizzato.", errors)
+        require('NAME="StradiLabOS"' in text, "Nome OS non personalizzato.", errors)
         require('ID=stradilabos' in text, "ID OS non personalizzato.", errors)
         require('ID_LIKE=debian' in text, "Compatibilità Debian non dichiarata.", errors)
 
@@ -492,8 +522,8 @@ def validate_system_branding(errors: list[str]) -> None:
     require(binary_hook.exists(), "Hook di branding della ISO assente.", errors)
     if binary_hook.exists():
         text = binary_hook.read_text(encoding="utf-8")
-        require("Prova StradilabOS" in text, "Menu Live non rinominato.", errors)
-        require("StradilabOS 0.3" in text, "Metadati ISO non personalizzati.", errors)
+        require("Prova StradiLabOS" in text, "Menu Live non rinominato.", errors)
+        require("StradiLabOS 0.3" in text, "Metadati ISO non personalizzati.", errors)
     live_theme = ROOT / "config/branding/grub-live-theme.txt"
     require(live_theme.exists(), "Tema del menu Live assente.", errors)
     if live_theme.exists():
@@ -573,11 +603,7 @@ def validate_system_branding(errors: list[str]) -> None:
             for child in children
             if child.tag == "value" and child.get("type") == "int"
         ]
-        require(
-            panel_ids == ["1", "2"],
-            f"Servono pannello superiore e barra applicazioni inferiore: {panel}.",
-            errors,
-        )
+        require(panel_ids == ["1"], f"Serve una sola barra applicazioni: {panel}.", errors)
         value_positions = [index for index, child in enumerate(children) if child.tag == "value"]
         definition_positions = [
             index
@@ -595,6 +621,22 @@ def validate_system_branding(errors: list[str]) -> None:
             for child in plugins
             if child.tag == "property"
         }
+        required_plugins = {
+            "whiskermenu",
+            "tasklist",
+            "separator",
+            "systray",
+            "notification-plugin",
+            "power-manager-plugin",
+            "pulseaudio",
+            "clock",
+            "actions",
+        }
+        require(
+            required_plugins.issubset(set(plugin_definitions.values())),
+            f"Controlli nativi della barra incompleti: {panel}.",
+            errors,
+        )
         for panel_id in panel_ids:
             definition = panels.find(f"./property[@name='panel-{panel_id}']")
             require(definition is not None, f"Definizione panel-{panel_id} assente: {panel}.", errors)
@@ -604,6 +646,12 @@ def validate_system_branding(errors: list[str]) -> None:
             require(plugin_ids is not None, f"Plugin di panel-{panel_id} assenti: {panel}.", errors)
             if plugin_ids is None:
                 continue
+            position = definition.find("./property[@name='position']")
+            require(
+                position is not None and position.get("value", "").startswith("p=12;"),
+                f"La barra non è ancorata in basso: {panel}.",
+                errors,
+            )
             for value in plugin_ids.findall("./value"):
                 plugin_id = value.get("value")
                 require(
@@ -611,6 +659,20 @@ def validate_system_branding(errors: list[str]) -> None:
                     f"Plugin {plugin_id} senza nome in panel-{panel_id}: {panel}.",
                     errors,
                 )
+        actions = plugins.find("./property[@name='plugin-13']")
+        action_items = (
+            {value.get("value") for value in actions.findall("./property[@name='items']/value")}
+            if actions is not None
+            else set()
+        )
+        for action in (
+            "+lock-screen",
+            "+switch-user",
+            "+restart",
+            "+shutdown",
+            "+logout-dialog",
+        ):
+            require(action in action_items, f"Azione di sessione assente ({action}): {panel}.", errors)
 
     panel = panel_paths[0]
     if panel.exists():
@@ -642,12 +704,22 @@ def validate_system_branding(errors: list[str]) -> None:
             errors,
         )
 
+    contrast = CHROOT / "usr/local/bin/stradilabos-wallpaper-contrast"
+    contrast_autostart = CHROOT / "etc/xdg/autostart/stradilabos-wallpaper-contrast.desktop"
+    require(contrast.exists(), "Contrasto automatico dello sfondo assente.", errors)
+    require(os.access(contrast, os.X_OK), "Contrasto automatico non eseguibile.", errors)
+    require(contrast_autostart.exists(), "Avvio del contrasto automatico assente.", errors)
+    if contrast.exists():
+        contrast_text = contrast.read_text(encoding="utf-8")
+        for fragment in ("relative_luminance", "light-wallpaper", "dark-wallpaper", "XfdesktopIconView.view"):
+            require(fragment in contrast_text, f"Contrasto automatico incompleto: {fragment}.", errors)
+
     live_config = CHROOT / "etc/live/config.conf.d/stradilabos.conf"
     require(live_config.exists(), "Nome utente Live personalizzato assente.", errors)
     if live_config.exists():
         text = live_config.read_text(encoding="utf-8")
         require(
-            'LIVE_USER_FULLNAME="StradilabOS Live"' in text,
+            'LIVE_USER_FULLNAME="StradiLabOS Live"' in text,
             "Nome completo dell'utente Live non personalizzato.",
             errors,
         )
@@ -656,7 +728,7 @@ def validate_system_branding(errors: list[str]) -> None:
     require(grub_config.exists(), "Configurazione GRUB installata assente.", errors)
     if grub_config.exists():
         text = grub_config.read_text(encoding="utf-8")
-        require('GRUB_DISTRIBUTOR="StradilabOS"' in text, "GRUB conserva il nome Debian.", errors)
+        require('GRUB_DISTRIBUTOR="StradiLabOS"' in text, "GRUB conserva il nome Debian.", errors)
         require(
             'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3"' in text,
             "Avvio grafico o filtro dei messaggi firmware non configurato in GRUB.",
@@ -907,7 +979,7 @@ def main() -> int:
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
-    print("Controlli StradilabOS superati.")
+    print("Controlli StradiLabOS superati.")
     return 0
 
 

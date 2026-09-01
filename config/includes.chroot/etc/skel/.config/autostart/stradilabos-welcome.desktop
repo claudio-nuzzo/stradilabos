@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=Benvenuto in StradilabOS
+Name=Benvenuto in StradiLabOS
 Exec=sh -c "sleep 4; exec stradilabos-welcome --autostart"
 TryExec=stradilabos-welcome
 Icon=stradilabos

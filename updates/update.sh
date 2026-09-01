@@ -1,5 +1,5 @@
 #!/bin/bash
-# StradilabOS — aggiornamento cumulativo, serie 4 (2026-09-01)
+# StradilabOS — aggiornamento cumulativo, serie 5 (2026-09-01)
 #
 # È pensato anche per PC già installati con la 0.2: scarica soltanto il
 # materiale pubblicato dal repository ufficiale, aggiorna i file posseduti da
@@ -72,6 +72,12 @@ sync_0_3_interface() {
 
   # File applicativi e guide: tutti sotto /usr/local sono di StradilabOS.
   copy_tree "$source_root/config/includes.chroot/usr/local" /usr/local || return 1
+  # I launcher desktop eseguono direttamente questi comandi. Rendere espliciti
+  # i permessi evita che un bit perso nell'archivio provochi “permesso negato”.
+  for file in /usr/local/bin/stradilabos-*; do
+    [ -f "$file" ] || continue
+    chmod 0755 "$file" || return 1
+  done
   if [ -f "$update_tmpdir/stradilabos-update.new" ]; then
     install -m 0755 "$update_tmpdir/stradilabos-update.new" /usr/local/bin/stradilabos-update.nuovo || return 1
     mv -f /usr/local/bin/stradilabos-update.nuovo /usr/local/bin/stradilabos-update || return 1
@@ -79,9 +85,22 @@ sync_0_3_interface() {
   copy_tree "$source_root/config/includes.chroot/usr/share/themes/WhiteSur-Light" /usr/share/themes/WhiteSur-Light || return 1
   copy_tree "$source_root/config/includes.chroot/usr/share/themes/WhiteSur-Dark" /usr/share/themes/WhiteSur-Dark || return 1
   copy_tree "$source_root/config/includes.chroot/usr/share/icons/WhiteSur" /usr/share/icons/WhiteSur || return 1
+  copy_tree "$source_root/config/includes.chroot/usr/share/icons/StradiLab" /usr/share/icons/StradiLab || return 1
+  copy_tree "$source_root/config/includes.chroot/usr/share/backgrounds/stradilabos" /usr/share/backgrounds/stradilabos || return 1
   copy_tree "$source_root/config/includes.chroot/usr/share/grub/themes/stradilabos" /usr/share/grub/themes/stradilabos || return 1
+  copy_tree "$source_root/config/includes.chroot/usr/share/plymouth/themes/stradilabos" /usr/share/plymouth/themes/stradilabos || return 1
   copy_tree "$source_root/config/includes.chroot/etc/xdg" /etc/xdg || return 1
   copy_tree "$source_root/config/includes.chroot/etc/skel/.config" /etc/skel/.config || return 1
+
+  for file in usr/lib/os-release etc/lsb-release etc/issue etc/issue.net; do
+    source_file="$source_root/config/includes.chroot/$file"
+    if [ -f "$source_file" ]; then
+      install -D -m 0644 "$source_file" "/$file" || return 1
+    fi
+  done
+  if command -v update-initramfs >/dev/null 2>&1; then
+    update-initramfs -u || return 1
+  fi
 
   source_file="$source_root/config/includes.chroot/etc/default/grub.d/60-stradilabos.cfg"
   if [ -f "$source_file" ]; then
@@ -129,7 +148,7 @@ repair_existing_panel_profiles() {
   # configurazione personale: sui PC installati il dialogo “(null)” può quindi
   # comparire prima della riparazione. Migriamo qui i profili esistenti, usando
   # la sessione D-Bus dell'utente quando è attiva e conservando il backup.
-  local user uid home runtime_dir bus_address
+  local user uid home runtime_dir bus_address launcher_source launcher_target
   if ! command -v runuser >/dev/null 2>&1; then
     echo "ERRORE: runuser non disponibile; impossibile migrare il pannello utente." >&2
     return 1
@@ -146,20 +165,38 @@ repair_existing_panel_profiles() {
       /home/*) ;;
       *) continue ;;
     esac
-    [ -f "$home/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml" ] || continue
-
     runtime_dir="/run/user/$uid"
     bus_address="unix:path=$runtime_dir/bus"
-    runuser -u "$user" -- env \
-      HOME="$home" USER="$user" LOGNAME="$user" \
-      XDG_CONFIG_HOME="$home/.config" \
-      XDG_RUNTIME_DIR="$runtime_dir" \
-      DBUS_SESSION_BUS_ADDRESS="$bus_address" \
-      DISPLAY="${DISPLAY:-:0}" \
-      XAUTHORITY="$home/.Xauthority" \
-      STRADILABOS_PANEL_DEFAULT=/etc/xdg/xfce4/panel/default.xml \
-      STRADILABOS_PANEL_RESTART_DELAY=0 \
-      /usr/local/bin/stradilabos-repair-panel --force || return 1
+    if [ -f "$home/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml" ]; then
+      launcher_source=/etc/skel/.config/xfce4/panel/launcher-21/chromium.desktop
+      launcher_target="$home/.config/xfce4/panel/launcher-21/chromium.desktop"
+      if [ -f "$launcher_source" ]; then
+        runuser -u "$user" -- install -D -m 0644 \
+          "$launcher_source" "$launcher_target" || return 1
+      fi
+
+      runuser -u "$user" -- env \
+        HOME="$home" USER="$user" LOGNAME="$user" \
+        XDG_CONFIG_HOME="$home/.config" \
+        XDG_RUNTIME_DIR="$runtime_dir" \
+        DBUS_SESSION_BUS_ADDRESS="$bus_address" \
+        DISPLAY="${DISPLAY:-:0}" \
+        XAUTHORITY="$home/.Xauthority" \
+        STRADILABOS_PANEL_DEFAULT=/etc/xdg/xfce4/panel/default.xml \
+        STRADILABOS_PANEL_RESTART_DELAY=0 \
+        /usr/local/bin/stradilabos-repair-panel --force || return 1
+    fi
+
+    if [ -x /usr/local/bin/stradilabos-wallpaper-contrast ]; then
+      runuser -u "$user" -- env \
+        HOME="$home" USER="$user" LOGNAME="$user" \
+        XDG_CONFIG_HOME="$home/.config" \
+        XDG_RUNTIME_DIR="$runtime_dir" \
+        DBUS_SESSION_BUS_ADDRESS="$bus_address" \
+        DISPLAY="${DISPLAY:-:0}" \
+        XAUTHORITY="$home/.Xauthority" \
+        /usr/local/bin/stradilabos-wallpaper-contrast --once || return 1
+    fi
   done < /etc/passwd
 }
 
@@ -180,9 +217,9 @@ install_security_updates() {
   fi
 }
 
-echo "— Serie 4: riparazione profili pannello StradilabOS 0.3 —"
+echo "— Serie 5: desktop, accesso Google e aggiornamenti StradiLabOS 0.3 —"
 install_cookie_policy || exit 1
 sync_0_3_interface || exit 1
 repair_existing_panel_profiles || exit 1
 install_security_updates || exit 1
-echo "Pannelli, rete e avvio corretti: nessuna reinstallazione necessaria."
+echo "Barra, menu, contrasto, Guide, browser e aggiornamenti corretti: nessuna reinstallazione necessaria."

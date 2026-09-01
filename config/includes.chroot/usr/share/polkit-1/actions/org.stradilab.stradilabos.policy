@@ -6,7 +6,7 @@
   <vendor>StradiLab</vendor>
   <vendor_url>https://stradilab.org/stradilabos/</vendor_url>
   <action id="org.stradilab.stradilabos.install-packs">
-    <description>Installare applicazioni didattiche in StradilabOS</description>
+    <description>Installare applicazioni didattiche in StradiLabOS</description>
     <message>Inserisci la password per installare le applicazioni selezionate nel Centro App</message>
     <icon_name>stradilabos-app-center</icon_name>
     <defaults>
@@ -17,8 +17,8 @@
     <annotate key="org.freedesktop.policykit.exec.path">/usr/local/lib/stradilabos/install_pack.py</annotate>
   </action>
   <action id="org.stradilab.stradilabos.update">
-    <description>Verificare gli aggiornamenti di StradilabOS</description>
-    <message>Inserisci la password per verificare subito gli aggiornamenti di StradilabOS</message>
+    <description>Verificare gli aggiornamenti di StradiLabOS</description>
+    <message>Inserisci la password per verificare subito gli aggiornamenti di StradiLabOS</message>
     <icon_name>stradilabos</icon_name>
     <defaults>
       <allow_any>no</allow_any>

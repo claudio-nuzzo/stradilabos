@@ -7,13 +7,13 @@ windowSize: 900px,620px
 windowPlacement: center
 
 strings:
-    productName:         StradilabOS
-    shortProductName:    StradilabOS
+    productName:         StradiLabOS
+    shortProductName:    StradiLabOS
     version:             "0.3 · in sviluppo"
     shortVersion:        0.3
-    versionedName:       "StradilabOS 0.3 · in sviluppo"
-    shortVersionedName:  StradilabOS 0.3
-    bootloaderEntryName: StradilabOS
+    versionedName:       "StradiLabOS 0.3 · in sviluppo"
+    shortVersionedName:  StradiLabOS 0.3
+    bootloaderEntryName: StradiLabOS
     productUrl:          https://stradilab.org
     supportUrl:          https://www.istitutostradivari.edu.it
     knownIssuesUrl:      https://www.istitutostradivari.edu.it

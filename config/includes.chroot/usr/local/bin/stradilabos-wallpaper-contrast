@@ -1,0 +1,216 @@
+#!/usr/bin/python3
+"""Mantiene leggibili le etichette del desktop sullo sfondo scelto."""
+
+from __future__ import annotations
+
+import fcntl
+import os
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+import gi
+
+gi.require_version("GdkPixbuf", "2.0")
+from gi.repository import GdkPixbuf, GLib  # noqa: E402
+
+
+IMPORT_LINE = '@import url("stradilabos-desktop-contrast.css");'
+DEFAULT_WALLPAPER = Path(
+    "/usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v3.png"
+)
+
+
+def srgb_channel(value: int) -> float:
+    channel = value / 255.0
+    return channel / 12.92 if channel <= 0.04045 else ((channel + 0.055) / 1.055) ** 2.4
+
+
+def relative_luminance(red: int, green: int, blue: int) -> float:
+    return 0.2126 * srgb_channel(red) + 0.7152 * srgb_channel(green) + 0.0722 * srgb_channel(blue)
+
+
+def contrast_mode(luminance: float) -> str:
+    return "light-wallpaper" if luminance >= 0.46 else "dark-wallpaper"
+
+
+def css_for(mode: str) -> str:
+    if mode == "light-wallpaper":
+        foreground = "#16130f"
+        shadow = "rgba(255, 255, 255, 0.98)"
+        selected = "rgba(155, 35, 53, 0.88)"
+        selected_text = "#f6f4ef"
+    else:
+        foreground = "#f6f4ef"
+        shadow = "rgba(0, 0, 0, 0.95)"
+        selected = "rgba(246, 244, 239, 0.88)"
+        selected_text = "#16130f"
+    return f"""/* Generato da StradiLabOS: contrasto automatico del desktop. */
+XfdesktopIconView.view {{
+  color: {foreground};
+  background-color: transparent;
+  text-shadow: 0 1px 2px {shadow}, 1px 0 1px {shadow};
+}}
+
+XfdesktopIconView.view:active,
+XfdesktopIconView.view:selected {{
+  color: {selected_text};
+  background-color: {selected};
+  border-radius: 6px;
+}}
+"""
+
+
+def image_luminance(path: Path) -> float:
+    pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(str(path), 96, 54, True)
+    pixels = pixbuf.get_pixels()
+    channels = pixbuf.get_n_channels()
+    rowstride = pixbuf.get_rowstride()
+    width = pixbuf.get_width()
+    height = pixbuf.get_height()
+    # Xfce colloca normalmente le icone a sinistra: diamo priorità proprio
+    # alla zona sulla quale vengono disegnate etichette e selezioni.
+    sample_width = max(1, int(width * 0.45))
+    total = 0.0
+    samples = 0
+    for y in range(0, height, 2):
+        for x in range(0, sample_width, 2):
+            offset = y * rowstride + x * channels
+            total += relative_luminance(
+                pixels[offset], pixels[offset + 1], pixels[offset + 2]
+            )
+            samples += 1
+    return total / samples if samples else 0.0
+
+
+def query(args: list[str]) -> str:
+    try:
+        completed = subprocess.run(
+            args,
+            check=False,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            timeout=8,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+    return completed.stdout.strip() if completed.returncode == 0 else ""
+
+
+def wallpaper_path(property_hint: str | None = None) -> Path:
+    properties: list[str] = []
+    if property_hint:
+        properties.append(property_hint)
+    listed = query(["xfconf-query", "-c", "xfce4-desktop", "-l"])
+    properties.extend(
+        line
+        for line in listed.splitlines()
+        if line.endswith("/last-image") or line.endswith("/image-path")
+    )
+    seen: set[str] = set()
+    for property_name in properties:
+        if property_name in seen:
+            continue
+        seen.add(property_name)
+        value = query(
+            ["xfconf-query", "-c", "xfce4-desktop", "-p", property_name]
+        ).splitlines()
+        if value:
+            candidate = Path(value[-1]).expanduser()
+            if candidate.is_file():
+                return candidate
+    return DEFAULT_WALLPAPER
+
+
+def ensure_import(gtk_css: Path) -> bool:
+    try:
+        original = gtk_css.read_text(encoding="utf-8") if gtk_css.exists() else ""
+        if IMPORT_LINE in original:
+            return False
+        gtk_css.parent.mkdir(parents=True, exist_ok=True)
+        gtk_css.write_text(f"{IMPORT_LINE}\n\n{original}", encoding="utf-8")
+        return True
+    except OSError:
+        return False
+
+
+def refresh_desktop() -> None:
+    if shutil.which("xfdesktop"):
+        try:
+            subprocess.run(
+                ["xfdesktop", "--reload"],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=8,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+
+
+def apply_contrast(property_hint: str | None = None) -> None:
+    config_home = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+    gtk_dir = config_home / "gtk-3.0"
+    dynamic_css = gtk_dir / "stradilabos-desktop-contrast.css"
+    current = wallpaper_path(property_hint)
+    try:
+        mode = contrast_mode(image_luminance(current))
+    except (GLib.Error, OSError):
+        mode = "dark-wallpaper"
+    css = css_for(mode)
+    changed = ensure_import(gtk_dir / "gtk.css")
+    try:
+        previous = dynamic_css.read_text(encoding="utf-8") if dynamic_css.exists() else ""
+        if previous != css:
+            dynamic_css.parent.mkdir(parents=True, exist_ok=True)
+            dynamic_css.write_text(css, encoding="utf-8")
+            changed = True
+    except OSError:
+        return
+    if changed:
+        refresh_desktop()
+
+def monitor() -> None:
+    runtime = Path(os.environ.get("XDG_RUNTIME_DIR", "/tmp"))
+    lock_path = runtime / f"stradilabos-wallpaper-contrast-{os.getuid()}.lock"
+    try:
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+        lock = lock_path.open("w", encoding="utf-8")
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except (OSError, BlockingIOError):
+        return
+
+    apply_contrast()
+    try:
+        process = subprocess.Popen(
+            ["xfconf-query", "-c", "xfce4-desktop", "-m"],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        )
+    except OSError:
+        return
+    assert process.stdout is not None
+    for line in process.stdout:
+        property_name = line.strip().split(maxsplit=1)[0]
+        if property_name.endswith("/last-image") or property_name.endswith("/image-path"):
+            time.sleep(0.4)
+            apply_contrast(property_name)
+
+
+def main() -> int:
+    if len(sys.argv) == 1 or sys.argv[1] == "--monitor":
+        monitor()
+        return 0
+    if sys.argv[1] == "--once":
+        apply_contrast()
+        return 0
+    print("Uso: stradilabos-wallpaper-contrast [--once|--monitor]", file=sys.stderr)
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

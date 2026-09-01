@@ -34,6 +34,7 @@ PROFILE_STATE = CONFIG_DIR / "profiles.json"
 PACKS_CATALOG = Path("/usr/local/share/stradilabos/packs.json")
 ADDRESS_IDS = ("artistico", "musicale", "liuteria", "moda", "arredo")
 ROLE_IDS = ("student", "teacher", "staff", "base")
+WORKSPACE_ONBOARDING_MODES = {"first-boot", "later", "completed"}
 ROLE_LABELS = {
     "student": "Studente",
     "teacher": "Docente · tutti gli indirizzi",
@@ -136,12 +137,28 @@ def load_workspace_onboarding() -> str:
         ]
     except (OSError, KeyError, TypeError, json.JSONDecodeError):
         return "first-boot"
-    return mode if mode in {"first-boot", "later"} else "first-boot"
+    return mode if mode in WORKSPACE_ONBOARDING_MODES else "first-boot"
+
+
+def store_workspace_onboarding(mode: str) -> None:
+    """Aggiorna soltanto lo stato Workspace, preservando il profilo scelto."""
+    if mode not in WORKSPACE_ONBOARDING_MODES:
+        raise ValueError(f"stato Workspace non valido: {mode}")
+    state = json.loads(PROFILE_STATE.read_text(encoding="utf-8"))
+    if not isinstance(state, dict):
+        raise ValueError("profilo StradiLabOS non valido")
+    state["workspace_onboarding"] = mode
+    temporary = PROFILE_STATE.with_suffix(".tmp")
+    temporary.write_text(
+        json.dumps(state, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    temporary.replace(PROFILE_STATE)
 
 
 class WelcomeWindow(Gtk.ApplicationWindow):
     def __init__(self, application: Gtk.Application):
-        super().__init__(application=application, title="Benvenuto in StradilabOS")
+        super().__init__(application=application, title="Benvenuto in StradiLabOS")
         self.set_default_size(860, 720)
         self.set_resizable(True)
         self.set_position(Gtk.WindowPosition.CENTER)
@@ -187,7 +204,7 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         live_session = is_live()
         connected = self.nm_is_connected()
         brand, title, copy = self.heading(
-            "Prova o installa StradilabOS" if live_session else "Benvenuto in StradilabOS",
+            "Prova o installa StradiLabOS" if live_session else "Benvenuto in StradiLabOS",
             (
                 "Puoi provarlo senza modificare il computer oppure avviare subito "
                 "l'installazione grafica."
@@ -213,7 +230,7 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         if live_session and shutil.which("calamares-install-debian"):
             root.pack_start(
                 self.action(
-                    "Installa StradilabOS sul computer",
+                    "Installa StradiLabOS sul computer",
                     "Scegli Studente, Docente, Segreteria o la sola installazione base",
                     self.install_and_check,
                     primary=True,
@@ -266,25 +283,32 @@ class WelcomeWindow(Gtk.ApplicationWindow):
             and self.workspace_onboarding == "first-boot"
             and connected
         )
+        workspace_completed = self.workspace_onboarding == "completed"
+        self.workspace_button = self.action(
+            "2 · Google Workspace configurato ✓"
+            if workspace_completed
+            else "2 · Accedi a Google Workspace",
+            "Accesso condiviso tra posta, Classroom, Drive, Meet e le altre app"
+            if workspace_completed
+            else "Solo account @istitutostradivari.it · posta, Classroom, Drive, Meet e le altre app",
+            self.open_workspace,
+            primary=google_primary,
+        )
         root.pack_start(
-            self.action(
-                "2 · Accedi a Google Workspace",
-                "Solo account @istitutostradivari.it · posta, Classroom, Drive, Meet e le altre app",
-                self.open_workspace,
-                primary=google_primary,
-            ),
+            self.workspace_button,
             False,
             False,
             3,
         )
         if not live_session:
+            self.apps_button = self.action(
+                "3 · Scarica le app consigliate",
+                "Il Centro App segue il profilo scelto; per il download serve Internet",
+                ["stradilabos-app-center"],
+                primary=self.workspace_onboarding in {"later", "completed"} and connected,
+            )
             root.pack_start(
-                self.action(
-                    "3 · Scarica le app consigliate",
-                    "Il Centro App segue il profilo scelto; per il download serve Internet",
-                    ["stradilabos-app-center"],
-                    primary=self.workspace_onboarding == "later" and connected,
-                ),
+                self.apps_button,
                 False,
                 False,
                 3,
@@ -557,14 +581,26 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         button.connect("clicked", callback)
         return button
 
-    def launch(self, command: list[str]) -> None:
+    def launch(self, command: list[str]) -> bool:
         if not shutil.which(command[0]):
             self.message("Funzione non disponibile", f"Non trovo {command[0]} in questo sistema.")
-            return
+            return False
         try:
             subprocess.Popen(command)
         except OSError as error:
             self.message("Impossibile avviare l'applicazione", str(error))
+            return False
+        return True
+
+    @staticmethod
+    def update_action(button: Gtk.Button, title: str, subtitle: str, primary: bool) -> None:
+        context = button.get_style_context()
+        context.remove_class("action")
+        context.remove_class("primary")
+        context.add_class("primary" if primary else "action")
+        labels = button.get_child().get_children()
+        labels[0].set_markup(f"<b>{GLib.markup_escape_text(title)}</b>")
+        labels[1].set_text(subtitle)
 
     def nm_is_connected(self) -> bool:
         """Verifica la connettività di rete senza privilegi, a ogni comparsa."""
@@ -614,7 +650,28 @@ class WelcomeWindow(Gtk.ApplicationWindow):
             if open_nets:
                 self.open_network_center()
             return
-        self.launch(["stradilabos-open-app", WORKSPACE_LOGIN, "workspace-login"])
+        if not self.launch(["stradilabos-open-app", WORKSPACE_LOGIN, "workspace-login"]):
+            return
+        if is_live():
+            return
+        try:
+            store_workspace_onboarding("completed")
+        except (OSError, TypeError, ValueError, json.JSONDecodeError) as error:
+            self.message("Accesso aperto, stato non salvato", str(error))
+            return
+        self.workspace_onboarding = "completed"
+        self.update_action(
+            self.workspace_button,
+            "2 · Google Workspace configurato ✓",
+            "Accesso condiviso tra posta, Classroom, Drive, Meet e le altre app",
+            primary=False,
+        )
+        self.update_action(
+            self.apps_button,
+            "3 · Scarica le app consigliate",
+            "Il Centro App segue il profilo scelto; per il download serve Internet",
+            primary=True,
+        )
 
     def install_and_check(self, *_args) -> None:
         if not shutil.which("calamares-install-debian"):
@@ -628,7 +685,7 @@ class WelcomeWindow(Gtk.ApplicationWindow):
             return
         proceed = self.choice(
             "Collega prima il computer a Internet",
-            "L'installazione di StradilabOS ha bisogno di Internet: senza rete "
+            "L'installazione di StradiLabOS ha bisogno di Internet: senza rete "
             "può fermarsi a metà e non potrà proporre l'accesso a Google Workspace.\n\n"
             "Puoi continuare senza rete: potrai collegarti al primo avvio del "
             "sistema installato.",
@@ -641,20 +698,20 @@ class WelcomeWindow(Gtk.ApplicationWindow):
             self.open_network_center()
 
     def check_updates(self, *_args) -> None:
-        update_client = shutil.which("stradilabos-update")
-        if not shutil.which("pkexec") or not update_client:
+        update_ui = shutil.which("stradilabos-update-ui")
+        if not update_ui:
             self.message(
                 "Funzione non disponibile",
                 "Il controllo degli aggiornamenti non è disponibile in questo sistema.",
             )
             return
         try:
-            subprocess.Popen(["pkexec", update_client])
+            subprocess.Popen([update_ui])
         except OSError as error:
             self.message("Impossibile avviare la verifica", str(error))
 
     def status_text(self) -> str:
-        base = "StradilabOS 0.3"
+        base = "StradiLabOS 0.3"
         if system_status is not None:
             try:
                 return system_status.status_label()

@@ -66,6 +66,13 @@ class CatalogTests(unittest.TestCase):
 
 
 class DesktopDefaultsTests(unittest.TestCase):
+    def test_all_installed_stradilabos_commands_are_executable(self) -> None:
+        commands = list((CHROOT / "usr/local/bin").glob("stradilabos-*"))
+        self.assertTrue(commands)
+        for command in commands:
+            with self.subTest(command=command):
+                self.assertTrue(os.access(command, os.X_OK))
+
     def test_all_xml_defaults_are_well_formed(self) -> None:
         paths = [
             *(
@@ -94,8 +101,8 @@ class DesktopDefaultsTests(unittest.TestCase):
             self.assertIn('name="use_compositing" type="bool" value="false"', text)
             self.assertIn('name="theme" type="string" value="WhiteSur-Light"', text)
 
-    def test_both_panels_have_ordered_ids_and_named_plugins(self) -> None:
-        """Previene il plugin “(null)” e la scomparsa della barra inferiore."""
+    def test_single_bottom_panel_has_native_controls_and_named_plugins(self) -> None:
+        """Previene il plugin “(null)” e mantiene una sola barra completa."""
         for relative in (
             "etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml",
             "etc/xdg/xfce4/panel/default.xml",
@@ -114,7 +121,7 @@ class DesktopDefaultsTests(unittest.TestCase):
                 for child in children
                 if child.tag == "value" and child.get("type") == "int"
             ]
-            self.assertEqual(panel_ids, ["1", "2"], path)
+            self.assertEqual(panel_ids, ["1"], path)
             value_positions = [index for index, child in enumerate(children) if child.tag == "value"]
             panel_positions = [
                 index
@@ -128,6 +135,18 @@ class DesktopDefaultsTests(unittest.TestCase):
                 for child in plugins
                 if child.tag == "property"
             }
+            required = {
+                "whiskermenu",
+                "tasklist",
+                "separator",
+                "systray",
+                "notification-plugin",
+                "power-manager-plugin",
+                "pulseaudio",
+                "clock",
+                "actions",
+            }
+            self.assertTrue(required.issubset(set(definitions.values())), path)
             for panel_id in panel_ids:
                 panel = panels.find(f"./property[@name='panel-{panel_id}']")
                 self.assertIsNotNone(panel, path)
@@ -135,8 +154,28 @@ class DesktopDefaultsTests(unittest.TestCase):
                 plugin_ids = panel.find("./property[@name='plugin-ids']")
                 self.assertIsNotNone(plugin_ids, path)
                 assert plugin_ids is not None
+                position = panel.find("./property[@name='position']")
+                self.assertIsNotNone(position, path)
+                assert position is not None
+                self.assertTrue(position.get("value", "").startswith("p=12;"), path)
                 for value in plugin_ids.findall("./value"):
                     self.assertTrue(definitions.get(f"plugin-{value.get('value')}"), path)
+
+            actions = plugins.find("./property[@name='plugin-13']")
+            self.assertIsNotNone(actions, path)
+            assert actions is not None
+            action_items = {
+                value.get("value")
+                for value in actions.findall("./property[@name='items']/value")
+            }
+            for item in (
+                "+lock-screen",
+                "+switch-user",
+                "+restart",
+                "+shutdown",
+                "+logout-dialog",
+            ):
+                self.assertIn(item, action_items, path)
 
     def test_panel_repair_replaces_the_broken_personal_layout(self) -> None:
         repair = CHROOT / "usr/local/bin/stradilabos-repair-panel"
@@ -148,14 +187,13 @@ class DesktopDefaultsTests(unittest.TestCase):
             personal = config_home / "xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"
             personal.parent.mkdir(parents=True)
             valid_text = default.read_text(encoding="utf-8")
-            id_two = '    <value type="int" value="2"/>\n'
-            broken_text = valid_text.replace(id_two, "", 1).replace(
-                '    <property name="panel-2" type="empty">',
-                id_two + '    <property name="panel-2" type="empty">',
+            broken_text = valid_text.replace(
+                '<property name="plugin-13" type="string" value="actions">',
+                '<property name="plugin-13" type="string" value="">',
                 1,
             )
             personal.write_text(broken_text, encoding="utf-8")
-            marker = config_home / "stradilabos/panel-layout-v4"
+            marker = config_home / "stradilabos/panel-layout-v5"
             marker.parent.mkdir(parents=True)
             marker.touch()
 
@@ -204,6 +242,112 @@ class DesktopDefaultsTests(unittest.TestCase):
         self.assertIn('set_icon_name("network-wireless")', wifi_text)
         self.assertIn("Vuoi scaricare e installare ora", wifi_text)
         self.assertIn("subprocess.Popen([pkexec, updater])", wifi_text)
+
+    def test_workspace_onboarding_records_completion(self) -> None:
+        welcome = CHROOT / "usr/local/lib/stradilabos/welcome.py"
+        tree = ast.parse(welcome.read_text(encoding="utf-8"))
+        functions = {
+            node.name: node
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef)
+            and node.name in {"load_workspace_onboarding", "store_workspace_onboarding"}
+        }
+        self.assertEqual(set(functions), {"load_workspace_onboarding", "store_workspace_onboarding"})
+        with tempfile.TemporaryDirectory() as temporary:
+            profile_state = Path(temporary) / "profiles.json"
+            original = {
+                "schema_version": 2,
+                "role": "student",
+                "profiles": ["musicale"],
+                "device_mode": "personal",
+                "workspace_onboarding": "first-boot",
+                "source": "welcome",
+            }
+            profile_state.write_text(json.dumps(original), encoding="utf-8")
+            namespace = {
+                "json": json,
+                "PROFILE_STATE": profile_state,
+                "WORKSPACE_ONBOARDING_MODES": {"first-boot", "later", "completed"},
+            }
+            module = ast.Module(body=list(functions.values()), type_ignores=[])
+            exec(compile(module, str(welcome), "exec"), namespace)
+            namespace["store_workspace_onboarding"]("completed")
+            saved = json.loads(profile_state.read_text(encoding="utf-8"))
+            self.assertEqual(saved["workspace_onboarding"], "completed")
+            self.assertEqual(saved["profiles"], ["musicale"])
+            self.assertEqual(namespace["load_workspace_onboarding"](), "completed")
+
+        text = welcome.read_text(encoding="utf-8")
+        self.assertIn("2 · Google Workspace configurato ✓", text)
+        self.assertIn('self.update_action(\n            self.apps_button', text)
+
+    def test_workspace_opens_a_visible_shared_chromium_profile(self) -> None:
+        browser = CHROOT / "usr/local/bin/stradilabos-browser"
+        open_app = CHROOT / "usr/local/bin/stradilabos-open-app"
+        chromium_launcher = (
+            CHROOT
+            / "etc/skel/.config/xfce4/panel/launcher-21/chromium.desktop"
+        )
+        self.assertTrue(os.access(browser, os.X_OK))
+        browser_text = browser.read_text(encoding="utf-8")
+        self.assertIn('--profile-directory=Default', browser_text)
+        self.assertIn('user_data_dir="$config_dir/browser"', browser_text)
+        self.assertIn('user_data_dir="$runtime_dir/stradilabos-browser-session"', browser_text)
+        self.assertIn('"device_mode"[[:space:]]*:[[:space:]]*"shared"', browser_text)
+        self.assertNotIn('--app=', browser_text)
+        self.assertIn('exec stradilabos-browser "$url"', open_app.read_text(encoding="utf-8"))
+        launcher_text = chromium_launcher.read_text(encoding="utf-8")
+        self.assertIn("Exec=stradilabos-browser", launcher_text)
+        self.assertIn("TryExec=stradilabos-browser", launcher_text)
+
+    def test_updates_are_available_from_welcome_and_the_main_menu(self) -> None:
+        update_ui = CHROOT / "usr/local/bin/stradilabos-update-ui"
+        desktop = CHROOT / "usr/local/share/applications/stradilabos-update.desktop"
+        welcome = (CHROOT / "usr/local/lib/stradilabos/welcome.py").read_text(encoding="utf-8")
+        self.assertTrue(os.access(update_ui, os.X_OK))
+        self.assertIn("Aggiornamenti StradiLabOS", update_ui.read_text(encoding="utf-8"))
+        desktop_text = desktop.read_text(encoding="utf-8")
+        self.assertIn("Name=Aggiornamenti StradiLabOS", desktop_text)
+        self.assertIn("Exec=stradilabos-update-ui", desktop_text)
+        self.assertIn("Categories=Settings;System;", desktop_text)
+        self.assertIn('Gtk.Button(label="Controlla aggiornamenti")', welcome)
+        self.assertIn('subprocess.Popen([update_ui])', welcome)
+
+    def test_wallpaper_contrast_adapts_to_light_and_dark_backgrounds(self) -> None:
+        contrast = CHROOT / "usr/local/bin/stradilabos-wallpaper-contrast"
+        tree = ast.parse(contrast.read_text(encoding="utf-8"))
+        functions = {
+            node.name: node
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef)
+            and node.name in {"srgb_channel", "relative_luminance", "contrast_mode", "css_for"}
+        }
+        self.assertEqual(
+            set(functions),
+            {"srgb_channel", "relative_luminance", "contrast_mode", "css_for"},
+        )
+        namespace: dict[str, object] = {}
+        exec(compile(ast.Module(body=list(functions.values()), type_ignores=[]), str(contrast), "exec"), namespace)
+        self.assertEqual(namespace["contrast_mode"](namespace["relative_luminance"](246, 244, 239)), "light-wallpaper")
+        self.assertEqual(namespace["contrast_mode"](namespace["relative_luminance"](22, 19, 15)), "dark-wallpaper")
+        self.assertIn("color: #16130f", namespace["css_for"]("light-wallpaper"))
+        self.assertIn("color: #f6f4ef", namespace["css_for"]("dark-wallpaper"))
+
+        autostart = CHROOT / "etc/xdg/autostart/stradilabos-wallpaper-contrast.desktop"
+        self.assertIn("--monitor", autostart.read_text(encoding="utf-8"))
+        gtk_css = CHROOT / "etc/skel/.config/gtk-3.0/gtk.css"
+        self.assertTrue(
+            gtk_css.read_text(encoding="utf-8").startswith(
+                '@import url("stradilabos-desktop-contrast.css");'
+            )
+        )
+        for visible_name, target in (
+            ("StradiLabOS-Crema.png", "stradilabos-wallpaper-v2.png"),
+            ("StradiLabOS-Onde.png", "stradilabos-wallpaper-v3.png"),
+        ):
+            alias = CHROOT / "usr/share/backgrounds/stradilabos" / visible_name
+            self.assertTrue(alias.is_symlink())
+            self.assertEqual(os.readlink(alias), target)
 
     def test_built_image_validator_tracks_the_current_desktop_theme(self) -> None:
         text = (ROOT / "scripts/validate_built_image.sh").read_text(encoding="utf-8")
@@ -324,7 +468,7 @@ class DesktopDefaultsTests(unittest.TestCase):
         )
         self.assertIn('GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3"', installed)
         self.assertIn("quiet splash loglevel=3", (ROOT / "auto/config").read_text(encoding="utf-8"))
-        self.assertEqual((ROOT / "updates/version.txt").read_text(encoding="utf-8").strip(), "4")
+        self.assertEqual((ROOT / "updates/version.txt").read_text(encoding="utf-8").strip(), "5")
         update = (ROOT / "updates/update.sh").read_text(encoding="utf-8")
         self.assertIn("usr/share/grub/themes/stradilabos", update)
         self.assertIn("update-grub || return 1", update)
@@ -332,6 +476,8 @@ class DesktopDefaultsTests(unittest.TestCase):
         self.assertIn("xfce4-pulseaudio-plugin", update)
         self.assertIn("repair_existing_panel_profiles", update)
         self.assertIn("stradilabos-repair-panel --force", update)
+        self.assertIn('chmod 0755 "$file"', update)
+        self.assertIn("launcher-21/chromium.desktop", update)
 
     def test_container_workflows_fail_on_intermediate_errors(self) -> None:
         workflows = ROOT / ".github/workflows"

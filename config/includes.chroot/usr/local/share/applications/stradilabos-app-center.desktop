@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=Centro App StradilabOS
+Name=Centro App StradiLabOS
 GenericName=Applicazioni per ruolo e indirizzo
 Comment=Scegli e installa le applicazioni adatte al tuo profilo d'uso
 Exec=stradilabos-app-center

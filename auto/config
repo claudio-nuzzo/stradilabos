@@ -23,7 +23,7 @@ lb config noauto \
     --firmware-chroot true \
     --debian-installer none \
     --bootappend-live "boot=live components username=stradi hostname=stradilabos locales=it_IT.UTF-8 keyboard-layouts=it timezone=Europe/Rome utc=yes quiet splash loglevel=3" \
-    --iso-application "StradilabOS Live" \
+    --iso-application "StradiLabOS Live" \
     --iso-publisher "StradiLab - IIS Antonio Stradivari Cremona" \
     --iso-volume "STRADILABOS" \
     --image-name "stradilabos-live" \

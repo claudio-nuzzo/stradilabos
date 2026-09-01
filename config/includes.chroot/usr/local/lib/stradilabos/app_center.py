@@ -92,7 +92,7 @@ def flatpak_installed(app_id: str) -> bool:
 
 class AppCenterWindow(Gtk.ApplicationWindow):
     def __init__(self, application: Gtk.Application):
-        super().__init__(application=application, title="Centro App StradilabOS")
+        super().__init__(application=application, title="Centro App StradiLabOS")
         self.set_default_size(820, 660)
         self.set_icon_name("stradilabos-app-center")
         self.packs = json.loads(CATALOG.read_text(encoding="utf-8"))["packs"]
@@ -115,7 +115,7 @@ class AppCenterWindow(Gtk.ApplicationWindow):
         root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         root.set_border_width(20)
         root.get_style_context().add_class("app-center-wrap")
-        title = Gtk.Label(label="App e raccolte StradilabOS", xalign=0)
+        title = Gtk.Label(label="App e raccolte StradiLabOS", xalign=0)
         title.get_style_context().add_class("app-center-title")
         role_note = {
             "teacher": "Profilo docente: sono consigliate le raccolte di tutti gli indirizzi.",
@@ -129,7 +129,7 @@ class AppCenterWindow(Gtk.ApplicationWindow):
                 f"e scarica soltanto gli strumenti utili. {role_note}"
                 if not self.live_session
                 else "Qui trovi le raccolte disponibili. Per mantenere leggera la "
-                "chiavetta, potrai scaricarle dopo aver installato StradilabOS."
+                "chiavetta, potrai scaricarle dopo aver installato StradiLabOS."
             ),
             xalign=0,
         )
@@ -216,7 +216,7 @@ class AppCenterWindow(Gtk.ApplicationWindow):
         if self.live_session:
             self.show_message(
                 Gtk.MessageType.INFO,
-                "Installa prima StradilabOS",
+                "Installa prima StradiLabOS",
                 "Le raccolte specialistiche si scaricano sul disco dopo l'installazione.",
             )
             return

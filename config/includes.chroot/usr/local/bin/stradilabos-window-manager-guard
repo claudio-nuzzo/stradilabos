@@ -37,7 +37,7 @@ log() {
 
 notify() {
     command -v notify-send >/dev/null 2>&1 || return 0
-    notify-send --app-name=StradilabOS --icon=stradilabos "$1" "$2" >/dev/null 2>&1 || true
+    notify-send --app-name=StradiLabOS --icon=stradilabos "$1" "$2" >/dev/null 2>&1 || true
 }
 
 wm_running() {

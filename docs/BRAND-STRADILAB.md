@@ -51,14 +51,16 @@ etichette, 13 px per le descrizioni, 15 px per il testo corrente.
    fondo avorio, schede bianche con bordo grigio carta e raggio 14–16 px, bordo
    bordeaux al passaggio del mouse, pulsante primario bordeaux con testo avorio.
 5. Le icone restano vettoriali, semplici e leggibili da 16 a 128 pixel.
-6. Il pannello è unico, in alto e leggero: il marchio apre il menu; StradiLab,
-   Workspace, Centro App e File sono gli unici launcher permanenti.
+6. Il pannello è unico, in basso e leggero: il marchio StradiLabOS apre il menu;
+   i launcher principali precedono l'elenco finestre e i controlli nativi di
+   rete, notifiche, batteria, audio, orologio e sessione restano a destra.
 7. Il nome Debian può comparire solo nelle note tecniche sulla base del sistema,
    non come titolo dell'avvio, del login o del desktop.
 
 ## Risorse principali
 
-- Sfondo: `/usr/share/backgrounds/stradilabos/stradilabos-wallpaper-v2.png`
+- Sfondi visibili: `StradiLabOS-Crema.png` e `StradiLabOS-Onde.png` in
+  `/usr/share/backgrounds/stradilabos/` (alias senza duplicare gli asset)
 - Tema icone: `/usr/share/icons/StradiLab`
 - Tema GTK e finestre: `/usr/share/themes/StradiLab` (generato dall'hook 012
   a partire da Greybird; incorpora le regole comuni di `/etc/xdg/gtk-3.0/gtk.css`

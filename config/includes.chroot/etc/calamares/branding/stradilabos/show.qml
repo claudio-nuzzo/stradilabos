@@ -36,7 +36,7 @@ Presentation {
             spacing: 16
             Text {
                 width: parent.width
-                text: qsTr("Benvenuto in StradilabOS")
+                text: qsTr("Benvenuto in StradiLabOS")
                 color: "#9b2335"
                 font.family: "Noto Sans"
                 font.pixelSize: 34
@@ -149,7 +149,7 @@ Presentation {
             }
             Text {
                 width: parent.width
-                text: qsTr("Studente con il proprio indirizzo, Docente con tutti gli indirizzi, Segreteria oppure installazione base: StradilabOS propone solo le raccolte utili al profilo scelto.")
+                text: qsTr("Studente con il proprio indirizzo, Docente con tutti gli indirizzi, Segreteria oppure installazione base: StradiLabOS propone solo le raccolte utili al profilo scelto.")
                 color: "#16130f"
                 font.family: "Noto Sans"
                 font.pixelSize: 19

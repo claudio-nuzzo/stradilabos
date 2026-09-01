@@ -103,7 +103,7 @@ def read_last_check() -> str:
 
 def status_label() -> str:
     """Riga di stato completa, in italiano, pronta per la UI."""
-    parts = [f"StradilabOS {read_version()}"]
+    parts = [f"StradiLabOS {read_version()}"]
     serial = read_serial()
     if serial:
         parts.append(f"aggiornamenti serie {serial}")

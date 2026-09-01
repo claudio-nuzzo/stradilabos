@@ -1,12 +1,12 @@
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=Installa StradilabOS
+Name=Installa StradiLabOS
 GenericName=Installatore grafico
-Comment=Installa StradilabOS sul computer
+Comment=Installa StradiLabOS sul computer
 Exec=calamares-install-debian
 TryExec=calamares-install-debian
-Keywords=installazione;sistema;disco;StradilabOS;
+Keywords=installazione;sistema;disco;StradiLabOS;
 Icon=stradilabos
 Terminal=false
 Categories=System;

@@ -17,7 +17,7 @@ logo_sprite.SetPosition(
     10
 );
 
-status_image = Image.Text("Avvio di StradilabOS…", 0.38, 0.15, 0.21);
+status_image = Image.Text("Avvio di StradiLabOS…", 0.38, 0.15, 0.21);
 status_sprite = Sprite(status_image);
 status_sprite.SetPosition(
     screen_width * 0.09,

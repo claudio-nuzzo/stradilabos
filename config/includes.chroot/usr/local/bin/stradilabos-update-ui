@@ -1,0 +1,166 @@
+#!/usr/bin/python3
+"""Interfaccia grafica per il canale di aggiornamento StradiLabOS."""
+
+from __future__ import annotations
+
+import shutil
+import subprocess
+import threading
+from pathlib import Path
+
+import gi
+
+gi.require_version("Gtk", "3.0")
+from gi.repository import GLib, Gtk  # noqa: E402
+
+
+LOG_PATH = Path("/var/log/stradilabos-update.log")
+
+
+def recent_log() -> str:
+    try:
+        return "\n".join(LOG_PATH.read_text(encoding="utf-8", errors="replace").splitlines()[-20:])
+    except OSError:
+        return ""
+
+
+def outcome(returncode: int, log_text: str) -> tuple[str, str, Gtk.MessageType]:
+    if returncode in (126, 127):
+        return (
+            "Operazione annullata",
+            "Non è stato eseguito alcun aggiornamento.",
+            Gtk.MessageType.INFO,
+        )
+    if returncode != 0:
+        return (
+            "Aggiornamento non completato",
+            "Si è verificato un errore. Il controllo automatico riproverà alla prossima accensione.",
+            Gtk.MessageType.ERROR,
+        )
+    last_line = log_text.splitlines()[-1].lower() if log_text.splitlines() else ""
+    if "rete non raggiungibile" in last_line:
+        return (
+            "Connessione non disponibile",
+            "Controlla la rete e riprova. Non è stato modificato nulla.",
+            Gtk.MessageType.WARNING,
+        )
+    if "nessun aggiornamento" in last_line:
+        return (
+            "StradiLabOS è aggiornato",
+            "Su questo computer è già installata l’ultima serie disponibile.",
+            Gtk.MessageType.INFO,
+        )
+    if "aggiornamento serie" in last_line and "completato" in last_line:
+        return (
+            "Aggiornamento installato",
+            "Le correzioni sono state applicate. Se richiesto, chiudi e riapri la sessione.",
+            Gtk.MessageType.INFO,
+        )
+    return (
+        "Controllo completato",
+        "Il canale di aggiornamento ha terminato la verifica.",
+        Gtk.MessageType.INFO,
+    )
+
+
+class UpdateWindow(Gtk.Window):
+    def __init__(self) -> None:
+        super().__init__(title="Aggiornamenti StradiLabOS")
+        self.set_icon_name("stradilabos-update")
+        self.set_default_size(520, 230)
+        self.set_resizable(False)
+        self.set_border_width(24)
+        self.connect("destroy", Gtk.main_quit)
+
+        content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        title = Gtk.Label()
+        title.set_markup("<span size='x-large' weight='bold'>Aggiornamenti StradiLabOS</span>")
+        title.set_xalign(0)
+        copy = Gtk.Label(
+            label=(
+                "Controlla il canale ufficiale e installa soltanto le correzioni nuove. "
+                "Non serve reinstallare StradiLabOS né ricreare la chiavetta."
+            ),
+            xalign=0,
+        )
+        copy.set_line_wrap(True)
+
+        self.status = Gtk.Label(label="Pronto per il controllo.", xalign=0)
+        self.status.set_line_wrap(True)
+        self.spinner = Gtk.Spinner()
+        status_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        status_row.pack_start(self.spinner, False, False, 0)
+        status_row.pack_start(self.status, True, True, 0)
+
+        buttons = Gtk.ButtonBox(orientation=Gtk.Orientation.HORIZONTAL)
+        buttons.set_layout(Gtk.ButtonBoxStyle.END)
+        close = Gtk.Button(label="Chiudi")
+        close.connect("clicked", lambda *_args: self.destroy())
+        self.check_button = Gtk.Button(label="Controlla e installa")
+        self.check_button.get_style_context().add_class("suggested-action")
+        self.check_button.connect("clicked", self.start_update)
+        buttons.add(close)
+        buttons.add(self.check_button)
+
+        content.pack_start(title, False, False, 0)
+        content.pack_start(copy, False, False, 0)
+        content.pack_start(status_row, True, True, 0)
+        content.pack_end(buttons, False, False, 0)
+        self.add(content)
+
+    def start_update(self, *_args) -> None:
+        updater = shutil.which("stradilabos-update")
+        pkexec = shutil.which("pkexec")
+        if not updater or not pkexec:
+            self.show_result(
+                "Funzione non disponibile",
+                "Il programma di aggiornamento non è installato correttamente.",
+                Gtk.MessageType.ERROR,
+            )
+            return
+        self.check_button.set_sensitive(False)
+        self.status.set_text("Controllo e installazione in corso…")
+        self.spinner.start()
+        threading.Thread(target=self.run_update, args=(pkexec, updater), daemon=True).start()
+
+    def run_update(self, pkexec: str, updater: str) -> None:
+        try:
+            completed = subprocess.run([pkexec, updater], check=False)
+            result = outcome(completed.returncode, recent_log())
+        except OSError as error:
+            result = (
+                "Impossibile avviare il controllo",
+                str(error),
+                Gtk.MessageType.ERROR,
+            )
+        GLib.idle_add(self.finish_update, *result)
+
+    def finish_update(self, title: str, detail: str, message_type: Gtk.MessageType) -> bool:
+        self.spinner.stop()
+        self.status.set_text(detail)
+        self.check_button.set_sensitive(True)
+        self.show_result(title, detail, message_type)
+        return False
+
+    def show_result(self, title: str, detail: str, message_type: Gtk.MessageType) -> None:
+        dialog = Gtk.MessageDialog(
+            transient_for=self,
+            modal=True,
+            message_type=message_type,
+            buttons=Gtk.ButtonsType.CLOSE,
+            text=title,
+        )
+        dialog.format_secondary_text(detail)
+        dialog.run()
+        dialog.destroy()
+
+
+def main() -> None:
+    window = UpdateWindow()
+    window.show_all()
+    window.spinner.stop()
+    Gtk.main()
+
+
+if __name__ == "__main__":
+    main()

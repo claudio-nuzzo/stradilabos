@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=Finestre StradilabOS
+Name=Finestre StradiLabOS
 Comment=Controlla che il gestore delle finestre resti in esecuzione
 Exec=stradilabos-window-manager-guard
 TryExec=stradilabos-window-manager-guard

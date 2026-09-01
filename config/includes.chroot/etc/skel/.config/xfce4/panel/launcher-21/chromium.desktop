@@ -2,6 +2,7 @@
 Type=Application
 Name=Browser
 Comment=Apri il browser per navigare
-Exec=chromium
+Exec=stradilabos-browser
+TryExec=stradilabos-browser
 Icon=chromium
 Terminal=false

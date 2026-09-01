@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Aggiornamenti StradiLabOS
+Comment=Controlla e installa gli aggiornamenti senza reinstallare il sistema
+Exec=stradilabos-update-ui
+TryExec=stradilabos-update-ui
+Icon=stradilabos-update
+Terminal=false
+Categories=Settings;System;
+Keywords=aggiornamenti;update;sistema;StradiLabOS;
+StartupNotify=true

@@ -1,6 +1,6 @@
 [Icon Theme]
 Name=StradiLab
-Comment=Tema leggero coordinato con StradilabOS
+Comment=Tema leggero coordinato con StradiLabOS
 Inherits=elementary-xfce,Adwaita,hicolor
 Directories=scalable/places,scalable/devices,scalable/apps
 

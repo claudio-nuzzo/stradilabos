@@ -424,12 +424,12 @@ def page(app: tuple) -> str:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{html.escape(title)} · Guide StradilabOS</title>
+<title>{html.escape(title)} · Guide StradiLabOS</title>
 <link rel="stylesheet" href="css/guida.css">
 </head>
 <body>
 <header class="testata">
-  <p class="occhiello">Guide StradilabOS · {html.escape(audience)}</p>
+  <p class="occhiello">Guide StradiLabOS · {html.escape(audience)}</p>
   <h1>{html.escape(title)}</h1>
 </header>
 <main class="pagina">
@@ -498,12 +498,12 @@ def index_page() -> str:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Guide delle app StradilabOS</title>
+<title>Guide delle app StradiLabOS</title>
 <link rel="stylesheet" href="css/guida.css">
 </head>
 <body>
 <header class="testata">
-  <p class="occhiello">StradilabOS</p>
+  <p class="occhiello">StradiLabOS</p>
   <h1>Guide delle app</h1>
   <p class="sottotitolo">Mini istruzioni in italiano, per imparare a usare le app della tua area.</p>
 </header>
@@ -511,7 +511,7 @@ def index_page() -> str:
 <main class="pagina">
 {''.join(sections)}
 </main>
-<footer class="pie">Guide StradilabOS · leggibili anche senza connessione</footer>
+<footer class="pie">Guide StradiLabOS · leggibili anche senza connessione</footer>
 <script>
   // Apre direttamente la sezione dell'indirizzo richiesto (es. index.html#moda).
   var hash = window.location.hash;
@@ -526,7 +526,7 @@ def index_page() -> str:
 
 
 def main() -> int:
-    css = """/* Guide StradilabOS: leggere, in italiano, leggibili anche offline. */
+    css = """/* Guide StradiLabOS: leggere, in italiano, leggibili anche offline. */
 :root {
   --bordeaux: #9b2335;
   --navy: #1b3a6b;

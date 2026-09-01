@@ -76,10 +76,10 @@ count=$(pgrep -x xfwm4 | wc -l)
 [ "$count" -eq 1 ] || fail "atteso un solo xfwm4 all'avvio, trovati $count"
 sleep 3
 
-xlogo -geometry 400x250 -title 'Prova StradilabOS' >/dev/null 2>&1 &
+xlogo -geometry 400x250 -title 'Prova StradiLabOS' >/dev/null 2>&1 &
 sleep 3
-window=$(xwininfo -root -tree 2>/dev/null | awk '/"Prova StradilabOS"/ {print $1; exit}')
-[ -n "$window" ] || fail "nessuna finestra 'Prova StradilabOS' gestita da xfwm4"
+window=$(xwininfo -root -tree 2>/dev/null | awk '/"Prova StradiLabOS"/ {print $1; exit}')
+[ -n "$window" ] || fail "nessuna finestra 'Prova StradiLabOS' gestita da xfwm4"
 
 # Il gestore annunciato via EWMH deve essere xfwm4.
 supporting=$(xprop -root _NET_SUPPORTING_WM_CHECK 2>/dev/null | sed -n 's/.*window id # *//p')

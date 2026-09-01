@@ -17,18 +17,18 @@ fail() {
 [ -s "$squashfs" ] || fail "filesystem Live assente"
 
 cmp -s config/branding/stradilabos-boot-800x600.png "$grub_dir/splash.png" || \
-    fail "lo sfondo GRUB non è quello StradilabOS"
-grep -q "Prova StradilabOS" "$grub_dir/grub.cfg" || \
+    fail "lo sfondo GRUB non è quello StradiLabOS"
+grep -q "Prova StradiLabOS" "$grub_dir/grub.cfg" || \
     fail "il menu Live conserva il nome Debian"
 grep -q "quiet splash loglevel=3" "$grub_dir/grub.cfg" || \
     fail "il menu Live non filtra i messaggi firmware non critici"
-grep -q "StradilabOS 0.3" "$binary_dir/.disk/info" || \
-    fail "il supporto non si identifica come StradilabOS"
+grep -q "StradiLabOS 0.3" "$binary_dir/.disk/info" || \
+    fail "il supporto non si identifica come StradiLabOS"
 
 os_release=$(unsquashfs -cat "$squashfs" usr/lib/os-release 2>/dev/null) || \
     fail "os-release non leggibile"
-printf '%s\n' "$os_release" | grep -q '^NAME="StradilabOS"$' || \
-    fail "il sistema interno non si identifica come StradilabOS"
+printf '%s\n' "$os_release" | grep -q '^NAME="StradiLabOS"$' || \
+    fail "il sistema interno non si identifica come StradiLabOS"
 printf '%s\n' "$os_release" | grep -q '^ID_LIKE=debian$' || \
     fail "la compatibilità Debian non è dichiarata"
 
@@ -76,6 +76,7 @@ for path in \
     usr/share/grub/themes/stradilabos/theme.txt \
     etc/xdg/autostart/stradilabos-window-manager.desktop \
     etc/xdg/autostart/stradilabos-repair-panel.desktop \
+    etc/xdg/autostart/stradilabos-wallpaper-contrast.desktop \
     usr/bin/xprop \
     usr/bin/notify-send \
     usr/bin/xfwm4 \
@@ -84,7 +85,12 @@ for path in \
     usr/local/share/stradilabos/guide/index.html \
     usr/local/share/stradilabos/guide/css/guida.css \
     usr/local/bin/stradilabos-guide \
+    usr/local/bin/stradilabos-browser \
+    usr/local/bin/stradilabos-update-ui \
+    usr/local/bin/stradilabos-wallpaper-contrast \
     usr/local/share/applications/stradilabos-guide.desktop \
+    usr/local/share/applications/stradilabos-update.desktop \
+    etc/skel/.config/gtk-3.0/stradilabos-desktop-contrast.css \
     usr/share/plymouth/themes/stradilabos/stradilabos.script; do
     unsquashfs -cat "$squashfs" "$path" >/dev/null 2>&1 || \
         fail "file interno assente: $path"
@@ -138,6 +144,16 @@ printf '%s\n' "$xfwm_config" | grep -q 'value="WhiteSur-Light"' || \
 printf '%s\n' "$xfwm_config" | grep -q 'name="borderless_maximize" type="bool" value="false"' || \
     fail "le finestre massimizzate possono perdere i bordi"
 
+panel_config=$(unsquashfs -cat \
+    "$squashfs" etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml \
+    2>/dev/null) || fail "configurazione barra applicazioni assente"
+printf '%s\n' "$panel_config" | grep -q 'name="position" type="string" value="p=12;' || \
+    fail "la barra applicazioni non è ancorata in basso"
+printf '%s\n' "$panel_config" | grep -q 'value="actions"' || \
+    fail "menu utente e spegnimento assente dalla barra"
+printf '%s\n' "$panel_config" | grep -q 'value="+shutdown"' || \
+    fail "spegnimento assente dal menu di sessione"
+
 wm_autostart=$(unsquashfs -cat \
     "$squashfs" etc/xdg/autostart/stradilabos-window-manager.desktop \
     2>/dev/null) || fail "avvio della guardia finestre assente"
@@ -155,4 +171,4 @@ for launcher in \
         fail "voce terminale ancora visibile: $launcher"
 done
 
-printf '%s\n' "Controlli sull'immagine StradilabOS superati."
+printf '%s\n' "Controlli sull'immagine StradiLabOS superati."

@@ -7,10 +7,17 @@ app_id=${2:-stradilab}
 case "$url" in
     https://*) ;;
     *)
-        printf '%s\n' "StradilabOS apre soltanto indirizzi HTTPS." >&2
+        printf '%s\n' "StradiLabOS apre soltanto indirizzi HTTPS." >&2
         exit 2
         ;;
 esac
+
+# Il primo accesso mostra il browser completo e il profilo locale. Le aperture
+# successive in modalità app riutilizzano gli stessi cookie e la stessa
+# sessione tramite la medesima directory dati.
+if [ "$app_id" = "workspace-login" ] && command -v stradilabos-browser >/dev/null 2>&1; then
+    exec stradilabos-browser "$url"
+fi
 
 if command -v chromium >/dev/null 2>&1; then
     config_dir=${XDG_CONFIG_HOME:-"$HOME/.config"}/stradilabos

@@ -2,19 +2,24 @@
 <channel name="xfce4-panel" version="1.0">
   <property name="panels" type="array">
     <value type="int" value="1"/>
-    <value type="int" value="2"/>
     <property name="panel-1" type="empty">
-      <property name="position" type="string" value="p=2;x=0;y=0"/>
+      <property name="position" type="string" value="p=12;x=0;y=0"/>
       <property name="length" type="uint" value="100"/>
-      <property name="length-adjust" type="bool" value="true"/>
+      <property name="length-adjust" type="bool" value="false"/>
       <property name="position-locked" type="bool" value="true"/>
-      <property name="size" type="uint" value="30"/>
-      <property name="icon-size" type="uint" value="22"/>
+      <property name="autohide-behavior" type="uint" value="0"/>
+      <property name="size" type="uint" value="42"/>
+      <property name="icon-size" type="uint" value="28"/>
       <property name="background-style" type="uint" value="0"/>
       <property name="enter-opacity" type="uint" value="100"/>
       <property name="leave-opacity" type="uint" value="100"/>
       <property name="plugin-ids" type="array">
         <value type="int" value="1"/>
+        <value type="int" value="21"/>
+        <value type="int" value="5"/>
+        <value type="int" value="2"/>
+        <value type="int" value="4"/>
+        <value type="int" value="22"/>
         <value type="int" value="6"/>
         <value type="int" value="7"/>
         <value type="int" value="8"/>
@@ -22,36 +27,14 @@
         <value type="int" value="10"/>
         <value type="int" value="11"/>
         <value type="int" value="12"/>
-      </property>
-    </property>
-    <property name="panel-2" type="empty">
-      <property name="position" type="string" value="p=6;x=0;y=0"/>
-      <property name="length" type="uint" value="100"/>
-      <property name="length-adjust" type="bool" value="true"/>
-      <property name="position-locked" type="bool" value="true"/>
-      <property name="autohide-behavior" type="uint" value="0"/>
-      <property name="size" type="uint" value="56"/>
-      <property name="icon-size" type="uint" value="38"/>
-      <property name="background-style" type="uint" value="0"/>
-      <property name="enter-opacity" type="uint" value="100"/>
-      <property name="leave-opacity" type="uint" value="100"/>
-      <property name="plugin-ids" type="array">
-        <value type="int" value="30"/>
-        <value type="int" value="21"/>
-        <value type="int" value="2"/>
-        <value type="int" value="3"/>
-        <value type="int" value="5"/>
-        <value type="int" value="23"/>
-        <value type="int" value="4"/>
-        <value type="int" value="22"/>
-        <value type="int" value="31"/>
+        <value type="int" value="13"/>
       </property>
     </property>
   </property>
   <property name="plugins" type="empty">
     <property name="plugin-1" type="string" value="whiskermenu">
       <property name="button-icon" type="string" value="stradilabos"/>
-      <property name="button-title" type="string" value="StradiLab"/>
+      <property name="button-title" type="string" value="StradiLabOS"/>
       <property name="show-button-title" type="bool" value="true"/>
       <property name="show-generic-names" type="bool" value="false"/>
       <property name="view-mode" type="int" value="1"/>
@@ -101,6 +84,25 @@
     <property name="plugin-12" type="string" value="clock">
       <property name="digital-format" type="string" value=" %a %d %b  %H:%M "/>
     </property>
+    <property name="plugin-13" type="string" value="actions">
+      <property name="appearance" type="uint" value="1"/>
+      <property name="ask-confirmation" type="bool" value="true"/>
+      <property name="button-title" type="uint" value="0"/>
+      <property name="items" type="array">
+        <value type="string" value="+lock-screen"/>
+        <value type="string" value="+switch-user"/>
+        <value type="string" value="+separator"/>
+        <value type="string" value="+suspend"/>
+        <value type="string" value="-hibernate"/>
+        <value type="string" value="-hybrid-sleep"/>
+        <value type="string" value="+separator"/>
+        <value type="string" value="+restart"/>
+        <value type="string" value="+shutdown"/>
+        <value type="string" value="+separator"/>
+        <value type="string" value="-logout"/>
+        <value type="string" value="+logout-dialog"/>
+      </property>
+    </property>
     <property name="plugin-21" type="string" value="launcher">
       <property name="items" type="array">
         <value type="string" value="chromium.desktop"/>
@@ -115,14 +117,6 @@
       <property name="items" type="array">
         <value type="string" value="libreoffice-writer.desktop"/>
       </property>
-    </property>
-    <property name="plugin-30" type="string" value="separator">
-      <property name="style" type="uint" value="0"/>
-      <property name="expand" type="bool" value="true"/>
-    </property>
-    <property name="plugin-31" type="string" value="separator">
-      <property name="style" type="uint" value="0"/>
-      <property name="expand" type="bool" value="true"/>
     </property>
   </property>
   <property name="configver" type="int" value="2"/>

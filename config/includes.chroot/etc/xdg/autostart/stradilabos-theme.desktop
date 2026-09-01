@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=Stile StradilabOS
+Name=Stile StradiLabOS
 Exec=sh -c "sleep 2; exec stradilabos-apply-theme"
 TryExec=stradilabos-apply-theme
 Icon=stradilabos

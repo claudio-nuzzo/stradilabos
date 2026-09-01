@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
   pull_request:
     # Attivazione su PR: permette di eseguire la validazione SENZA costruire
-    # la ISO (i workflow di build hanno solo il trigger push su main). La PR
+    # la ISO (i workflow di build sono solo manuali). La PR
     # viene creata dal branch di correzione verso main: qui girano test Xvfb,
     # pacchetti Trixie, ShellCheck e preflight; la build resta su main.
     branches: [main]
@@ -49,6 +49,14 @@ jobs:
               shellcheck scripts/test_panel_xvfb.sh
               shellcheck scripts/test_wifi_xvfb.sh
               shellcheck config/includes.chroot/usr/local/bin/stradilabos-repair-panel
+              shellcheck updates/update.sh
+              python3 -m unittest discover -s tests -v
+              python3 scripts/validate_project.py
+              contrast_tmp=$(mktemp -d)
+              XDG_CONFIG_HOME="$contrast_tmp" \
+                config/includes.chroot/usr/local/bin/stradilabos-wallpaper-contrast --once
+              grep -q "XfdesktopIconView.view" \
+                "$contrast_tmp/gtk-3.0/stradilabos-desktop-contrast.css"
               BUILD_ARCH=amd64 sh scripts/validate_debian_packages.sh
               timeout 90s sh scripts/test_window_manager_xvfb.sh
               timeout 60s sh scripts/test_panel_xvfb.sh
@@ -77,6 +85,11 @@ jobs:
                 xfwm4 xfce4-panel xfce4-whiskermenu-plugin xfce4-notifyd \
                 xfce4-power-manager xfce4-pulseaudio-plugin \
                 xvfb xfconf dbus-x11 x11-utils x11-apps greybird-gtk-theme
+              contrast_tmp=$(mktemp -d)
+              XDG_CONFIG_HOME="$contrast_tmp" \
+                config/includes.chroot/usr/local/bin/stradilabos-wallpaper-contrast --once
+              grep -q "XfdesktopIconView.view" \
+                "$contrast_tmp/gtk-3.0/stradilabos-desktop-contrast.css"
               BUILD_ARCH=arm64 sh scripts/validate_debian_packages.sh
               timeout 90s sh scripts/test_window_manager_xvfb.sh
               timeout 60s sh scripts/test_panel_xvfb.sh

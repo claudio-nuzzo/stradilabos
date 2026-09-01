@@ -7,7 +7,7 @@ title-text: ""
     top = 8%
     width = 48%
     height = 40
-    text = "StradilabOS"
+    text = "StradiLabOS"
     color = "#16130f"
     font = "Unifont Regular 28"
 }

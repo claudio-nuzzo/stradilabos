@@ -1,0 +1,13 @@
+/* Predefinito per lo sfondo scuro StradiLabOS; aggiornato automaticamente. */
+XfdesktopIconView.view {
+  color: #f6f4ef;
+  background-color: transparent;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 1px 0 1px rgba(0, 0, 0, 0.95);
+}
+
+XfdesktopIconView.view:active,
+XfdesktopIconView.view:selected {
+  color: #16130f;
+  background-color: rgba(246, 244, 239, 0.88);
+  border-radius: 6px;
+}

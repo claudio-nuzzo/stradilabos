@@ -19,7 +19,7 @@ def pretty_name() -> str:
 
 
 def pretty_status_message() -> str:
-    return "Preparazione di StradilabOS per il profilo scelto…"
+    return "Preparazione di StradiLabOS per il profilo scelto…"
 
 
 def run():
@@ -72,7 +72,7 @@ def run():
     if not root_mount:
         return (
             "Sistema di destinazione non disponibile",
-            "Non è possibile salvare il profilo StradilabOS nel nuovo sistema.",
+            "Non è possibile salvare il profilo StradiLabOS nel nuovo sistema.",
         )
 
     state = {

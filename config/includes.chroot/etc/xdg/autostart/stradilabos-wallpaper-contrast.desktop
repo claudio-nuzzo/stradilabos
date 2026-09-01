@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Contrasto sfondo StradiLabOS
+Comment=Adatta la leggibilità delle icone allo sfondo scelto
+Exec=sh -c "sleep 4; exec stradilabos-wallpaper-contrast --monitor"
+TryExec=stradilabos-wallpaper-contrast
+Icon=stradilabos
+Terminal=false
+OnlyShowIn=XFCE;
+X-GNOME-Autostart-enabled=true

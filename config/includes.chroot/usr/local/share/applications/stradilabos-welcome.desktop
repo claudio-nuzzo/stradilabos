@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=Benvenuto in StradilabOS
+Name=Benvenuto in StradiLabOS
 Comment=Le azioni principali per iniziare
 Exec=stradilabos-welcome
 TryExec=stradilabos-welcome

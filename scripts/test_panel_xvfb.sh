@@ -1,5 +1,5 @@
 #!/bin/sh
-# Avvia il layout reale dei due pannelli in Xvfb e fallisce se un plugin non
+# Avvia il layout reale della barra unica in Xvfb e fallisce se un plugin non
 # viene caricato. Deve girare in Debian Trixie con i plugin della ISO installati.
 set -eu
 
@@ -74,4 +74,4 @@ wait "$panel_pid" 2>/dev/null || true
 panel_pid=""
 INNER
 
-printf '%s\n' "Pannello superiore e barra applicazioni Xfce avviati correttamente."
+printf '%s\n' "Barra applicazioni Xfce avviata correttamente."

@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=Guide StradilabOS
+Name=Guide StradiLabOS
 Comment=Impara a usare le app della tua area
 Exec=stradilabos-guide
 TryExec=stradilabos-guide

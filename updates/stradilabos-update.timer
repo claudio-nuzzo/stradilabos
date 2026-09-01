@@ -1,5 +1,5 @@
 [Unit]
-Description=Controllo periodico aggiornamenti StradilabOS
+Description=Controllo periodico aggiornamenti StradiLabOS
 
 [Timer]
 OnBootSec=3min
