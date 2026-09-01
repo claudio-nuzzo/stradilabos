@@ -33,17 +33,26 @@ jobs:
               apt-get update
               apt-get install --yes --no-install-recommends \
                 python3 \
+                python3-gi gir1.2-gtk-3.0 \
                 shellcheck \
-                xfwm4 xvfb xfconf dbus-x11 x11-utils x11-apps greybird-gtk-theme
+                xfwm4 xfce4-panel xfce4-whiskermenu-plugin xfce4-notifyd \
+                xfce4-power-manager xfce4-pulseaudio-plugin \
+                xvfb xfconf dbus-x11 x11-utils x11-apps greybird-gtk-theme
               sh -n config/includes.chroot/usr/local/bin/stradilabos-window-manager-guard
               sh -n scripts/test_window_manager_xvfb.sh
+              sh -n config/includes.chroot/usr/local/bin/stradilabos-repair-panel
               sh -n scripts/preflight_xfce_session.sh
               shellcheck config/includes.chroot/usr/local/bin/stradilabos-window-manager-guard
               shellcheck scripts/test_window_manager_xvfb.sh
               shellcheck scripts/preflight_xfce_session.sh
               shellcheck scripts/validate_debian_packages.sh
+              shellcheck scripts/test_panel_xvfb.sh
+              shellcheck scripts/test_wifi_xvfb.sh
+              shellcheck config/includes.chroot/usr/local/bin/stradilabos-repair-panel
               BUILD_ARCH=amd64 sh scripts/validate_debian_packages.sh
-              sh scripts/test_window_manager_xvfb.sh
+              timeout 90s sh scripts/test_window_manager_xvfb.sh
+              timeout 60s sh scripts/test_panel_xvfb.sh
+              timeout 60s sh scripts/test_wifi_xvfb.sh
             '
 
   validate-arm64:
@@ -64,9 +73,14 @@ jobs:
               apt-get update
               apt-get install --yes --no-install-recommends \
                 python3 \
-                xfwm4 xvfb xfconf dbus-x11 x11-utils x11-apps greybird-gtk-theme
+                python3-gi gir1.2-gtk-3.0 \
+                xfwm4 xfce4-panel xfce4-whiskermenu-plugin xfce4-notifyd \
+                xfce4-power-manager xfce4-pulseaudio-plugin \
+                xvfb xfconf dbus-x11 x11-utils x11-apps greybird-gtk-theme
               BUILD_ARCH=arm64 sh scripts/validate_debian_packages.sh
-              sh scripts/test_window_manager_xvfb.sh
+              timeout 90s sh scripts/test_window_manager_xvfb.sh
+              timeout 60s sh scripts/test_panel_xvfb.sh
+              timeout 60s sh scripts/test_wifi_xvfb.sh
             '
 
   preflight-xfce:

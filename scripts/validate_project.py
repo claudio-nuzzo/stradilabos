@@ -227,6 +227,11 @@ def validate_updates(errors: list[str]) -> None:
         )
     version = ROOT / "updates/version.txt"
     require(version.read_text(encoding="utf-8").strip().isdigit(), "Serie aggiornamenti non numerica.", errors)
+    require(
+        version.read_text(encoding="utf-8").strip() == "3",
+        "Le correzioni del collaudo devono essere pubblicate nella serie 3.",
+        errors,
+    )
     payload = ROOT / "updates/update.sh"
     require(payload.exists(), "Payload aggiornamenti assente.", errors)
     if payload.exists():
@@ -235,6 +240,10 @@ def validate_updates(errors: list[str]) -> None:
             "sync_0_3_interface",
             "SOURCE_ARCHIVE_URL",
             "install_security_updates",
+            "usr/share/grub/themes/stradilabos",
+            "update-grub",
+            "xfce4-power-manager-plugins",
+            "xfce4-pulseaudio-plugin",
             "nessuna reinstallazione necessaria",
         ):
             require(fragment in text, f"Payload cumulativo incompleto: {fragment}.", errors)
@@ -246,6 +255,18 @@ def validate_code(errors: list[str]) -> None:
         *(CHROOT / "usr/local/lib/stradilabos").glob("*.py"),
         *(CHROOT / "usr/local/lib/calamares/modules").glob("*/main.py"),
     ]
+    local_commands = [
+        path for path in (CHROOT / "usr/local/bin").glob("*") if path.is_file()
+    ]
+    for path in local_commands:
+        try:
+            with path.open(encoding="utf-8") as command_file:
+                first_line = command_file.readline()
+        except (OSError, UnicodeDecodeError) as error:
+            errors.append(f"Comando non leggibile in {path}: {error}")
+            continue
+        if first_line.startswith("#!") and "python" in first_line:
+            python_files.append(path)
     for path in python_files:
         result = subprocess.run(
             [sys.executable, "-m", "py_compile", str(path)],
@@ -260,7 +281,11 @@ def validate_code(errors: list[str]) -> None:
         *ROOT.glob("auto/*"),
         *ROOT.glob("scripts/*.sh"),
         *ROOT.glob("config/hooks/live/*.hook.*"),
-        *(CHROOT / "usr/local/bin").glob("*"),
+        *[
+            path
+            for path in local_commands
+            if path not in python_files
+        ],
     ]
     for path in shell_files:
         result = subprocess.run(
@@ -519,13 +544,73 @@ def validate_system_branding(errors: list[str]) -> None:
             errors,
         )
 
-    panel = CHROOT / "etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"
-    require(panel.exists(), "Pannello Xfce StradilabOS assente.", errors)
-    if panel.exists():
+    panel_paths = (
+        CHROOT / "etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml",
+        CHROOT / "etc/xdg/xfce4/panel/default.xml",
+    )
+    for panel in panel_paths:
+        require(panel.exists(), f"Pannello Xfce StradilabOS assente: {panel}.", errors)
+        if not panel.exists():
+            continue
         try:
-            ET.parse(panel)
+            root = ET.parse(panel).getroot()
         except ET.ParseError as error:
             errors.append(f"Pannello Xfce non valido: {error}")
+            continue
+        panels = root.find("./property[@name='panels']")
+        plugins = root.find("./property[@name='plugins']")
+        require(panels is not None, f"Elenco pannelli assente: {panel}.", errors)
+        require(plugins is not None, f"Elenco plugin assente: {panel}.", errors)
+        if panels is None or plugins is None:
+            continue
+
+        children = list(panels)
+        panel_ids = [
+            child.get("value")
+            for child in children
+            if child.tag == "value" and child.get("type") == "int"
+        ]
+        require(
+            panel_ids == ["1", "2"],
+            f"Servono pannello superiore e barra applicazioni inferiore: {panel}.",
+            errors,
+        )
+        value_positions = [index for index, child in enumerate(children) if child.tag == "value"]
+        definition_positions = [
+            index
+            for index, child in enumerate(children)
+            if child.tag == "property" and child.get("name", "").startswith("panel-")
+        ]
+        require(
+            bool(value_positions and definition_positions)
+            and max(value_positions) < min(definition_positions),
+            f"Gli ID dei pannelli non precedono le definizioni (errore plugin null): {panel}.",
+            errors,
+        )
+        plugin_definitions = {
+            child.get("name"): child.get("value")
+            for child in plugins
+            if child.tag == "property"
+        }
+        for panel_id in panel_ids:
+            definition = panels.find(f"./property[@name='panel-{panel_id}']")
+            require(definition is not None, f"Definizione panel-{panel_id} assente: {panel}.", errors)
+            if definition is None:
+                continue
+            plugin_ids = definition.find("./property[@name='plugin-ids']")
+            require(plugin_ids is not None, f"Plugin di panel-{panel_id} assenti: {panel}.", errors)
+            if plugin_ids is None:
+                continue
+            for value in plugin_ids.findall("./value"):
+                plugin_id = value.get("value")
+                require(
+                    bool(plugin_definitions.get(f"plugin-{plugin_id}")),
+                    f"Plugin {plugin_id} senza nome in panel-{panel_id}: {panel}.",
+                    errors,
+                )
+
+    panel = panel_paths[0]
+    if panel.exists():
         text = panel.read_text(encoding="utf-8")
         require("stradilabos-workspace.desktop" in text, "Workspace non è nel pannello.", errors)
         require("xfce4-terminal" not in text, "Il terminale compare nel pannello utente.", errors)
@@ -542,6 +627,18 @@ def validate_system_branding(errors: list[str]) -> None:
                     errors,
                 )
 
+    panel_repair = CHROOT / "usr/local/bin/stradilabos-repair-panel"
+    require(panel_repair.exists(), "Riparazione automatica dei pannelli assente.", errors)
+    require(os.access(panel_repair, os.X_OK), "Riparazione pannelli non eseguibile.", errors)
+    panel_autostart = CHROOT / "etc/xdg/autostart/stradilabos-repair-panel.desktop"
+    require(panel_autostart.exists(), "Avvio della riparazione pannelli assente.", errors)
+    if panel_autostart.exists():
+        require(
+            "Exec=stradilabos-repair-panel" in panel_autostart.read_text(encoding="utf-8"),
+            "Autostart della riparazione pannelli errato.",
+            errors,
+        )
+
     live_config = CHROOT / "etc/live/config.conf.d/stradilabos.conf"
     require(live_config.exists(), "Nome utente Live personalizzato assente.", errors)
     if live_config.exists():
@@ -557,7 +654,24 @@ def validate_system_branding(errors: list[str]) -> None:
     if grub_config.exists():
         text = grub_config.read_text(encoding="utf-8")
         require('GRUB_DISTRIBUTOR="StradilabOS"' in text, "GRUB conserva il nome Debian.", errors)
-        require('GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"' in text, "Plymouth non attivato in GRUB.", errors)
+        require(
+            'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3"' in text,
+            "Avvio grafico o filtro dei messaggi firmware non configurato in GRUB.",
+            errors,
+        )
+    grub_theme = CHROOT / "usr/share/grub/themes/stradilabos/theme.txt"
+    require(grub_theme.exists(), "Tema GRUB installato assente.", errors)
+    if grub_theme.exists():
+        require(
+            'terminal-box: "0"' not in grub_theme.read_text(encoding="utf-8"),
+            "Il tema GRUB contiene ancora il pattern pixmap non valido.",
+            errors,
+        )
+    require(
+        "quiet splash loglevel=3" in (ROOT / "auto/config").read_text(encoding="utf-8"),
+        "Il menu Live non filtra i messaggi ACPI non critici.",
+        errors,
+    )
 
     policy = CHROOT / "etc/chromium/policies/managed/stradilabos-workspace.json"
     require(policy.exists(), "Criterio Workspace del browser assente.", errors)
@@ -595,6 +709,10 @@ def validate_system_branding(errors: list[str]) -> None:
     require("GTK_ARGV" in welcome_text, "Le opzioni del Benvenuto arrivano ancora a GTK.", errors)
     require("AUTOSTART_MODE" in welcome_text, "L'avvio iniziale non è controllabile.", errors)
     require("Gtk.PolicyType.ALWAYS" in welcome_text, "La lista degli indirizzi non mostra lo scorrimento.", errors)
+    require("stradilabos-wifi" in welcome_text, "Il Benvenuto apre ancora l'editor Wi-Fi tecnico.", errors)
+    wifi = CHROOT / "usr/local/bin/stradilabos-wifi"
+    require(wifi.exists(), "Selettore Wi-Fi StradiLabOS assente.", errors)
+    require(os.access(wifi, os.X_OK), "Selettore Wi-Fi StradiLabOS non eseguibile.", errors)
 
     app_center_text = (CHROOT / "usr/local/lib/stradilabos/app_center.py").read_text(
         encoding="utf-8"
@@ -746,6 +864,8 @@ def validate_system_branding(errors: list[str]) -> None:
         "xfce4-terminal",
         "x11-utils",
         "libnotify-bin",
+        "xfce4-power-manager-plugins",
+        "xfce4-pulseaudio-plugin",
     ):
         require(
             re.search(rf"^{re.escape(package)}$", packages, re.MULTILINE) is not None,

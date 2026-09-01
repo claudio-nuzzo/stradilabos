@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import importlib.util
 import json
 import os
@@ -92,6 +93,112 @@ class DesktopDefaultsTests(unittest.TestCase):
             self.assertIn('name="titleless_maximize" type="bool" value="false"', text)
             self.assertIn('name="use_compositing" type="bool" value="false"', text)
             self.assertIn('name="theme" type="string" value="WhiteSur-Light"', text)
+
+    def test_both_panels_have_ordered_ids_and_named_plugins(self) -> None:
+        """Previene il plugin “(null)” e la scomparsa della barra inferiore."""
+        for relative in (
+            "etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml",
+            "etc/xdg/xfce4/panel/default.xml",
+        ):
+            path = CHROOT / relative
+            root = ET.parse(path).getroot()
+            panels = root.find("./property[@name='panels']")
+            plugins = root.find("./property[@name='plugins']")
+            self.assertIsNotNone(panels, path)
+            self.assertIsNotNone(plugins, path)
+            assert panels is not None and plugins is not None
+
+            children = list(panels)
+            panel_ids = [
+                child.get("value")
+                for child in children
+                if child.tag == "value" and child.get("type") == "int"
+            ]
+            self.assertEqual(panel_ids, ["1", "2"], path)
+            value_positions = [index for index, child in enumerate(children) if child.tag == "value"]
+            panel_positions = [
+                index
+                for index, child in enumerate(children)
+                if child.tag == "property" and child.get("name", "").startswith("panel-")
+            ]
+            self.assertLess(max(value_positions), min(panel_positions), path)
+
+            definitions = {
+                child.get("name"): child.get("value")
+                for child in plugins
+                if child.tag == "property"
+            }
+            for panel_id in panel_ids:
+                panel = panels.find(f"./property[@name='panel-{panel_id}']")
+                self.assertIsNotNone(panel, path)
+                assert panel is not None
+                plugin_ids = panel.find("./property[@name='plugin-ids']")
+                self.assertIsNotNone(plugin_ids, path)
+                assert plugin_ids is not None
+                for value in plugin_ids.findall("./value"):
+                    self.assertTrue(definitions.get(f"plugin-{value.get('value')}"), path)
+
+    def test_panel_repair_replaces_the_broken_personal_layout(self) -> None:
+        repair = CHROOT / "usr/local/bin/stradilabos-repair-panel"
+        default = CHROOT / "etc/xdg/xfce4/panel/default.xml"
+        self.assertTrue(os.access(repair, os.X_OK))
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            config_home = root / "config"
+            personal = config_home / "xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"
+            personal.parent.mkdir(parents=True)
+            valid_text = default.read_text(encoding="utf-8")
+            id_two = '    <value type="int" value="2"/>\n'
+            broken_text = valid_text.replace(id_two, "", 1).replace(
+                '    <property name="panel-2" type="empty">',
+                id_two + '    <property name="panel-2" type="empty">',
+                1,
+            )
+            personal.write_text(broken_text, encoding="utf-8")
+
+            fake_bin = root / "bin"
+            fake_bin.mkdir()
+            for command in ("xfce4-panel", "xfconf-query", "xfconfd"):
+                stub = fake_bin / command
+                stub.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+                stub.chmod(0o755)
+            environment = {
+                **os.environ,
+                "PATH": f"{fake_bin}:{os.environ['PATH']}",
+                "XDG_CONFIG_HOME": str(config_home),
+                "STRADILABOS_PANEL_DEFAULT": str(default),
+                "STRADILABOS_PANEL_RESTART_DELAY": "0",
+            }
+            result = subprocess.run(["sh", str(repair)], env=environment, check=False)
+            self.assertEqual(result.returncode, 0)
+            self.assertEqual(personal.read_text(encoding="utf-8"), valid_text)
+            self.assertEqual(
+                personal.with_name("xfce4-panel.xml.stradilabos-backup").read_text(encoding="utf-8"),
+                broken_text,
+            )
+            self.assertTrue((config_home / "stradilabos/panel-layout-v3").exists())
+
+    def test_wifi_chooser_handles_escaped_network_names(self) -> None:
+        wifi = CHROOT / "usr/local/bin/stradilabos-wifi"
+        self.assertTrue(os.access(wifi, os.X_OK))
+        tree = ast.parse(wifi.read_text(encoding="utf-8"))
+        split_function = next(
+            node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "split_nmcli"
+        )
+        namespace: dict[str, object] = {}
+        exec(compile(ast.Module(body=[split_function], type_ignores=[]), str(wifi), "exec"), namespace)
+        split_nmcli = namespace["split_nmcli"]
+        self.assertEqual(
+            split_nmcli(r"*:Aula\:Musica:87:WPA2"),
+            ["*", "Aula:Musica", "87", "WPA2"],
+        )
+        welcome = (CHROOT / "usr/local/lib/stradilabos/welcome.py").read_text(encoding="utf-8")
+        self.assertIn('self.launch(["stradilabos-wifi"])', welcome)
+        wifi_text = wifi.read_text(encoding="utf-8")
+        self.assertIn("STRADILAB · RETE", wifi_text)
+        self.assertIn('set_icon_name("network-wireless")', wifi_text)
+        self.assertIn("Vuoi scaricare e installare ora", wifi_text)
+        self.assertIn("subprocess.Popen([pkexec, updater])", wifi_text)
 
     def test_built_image_validator_tracks_the_current_desktop_theme(self) -> None:
         text = (ROOT / "scripts/validate_built_image.sh").read_text(encoding="utf-8")
@@ -187,6 +294,37 @@ class DesktopDefaultsTests(unittest.TestCase):
                 encoding="utf-8"
             )
             self.assertIn("scripts/test_window_manager_xvfb.sh", yaml_text)
+            self.assertIn("scripts/test_panel_xvfb.sh", yaml_text)
+            self.assertIn("scripts/test_wifi_xvfb.sh", yaml_text)
+            self.assertIn("timeout 60s sh scripts/test_panel_xvfb.sh", yaml_text)
+            self.assertIn("timeout 60s sh scripts/test_wifi_xvfb.sh", yaml_text)
+
+        panel_test = ROOT / "scripts/test_panel_xvfb.sh"
+        self.assertTrue(os.access(panel_test, os.X_OK))
+        panel_test_text = panel_test.read_text(encoding="utf-8")
+        self.assertIn("xfce4-panel --disable-wm-check", panel_test_text)
+        self.assertIn("plugin_name.*NULL", panel_test_text)
+
+        wifi_test = ROOT / "scripts/test_wifi_xvfb.sh"
+        self.assertTrue(os.access(wifi_test, os.X_OK))
+        self.assertIn("stradilabos-wifi", wifi_test.read_text(encoding="utf-8"))
+
+    def test_grub_fixes_cover_live_installed_and_ota(self) -> None:
+        theme = (CHROOT / "usr/share/grub/themes/stradilabos/theme.txt").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn('terminal-box: "0"', theme)
+        installed = (CHROOT / "etc/default/grub.d/60-stradilabos.cfg").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3"', installed)
+        self.assertIn("quiet splash loglevel=3", (ROOT / "auto/config").read_text(encoding="utf-8"))
+        self.assertEqual((ROOT / "updates/version.txt").read_text(encoding="utf-8").strip(), "3")
+        update = (ROOT / "updates/update.sh").read_text(encoding="utf-8")
+        self.assertIn("usr/share/grub/themes/stradilabos", update)
+        self.assertIn("update-grub || return 1", update)
+        self.assertIn("xfce4-power-manager-plugins", update)
+        self.assertIn("xfce4-pulseaudio-plugin", update)
 
     def test_container_workflows_fail_on_intermediate_errors(self) -> None:
         workflows = ROOT / ".github/workflows"
@@ -205,6 +343,13 @@ class DesktopDefaultsTests(unittest.TestCase):
             ROOT / "scripts/validate_debian_packages.sh"
         ).read_text(encoding="utf-8")
         self.assertIn("command -v python3", package_validator)
+
+    def test_iso_builds_require_manual_approval(self) -> None:
+        for name in ("build-iso.yml", "build-arm64.yml"):
+            text = (ROOT / ".github/workflows" / name).read_text(encoding="utf-8")
+            with self.subTest(workflow=name):
+                self.assertIn("workflow_dispatch:", text)
+                self.assertNotRegex(text, r"(?m)^\s{2}push:\s*$")
 
     def test_xfce_preflight_uses_the_real_autostart_path(self) -> None:
         text = (ROOT / "scripts/preflight_xfce_session.sh").read_text(

@@ -1,5 +1,5 @@
 #!/bin/bash
-# StradilabOS — aggiornamento cumulativo, serie 2 (2026-08-31)
+# StradilabOS — aggiornamento cumulativo, serie 3 (2026-09-01)
 #
 # È pensato anche per PC già installati con la 0.2: scarica soltanto il
 # materiale pubblicato dal repository ufficiale, aggiorna i file posseduti da
@@ -44,7 +44,7 @@ copy_tree() {
 }
 
 sync_0_3_interface() {
-  local archive source_root source_file unit file
+  local archive source_root source_file unit file client_new
   archive="$update_tmpdir/stradilabos-main.tar.gz"
 
   if ! fetch "$SOURCE_ARCHIVE_URL" "$archive"; then
@@ -79,8 +79,18 @@ sync_0_3_interface() {
   copy_tree "$source_root/config/includes.chroot/usr/share/themes/WhiteSur-Light" /usr/share/themes/WhiteSur-Light || return 1
   copy_tree "$source_root/config/includes.chroot/usr/share/themes/WhiteSur-Dark" /usr/share/themes/WhiteSur-Dark || return 1
   copy_tree "$source_root/config/includes.chroot/usr/share/icons/WhiteSur" /usr/share/icons/WhiteSur || return 1
+  copy_tree "$source_root/config/includes.chroot/usr/share/grub/themes/stradilabos" /usr/share/grub/themes/stradilabos || return 1
   copy_tree "$source_root/config/includes.chroot/etc/xdg" /etc/xdg || return 1
   copy_tree "$source_root/config/includes.chroot/etc/skel/.config" /etc/skel/.config || return 1
+
+  source_file="$source_root/config/includes.chroot/etc/default/grub.d/60-stradilabos.cfg"
+  if [ -f "$source_file" ]; then
+    install -d /etc/default/grub.d || return 1
+    install -m 0644 "$source_file" /etc/default/grub.d/60-stradilabos.cfg || return 1
+    if command -v update-grub >/dev/null 2>&1; then
+      update-grub || return 1
+    fi
+  fi
 
   install -d /etc/apt/apt.conf.d /usr/share/polkit-1/actions || return 1
   for file in 20auto-upgrades 50unattended-upgrades; do
@@ -120,16 +130,19 @@ install_security_updates() {
   # dell'interfaccia resta valido e APT ritenterà al prossimo controllo.
   command -v apt-get >/dev/null 2>&1 || return 0
   export DEBIAN_FRONTEND=noninteractive
-  if apt-get update -qq && apt-get install -y -qq unattended-upgrades; then
-    echo "Aggiornamenti di sicurezza Debian attivati."
+  if apt-get update -qq && apt-get install -y -qq \
+      unattended-upgrades \
+      xfce4-power-manager-plugins \
+      xfce4-pulseaudio-plugin; then
+    echo "Aggiornamenti di sicurezza e plugin dei pannelli attivati."
   else
     echo "ERRORE: unattended-upgrades non installato ora; la serie sarà ritentata." >&2
     return 1
   fi
 }
 
-echo "— Serie 2: aggiornamento cumulativo StradilabOS 0.3 —"
+echo "— Serie 3: correzioni collaudo StradilabOS 0.3 —"
 install_cookie_policy || exit 1
 sync_0_3_interface || exit 1
 install_security_updates || exit 1
-echo "Aggiornamento cumulativo completato: nessuna reinstallazione necessaria."
+echo "Correzioni di avvio, pannelli e rete installate: nessuna reinstallazione necessaria."

@@ -585,9 +585,10 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         return result.stdout.strip() == "connected"
 
     def open_network_center(self, *_args) -> None:
-        # Editor connessioni esistente di NetworkManager: non scriviamo un
-        # gestore Wi-Fi da zero.
-        self.launch(["nm-connection-editor"])
+        if shutil.which("stradilabos-wifi"):
+            self.launch(["stradilabos-wifi"])
+        else:
+            self.launch(["nm-connection-editor"])
 
     def skip_network(self, *_args) -> None:
         """Conferma il rinvio senza memorizzare uno stato permanente.
@@ -611,7 +612,7 @@ class WelcomeWindow(Gtk.ApplicationWindow):
                 "Salta, configuro dopo",
             )
             if open_nets:
-                self.launch(["nm-connection-editor"])
+                self.open_network_center()
             return
         self.launch(["stradilabos-open-app", WORKSPACE_LOGIN, "workspace-login"])
 
@@ -637,7 +638,7 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         if proceed:
             self.launch(["calamares-install-debian"])
         else:
-            self.launch(["nm-connection-editor"])
+            self.open_network_center()
 
     def check_updates(self, *_args) -> None:
         update_client = shutil.which("stradilabos-update")
