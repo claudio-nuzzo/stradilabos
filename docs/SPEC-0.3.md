@@ -58,7 +58,7 @@ Identità visiva attuale: palette StradiLab (avorio/crema di fondo, bordeaux `#9
 | # | Requisito | Sezione |
 |---|---|---|
 | A | Primo avvio: la rete/Wi-Fi è il primo passo della configurazione | §3 |
-| B | Primo accesso: profilo Chromium personale creato e login Google guidato subito | §4 |
+| B | Primo accesso: Chrome opzionale, profilo sincronizzato e login Google guidato subito | §4 |
 | C | Aggiornamenti automatici dal repo GitHub + sicurezza Debian | §5 |
 | D | Grafica in stile macOS (riferimento: WhiteSur) mantenendo identità StradiLab | §6 |
 | E | Guide semplici per le app scaricate per indirizzo | §7 |
@@ -80,7 +80,7 @@ Identità visiva attuale: palette StradiLab (avorio/crema di fondo, bordeaux `#9
 
 ### 3.2 Al primo avvio del sistema installato
 
-- La sequenza di primo avvio (welcome) deve diventare: **1) rete → 2) accesso Google (se scelto in installazione) → 3) resto**.
+- La sequenza di primo avvio (welcome) deve diventare: **1) rete → 2) installazione Chrome e accesso Google (se scelto in installazione) → 3) resto**.
 - Passo rete: verifica automatica della connettività (es. `nmcli networking connectivity check` o equivalente); se assente, mostrare la scelta della rete con interfaccia grafica esistente di NetworkManager (aprire l'editor connessioni o il popup di nm-applet — non scrivere un gestore Wi-Fi da zero). Pulsante «Salta, configuro dopo» sempre presente, con avviso che senza rete l'accesso Google e le app non funzioneranno.
 - Il passo si considera superato appena la connettività risulta attiva; la verifica va rifatta a ogni comparsa della schermata, non memorizzata per sempre.
 
@@ -91,22 +91,37 @@ Identità visiva attuale: palette StradiLab (avorio/crema di fondo, bordeaux `#9
 
 ---
 
-## 4. Requisito B — Primo accesso: account e profilo Chromium già pronti
+## 4. Requisito B — Primo accesso: account e profilo Chrome già pronti
 
-**Obiettivo dichiarato dal committente:** «il login iniziale deve già creare un account e aprire Chromium per creare il profilo personale già loggato».
+**Obiettivo aggiornato dopo il collaudo hardware:** il login Chromium non viene
+riutilizzato dalle altre app e la creazione del profilo può fermarsi su una
+schermata bianca. Il primo avvio deve quindi proporre Google Chrome ufficiale,
+un profilo reale e la sincronizzazione.
 
-**Interpretazione corretta (confermata):** l'account **locale** Linux viene già creato da Calamares; ciò che manca è che al **primo login** dell'utente il sistema apra da solo Chromium sul profilo dedicato StradiLab e conduca l'utente al login Google del dominio, così che **alla fine del primo avvio tutte le micro-app risultino già autenticate**. Non è possibile (né voluto) precaricare credenziali: l'utente digita la propria password Google una volta sola, tutto il resto è automatico.
+**Interpretazione corretta (confermata):** l'account **locale** Linux viene già
+creato da Calamares. Sul sistema installato il Benvenuto scarica Chrome dal sito
+Google soltanto dopo consenso, lo rende predefinito e guida accesso e
+sincronizzazione. Tutte le micro-app usano poi il profilo Chrome nativo. Non è
+possibile né voluto precaricare credenziali.
 
 **Da realizzare:**
 
 1. **Autostart una tantum:** al primo login grafico dell'utente (flag tipo `~/.config/stradilabos/first-run-done` da creare a completamento), parte la sequenza di benvenuto già esistente, riordinata come da §3.2.
-2. **Passo Google:** dopo il passo rete, se in installazione era stato scelto «Workspace al primo avvio», aprire Chromium **sul profilo dedicato StradiLab** (lo stesso identico profilo/directory usato da `stradilabos-open-app`, così la sessione vale per tutte le micro-app) su **Gmail** (`https://mail.google.com`) — non Classroom: è il rilievo n. 2 del collaudo. La policy `AllowedDomainsForApps=istitutostradivari.it` già presente limita gli account proposti.
-3. **Sessione unica:** verificare e correggere il difetto rilevato al collaudo: dopo il login in Gmail, l'apertura di Classroom/Drive/Meet/Calendar **non deve** chiedere un nuovo login. Se oggi accade, la causa probabile è che le micro-app non usino tutte la stessa `--user-data-dir`/`--profile-directory`: uniformare il lancio in `stradilabos-open-app` e nel passo di benvenuto.
-4. **PC condiviso / sessione live:** comportamento invariato rispetto alla 0.2 — profilo Chromium in directory temporanea di sessione, cancellato al logout. La sequenza guidata resta uguale, ma senza persistenza.
+2. **Passo Chrome:** dopo la rete, mostrare «Scarica Chrome e accedi». Informare
+   su dimensione, origine Google, Termini e aggiornamenti; installare il
+   pacchetto stabile AMD64/ARM64 soltanto dopo consenso e autorizzazione.
+3. **Sessione unica:** rendere Chrome predefinito e avviare tutte le micro-app
+   senza una `--user-data-dir` parallela, così riutilizzano il profilo nativo.
+   Il passaggio diventa verde solo dopo la conferma esplicita di accesso e sync.
+4. **PC condiviso / sessione live:** sui PC condivisi il profilo è temporaneo e
+   cancellato al logout. In Live non installare Chrome, perché andrebbe perso;
+   Chromium resta il browser di riserva.
 5. **Riapertura:** dalla schermata di benvenuto deve restare possibile rifare l'accesso Google in ogni momento (cambio utente Google, sessione scaduta).
 
 **Criteri di accettazione:**
-- PC personale: al primo login l'utente si collega alla rete, fa un solo login Google in Gmail, e da lì in poi Classroom, Drive, Meet e le altre micro-app si aprono già autenticate — anche dopo il riavvio.
+- PC personale: al primo login l'utente installa Chrome, crea un solo profilo
+  Google, attiva la sincronizzazione e da lì in poi Classroom, Drive, Meet e
+  le altre micro-app si aprono già autenticate — anche dopo il riavvio.
 - PC condiviso: stesso percorso, ma tutto scompare al logout.
 - Nessuna credenziale nella ISO, nessun nuovo prompt di password Linux inatteso.
 
@@ -144,7 +159,7 @@ Identità visiva attuale: palette StradiLab (avorio/crema di fondo, bordeaux `#9
 
 1. **Tema GTK e finestre:** incorporare **WhiteSur-gtk-theme** (vinceliuice, GPL-3.0) nella ISO, in `config/includes.chroot/usr/share/themes/`, a versione fissata (release o commit specifico, annotato in un file `docs/TERZE-PARTI.md` con versione, origine e licenza). Non scaricare a runtime, non usare script d'installazione del tema upstream durante il boot: i file vanno vendorizzati al build (hook o commit diretto). Includere solo le varianti usate (chiara e scura standard), non tutte le decine di combinazioni: la ISO deve restare leggera.
 2. **Icone:** incorporare **WhiteSur-icon-theme** (stessa fonte e stesse regole). Verificare che le icone `stradilabos-*` esistenti (hub, centro app, ecc.) restino visibili e coerenti.
-3. **Dock:** aggiungere **Plank** (è in Debian) come dock inferiore con le app principali (Chromium, hub StradiLab, file, LibreOffice, Centro App, Guide §7), tema coordinato. In alternativa, se Plank desse problemi su Xfce/vecchi PC, un secondo pannello Xfce in basso con `dockbarx` o semplice barra icone — scegliere la soluzione più stabile e documentare il perché.
+3. **Dock:** aggiungere **Plank** (è in Debian) come dock inferiore con le app principali (browser predefinito, hub StradiLab, file, LibreOffice, Centro App, Guide §7), tema coordinato. In alternativa, se Plank desse problemi su Xfce/vecchi PC, un secondo pannello Xfce in basso con `dockbarx` o semplice barra icone — scegliere la soluzione più stabile e documentare il perché.
 4. **Pannello superiore:** sottile, scuro (come nello screenshot) oppure avorio con icone scure — in ogni caso risolvendo il **rilievo n. 3 del collaudo**: oggi le icone di stato (volume, rete, notifiche) sono bianche su fondo quasi bianco e illeggibili. Colore icone simboliche e orologio con contrasto AA sul fondo scelto, verificato anche in hover e focus.
 5. **Pulsanti finestra:** stile semaforo a sinistra (lo fornisce WhiteSur per xfwm4). Compositing xfwm4: solo ombre leggere, niente effetti costosi; la guardia xfwm4 esistente (`stradilabos-window-manager-guard`) non va rotta — leggere `docs/HANDOFF-CORREZIONE-XFWM4-2026-08-28.md` prima di toccare il WM.
 6. **Sfondo:** creare uno sfondo originale in stile «onde/gradiente Big Sur» con la palette StradiLab (bordeaux→navy→crema), in più risoluzioni, SVG sorgente + PNG esportati in `usr/share/backgrounds/`. **Non** copiare gli sfondi Apple.
@@ -170,7 +185,7 @@ Identità visiva attuale: palette StradiLab (avorio/crema di fondo, bordeaux `#9
 2. **Formato di ogni guida (rigido, max una schermata e mezza):** che cos'è (2 righe), a cosa serve a scuola in quell'indirizzo (2-3 righe), come si apre, «I primi 5 passi» concreti (aprire/creare, salvare dove, l'operazione tipica dell'indirizzo, esportare/stampare), 3 problemi comuni con soluzione, dove imparare di più (1 link ufficiale). Linguaggio da quattordicenne che non ha mai visto il programma; niente gergo; sempre «tu».
 3. **Veste grafica:** HTML statico con un solo CSS condiviso in stile StradiLab/tema 0.3, leggibile anche offline; niente framework, niente font remoti (font di sistema), immagini solo se essenziali e locali.
 4. **Struttura file:** `config/includes.chroot/usr/local/share/stradilabos/guide/` con `index.html` (elenco per indirizzo), `css/guida.css`, e una cartella o file per app (`krita.html`, `blender.html`, ...). Le guide di tutti gli indirizzi sono incluse nella ISO (è solo testo: pesa pochissimo).
-5. **Accesso:** voce «Guide» nel hub StradiLab e nel dock; apertura con Chromium `--app=file:///usr/local/share/stradilabos/guide/index.html`. Nel Centro App, a installazione completata di un pacchetto, il messaggio di esito include «Apri la guida» che porta all'indice filtrato sull'indirizzo installato (parametro `#indirizzo` gestito con poche righe di JS locale).
+5. **Accesso:** voce «Guide» nel hub StradiLab e nel dock; apertura con il browser disponibile su `file:///usr/local/share/stradilabos/guide/index.html`. Nel Centro App, a installazione completata di un pacchetto, il messaggio di esito include «Apri la guida» che porta all'indice filtrato sull'indirizzo installato (parametro `#indirizzo` gestito con poche righe di JS locale).
 6. **Aggiornabilità:** essendo file sotto `/usr/local/share/`, le guide si potranno correggere in futuro anche via canale aggiornamenti (serie in `update.sh`) senza ricostruire la ISO. Non implementare ora: basta non rendere i percorsi «speciali».
 
 **Criteri di accettazione:**

@@ -86,6 +86,7 @@ for path in \
     usr/local/share/stradilabos/guide/css/guida.css \
     usr/local/bin/stradilabos-guide \
     usr/local/bin/stradilabos-browser \
+    usr/local/bin/stradilabos-install-chrome \
     usr/local/bin/stradilabos-update-ui \
     usr/local/bin/stradilabos-wallpaper-contrast \
     usr/local/share/applications/stradilabos-guide.desktop \

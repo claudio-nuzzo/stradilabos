@@ -27,4 +27,15 @@
     </defaults>
     <annotate key="org.freedesktop.policykit.exec.path">/usr/local/bin/stradilabos-update</annotate>
   </action>
+  <action id="org.stradilab.stradilabos.install-chrome">
+    <description>Installare Google Chrome in StradiLabOS</description>
+    <message>Inserisci la password per scaricare e installare Google Chrome</message>
+    <icon_name>google-chrome</icon_name>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/local/bin/stradilabos-install-chrome</annotate>
+  </action>
 </policyconfig>

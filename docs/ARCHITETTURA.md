@@ -27,7 +27,7 @@ usare il terminale.
 L'utente vede sei azioni principali:
 
 1. connettersi alla rete;
-2. accedere a Google Workspace;
+2. scaricare Chrome, creare il profilo e accedere a Google Workspace;
 3. aprire StradiLab;
 4. consultare i servizi della scuola;
 5. scegliere le app consigliate per il proprio ruolo e indirizzo;
@@ -44,16 +44,19 @@ Debian resta dichiarata come base compatibile, non come identità principale.
 
 ## Web app StradiLab
 
-Ogni progetto attivo in `progetti.json` genera una voce `.desktop`. La voce
-avvia Chromium con `--app=<URL>`: niente barra degli indirizzi, una finestra
-separata e un comportamento simile a un'app locale.
+Ogni progetto attivo in `progetti.json` genera una voce `.desktop`. Dopo la
+configurazione guidata la voce avvia Google Chrome con `--app=<URL>`: niente
+barra degli indirizzi, una finestra separata e un comportamento simile a
+un'app locale. Chromium resta nella base Debian come ripiego.
 
-Tutte le finestre usano lo stesso profilo Chromium. È una scelta intenzionale:
-l'accesso Google istituzionale viene effettuato una volta e resta disponibile
-nelle diverse app StradiLab. I dati di accesso non sono incorporati nella ISO.
+Tutte le finestre usano il profilo Chrome nativo, senza una directory dati
+parallela. È una scelta intenzionale: l'accesso Google istituzionale e la
+sincronizzazione vengono attivati una volta e restano disponibili nelle diverse
+app StradiLab. I dati di accesso e il pacchetto proprietario Chrome non sono
+incorporati nella ISO.
 
 Su un PC personale il profilo del browser è persistente. Su un PC condiviso o
-avviato dalla chiavetta, Chromium usa invece una cartella temporanea nella
+avviato dalla chiavetta, il browser usa invece una cartella temporanea nella
 sessione dell'utente: Classroom, Drive e le altre app condividono l'accesso
 finché l'utente è collegato, ma i dati vengono eliminati alla chiusura della
 sessione. Questa distinzione evita che un laboratorio conservi l'account dello
@@ -64,7 +67,7 @@ riempire il desktop di icone.
 
 ## Software locale
 
-La ISO base include desktop, browser, Google Workspace e micro-app scolastiche,
+La ISO base include desktop, Chromium di riserva, Google Workspace e micro-app scolastiche,
 LibreOffice e gli strumenti comuni. Le applicazioni creative più pesanti non
 sono duplicate nella chiavetta: dopo l'installazione il Centro App preseleziona
 le raccolte corrispondenti al profilo scelto e le scarica da Debian o Flathub
@@ -103,6 +106,8 @@ partire dalle misure.
 - ARM64 è destinata soprattutto ai test su Mac Apple Silicon in Parallels e
   richiede verifiche specifiche prima dell'uso su altri dispositivi ARM;
 - le web app richiedono Internet;
+- Google Chrome richiede un download esplicito di circa 130–140 MB dopo
+  l'installazione del sistema;
 - Google Drive per desktop non è disponibile per Linux; StradilabOS usa Drive
   e gli editor Workspace nel browser;
 - la modalità live non conserva i dati tra un riavvio e l'altro senza una

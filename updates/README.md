@@ -21,7 +21,7 @@ Per i PC gia' installati con la 0.2 (una tantum, da terminale):
 
   sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/claudio-nuzzo/stradilabos/main/updates/install-updater.sh)"
 
-La serie 5 è cumulativa: aggiorna un PC 0.2/0.3 già installato senza cancellare
+La serie 6 è cumulativa: aggiorna un PC 0.2/0.3 già installato senza cancellare
 documenti o profili e senza richiedere una nuova ISO. Migra il profilo Xfce a
 una sola barra nativa in basso: menu StradiLabOS e launcher a sinistra, finestre
 al centro, rete/Bluetooth, notifiche, batteria, audio, orologio e menu di
@@ -29,10 +29,21 @@ sessione a destra. Blocco, cambio utente, riavvio, spegnimento e disconnessione
 restano disponibili. Il riferimento al plugin “(null)” viene eliminato e il
 vecchio file personale resta recuperabile come backup.
 
-La stessa serie rende eseguibile il comando Guide, registra il completamento
-del passaggio Google Workspace e apre il primo accesso in Chromium completo.
-Il browser e tutte le web app condividono lo stesso profilo: persistente sui PC
-personali, temporaneo su quelli condivisi. Gli sfondi hanno nomi visibili
+La stessa serie rende eseguibile il comando Guide e sostituisce il passaggio
+Chromium difettoso con «Scarica Chrome e accedi». Dopo consenso e password di
+amministrazione scarica da Google il pacchetto stabile AMD64 o ARM64, verifica
+nome e architettura, lo installa e rende Chrome il browser predefinito. Il
+Benvenuto guida poi l’utente nella creazione del profilo e nell’attivazione
+della sincronizzazione; il passaggio viene segnato come concluso soltanto dopo
+la conferma esplicita dell’utente. Gmail, Classroom, Drive, Meet e tutte le
+altre web app usano il profilo Chrome nativo: persistente sui PC personali,
+temporaneo su quelli condivisi. Chromium rimane disponibile come ripiego.
+
+La finestra Benvenuto calcola la propria altezza sull'area disponibile del
+monitor, resta ridimensionabile e permette di scorrere l'intera pagina: il
+pulsante «Controlla aggiornamenti» non può più finire nascosto sotto la barra.
+
+Gli sfondi hanno nomi visibili
 «StradiLabOS Crema» e «StradiLabOS Onde»; un controllo leggero sceglie testo
 scuro o chiaro per le icone del desktop in base alla luminosità dello sfondo.
 Le icone StradiLabOS restano differenziate e colorate.
@@ -45,7 +56,7 @@ aprono la stessa finestra grafica; se si rimanda, il timer di sistema continua
 a eseguire i controlli periodici.
 
 File del canale:
-- update.sh            payload cumulativo (serie corrente: 5)
+- update.sh            payload cumulativo (serie corrente: 6)
 - version.txt          numero di serie corrente
 - install-updater.sh   installazione una tantum su PC 0.2
 - stradilabos-update, stradilabos-update.service, stradilabos-update.timer

@@ -22,8 +22,8 @@
 8. Riproduzione e registrazione audio.
 9. Apertura di una web app StradiLab in finestra dedicata, senza richiesta del
    portachiavi né popup automatico di traduzione.
-10. Login `@istitutostradivari.it` condiviso fra due web app e rifiuto di un
-   account Google esterno al dominio.
+10. Nella sessione Live il pulsante Chrome spiega che l'installazione permanente
+    avverrà dopo avere installato StradiLabOS.
 11. Apertura e salvataggio di DOCX, XLSX, PPTX e PDF.
 12. Riconoscimento di una seconda chiavetta USB.
 13. Stampa o almeno rilevamento di una stampante di rete.
@@ -39,15 +39,20 @@ Usare inizialmente un disco di prova senza dati importanti.
 5. Riavvio senza chiavetta.
 6. Menu di avvio, caricamento e accesso con identità StradilabOS.
 7. Creazione e accesso dell'utente scelto.
-8. Se richiesto, pulsante Workspace principale al primo avvio e dominio
-   `@istitutostradivari.it` chiaramente indicato.
-9. Raccolte coerenti con il profilo già selezionate nel Centro App.
-10. Download e avvio di almeno una raccolta specialistica.
-11. Annullamento della richiesta di password del Centro App senza falso errore
+8. Pulsante «Scarica Chrome e accedi» principale al primo avvio, download
+   ufficiale riuscito su AMD64/ARM64 e Chrome impostato come predefinito.
+9. Creazione di un solo profilo `@istitutostradivari.it`, sincronizzazione
+   attivata e conferma manuale nel Benvenuto.
+10. Gmail, Classroom, Drive e Meet già autenticati senza un secondo login.
+11. Finestra Benvenuto ridimensionabile e pulsante aggiornamenti raggiungibile
+   anche a 1366×768 con la barra visibile.
+12. Raccolte coerenti con il profilo già selezionate nel Centro App.
+13. Download e avvio di almeno una raccolta specialistica.
+14. Annullamento della richiesta di password del Centro App senza falso errore
     di rete, seguito da una seconda prova con autorizzazione completata.
-12. Aggiornamenti da Synaptic.
-13. Riavvio e spegnimento grafici.
-14. Verifica che il launcher dell'installatore e le voci del terminale non
+15. Aggiornamenti da Synaptic.
+16. Riavvio e spegnimento grafici.
+17. Verifica che il launcher dell'installatore e le voci del terminale non
     compaiano nel menu ordinario.
 
 ## Controlli automatici prima della pubblicazione

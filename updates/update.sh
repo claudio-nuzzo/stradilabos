@@ -1,5 +1,5 @@
 #!/bin/bash
-# StradilabOS — aggiornamento cumulativo, serie 5 (2026-09-01)
+# StradilabOS — aggiornamento cumulativo, serie 6 (2026-09-01)
 #
 # È pensato anche per PC già installati con la 0.2: scarica soltanto il
 # materiale pubblicato dal repository ufficiale, aggiorna i file posseduti da
@@ -77,6 +77,15 @@ sync_0_3_interface() {
   for file in /usr/local/bin/stradilabos-*; do
     [ -f "$file" ] || continue
     chmod 0755 "$file" || return 1
+  done
+  for file in \
+      /usr/local/bin/stradilabos-browser \
+      /usr/local/bin/stradilabos-open-app \
+      /usr/local/bin/stradilabos-install-chrome; do
+    if [ ! -x "$file" ]; then
+      echo "ERRORE: componente Chrome mancante dopo l'aggiornamento: $file" >&2
+      return 1
+    fi
   done
   if [ -f "$update_tmpdir/stradilabos-update.new" ]; then
     install -m 0755 "$update_tmpdir/stradilabos-update.new" /usr/local/bin/stradilabos-update.nuovo || return 1
@@ -217,9 +226,9 @@ install_security_updates() {
   fi
 }
 
-echo "— Serie 5: desktop, accesso Google e aggiornamenti StradiLabOS 0.3 —"
+echo "— Serie 6: Chrome, profilo Google, desktop e aggiornamenti StradiLabOS 0.3 —"
 install_cookie_policy || exit 1
 sync_0_3_interface || exit 1
 repair_existing_panel_profiles || exit 1
 install_security_updates || exit 1
-echo "Barra, menu, contrasto, Guide, browser e aggiornamenti corretti: nessuna reinstallazione necessaria."
+echo "Chrome guidato, profilo Google condiviso, barra, Guide e aggiornamenti corretti: nessuna reinstallazione necessaria."

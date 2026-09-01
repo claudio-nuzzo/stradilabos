@@ -278,27 +278,102 @@ class DesktopDefaultsTests(unittest.TestCase):
             self.assertEqual(namespace["load_workspace_onboarding"](), "completed")
 
         text = welcome.read_text(encoding="utf-8")
-        self.assertIn("2 · Google Workspace configurato ✓", text)
-        self.assertIn('self.update_action(\n            self.apps_button', text)
+        self.assertIn("2 · Chrome e Google Workspace configurati ✓", text)
+        self.assertIn('self.update_action(\n                self.apps_button', text)
 
-    def test_workspace_opens_a_visible_shared_chromium_profile(self) -> None:
+    def test_workspace_installs_and_shares_the_native_chrome_profile(self) -> None:
         browser = CHROOT / "usr/local/bin/stradilabos-browser"
         open_app = CHROOT / "usr/local/bin/stradilabos-open-app"
+        installer = CHROOT / "usr/local/bin/stradilabos-install-chrome"
         chromium_launcher = (
             CHROOT
             / "etc/skel/.config/xfce4/panel/launcher-21/chromium.desktop"
         )
+        policy = CHROOT / "usr/share/polkit-1/actions/org.stradilab.stradilabos.policy"
+        welcome = (CHROOT / "usr/local/lib/stradilabos/welcome.py").read_text(
+            encoding="utf-8"
+        )
         self.assertTrue(os.access(browser, os.X_OK))
+        self.assertTrue(os.access(installer, os.X_OK))
+        installer_text = installer.read_text(encoding="utf-8")
+        self.assertIn("amd64) chrome_arch=amd64", installer_text)
+        self.assertIn("arm64) chrome_arch=arm64", installer_text)
+        self.assertIn("google-chrome-stable_current_${chrome_arch}.deb", installer_text)
+        self.assertIn('package_name" != "google-chrome-stable', installer_text)
+        self.assertIn('package_arch" != "$chrome_arch', installer_text)
+        self.assertIn("/usr/local/bin/stradilabos-install-chrome", policy.read_text(encoding="utf-8"))
+        self.assertIn("2 · Scarica Chrome e accedi", welcome)
+        self.assertIn("Attiva la sincronizzazione", welcome)
+        self.assertIn("CHROME_SETUP_DONE.exists()", welcome)
+        self.assertIn("[pkexec, installer]", welcome)
+        self.assertIn('"xdg-settings", "set", "default-web-browser", "google-chrome.desktop"', welcome)
+        self.assertIn("monitor.get_workarea()", welcome)
+        self.assertIn("self.stack.set_vhomogeneous(False)", welcome)
+        self.assertIn("home_scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)", welcome)
+        self.assertIn("profile_scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)", welcome)
+        self.assertIn("page.pack_end(footer, False, False, 0)", welcome)
         browser_text = browser.read_text(encoding="utf-8")
+        self.assertLess(browser_text.index("google-chrome-stable"), browser_text.index("chromium"))
         self.assertIn('--profile-directory=Default', browser_text)
         self.assertIn('user_data_dir="$config_dir/browser"', browser_text)
         self.assertIn('user_data_dir="$runtime_dir/stradilabos-browser-session"', browser_text)
         self.assertIn('"device_mode"[[:space:]]*:[[:space:]]*"shared"', browser_text)
         self.assertNotIn('--app=', browser_text)
-        self.assertIn('exec stradilabos-browser "$url"', open_app.read_text(encoding="utf-8"))
+        open_app_text = open_app.read_text(encoding="utf-8")
+        self.assertIn('exec stradilabos-browser "$url"', open_app_text)
+        self.assertLess(open_app_text.index("google-chrome-stable"), open_app_text.index("chromium"))
+        self.assertIn('--app="$url"', open_app_text)
         launcher_text = chromium_launcher.read_text(encoding="utf-8")
         self.assertIn("Exec=stradilabos-browser", launcher_text)
         self.assertIn("TryExec=stradilabos-browser", launcher_text)
+        self.assertIn("Icon=google-chrome", launcher_text)
+
+    def test_chrome_web_apps_reuse_native_personal_profile_and_isolate_shared_pc(self) -> None:
+        opener = CHROOT / "usr/local/bin/stradilabos-open-app"
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            fake_bin = root / "bin"
+            fake_bin.mkdir()
+            chrome = fake_bin / "google-chrome-stable"
+            chrome.write_text(
+                '#!/bin/sh\nprintf \'%s\\n\' "$@" > "$CHROME_ARGS_FILE"\n',
+                encoding="utf-8",
+            )
+            chrome.chmod(0o755)
+            config = root / "config" / "stradilabos"
+            config.mkdir(parents=True)
+            profile = config / "profiles.json"
+            args_file = root / "chrome-args"
+            environment = os.environ.copy()
+            environment.update(
+                {
+                    "PATH": f"{fake_bin}:/usr/bin:/bin",
+                    "HOME": str(root),
+                    "XDG_CONFIG_HOME": str(root / "config"),
+                    "XDG_RUNTIME_DIR": str(root / "runtime"),
+                    "CHROME_ARGS_FILE": str(args_file),
+                }
+            )
+
+            profile.write_text('{"device_mode":"personal"}\n', encoding="utf-8")
+            subprocess.run(
+                [str(opener), "https://mail.google.com/", "gmail"],
+                env=environment,
+                check=True,
+            )
+            personal_args = args_file.read_text(encoding="utf-8")
+            self.assertIn("--app=https://mail.google.com/", personal_args)
+            self.assertNotIn("--user-data-dir", personal_args)
+
+            profile.write_text('{"device_mode":"shared"}\n', encoding="utf-8")
+            subprocess.run(
+                [str(opener), "https://classroom.google.com/", "google-classroom"],
+                env=environment,
+                check=True,
+            )
+            shared_args = args_file.read_text(encoding="utf-8")
+            self.assertIn("--app=https://classroom.google.com/", shared_args)
+            self.assertIn(f"--user-data-dir={root / 'runtime' / 'stradilabos-browser-session'}", shared_args)
 
     def test_updates_are_available_from_welcome_and_the_main_menu(self) -> None:
         update_ui = CHROOT / "usr/local/bin/stradilabos-update-ui"
@@ -476,6 +551,12 @@ cp "${url#file://}" "$destination"
         self.assertTrue(os.access(wifi_test, os.X_OK))
         self.assertIn("stradilabos-wifi", wifi_test.read_text(encoding="utf-8"))
 
+        welcome_test = ROOT / "scripts/test_welcome_xvfb.sh"
+        self.assertTrue(os.access(welcome_test, os.X_OK))
+        welcome_test_text = welcome_test.read_text(encoding="utf-8")
+        self.assertIn("1024x600", welcome_test_text)
+        self.assertIn('xwininfo -display "$DISPLAY" -name "Benvenuto in StradiLabOS"', welcome_test_text)
+
     def test_grub_fixes_cover_live_installed_and_ota(self) -> None:
         theme = (CHROOT / "usr/share/grub/themes/stradilabos/theme.txt").read_text(
             encoding="utf-8"
@@ -486,7 +567,7 @@ cp "${url#file://}" "$destination"
         )
         self.assertIn('GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3"', installed)
         self.assertIn("quiet splash loglevel=3", (ROOT / "auto/config").read_text(encoding="utf-8"))
-        self.assertEqual((ROOT / "updates/version.txt").read_text(encoding="utf-8").strip(), "5")
+        self.assertEqual((ROOT / "updates/version.txt").read_text(encoding="utf-8").strip(), "6")
         update = (ROOT / "updates/update.sh").read_text(encoding="utf-8")
         self.assertIn("usr/share/grub/themes/stradilabos", update)
         self.assertIn("update-grub || return 1", update)

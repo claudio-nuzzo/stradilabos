@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
-Name=Browser
-Comment=Apri il browser per navigare
+Name=Google Chrome
+Comment=Apri Chrome o il browser disponibile
 Exec=stradilabos-browser
 TryExec=stradilabos-browser
-Icon=chromium
+Icon=google-chrome
 Terminal=false

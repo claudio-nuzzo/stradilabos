@@ -12,21 +12,48 @@ case "$url" in
         ;;
 esac
 
-# Il primo accesso mostra il browser completo e il profilo locale. Le aperture
-# successive in modalità app riutilizzano gli stessi cookie e la stessa
-# sessione tramite la medesima directory dati.
+# Il primo accesso mostra il browser completo. Le aperture successive usano
+# Chrome e il suo profilo nativo, quindi account e cookie sono davvero gli
+# stessi di Gmail, Classroom, Drive, Meet e delle altre web app.
 if [ "$app_id" = "workspace-login" ] && command -v stradilabos-browser >/dev/null 2>&1; then
     exec stradilabos-browser "$url"
 fi
 
-if command -v chromium >/dev/null 2>&1; then
-    config_dir=${XDG_CONFIG_HOME:-"$HOME/.config"}/stradilabos
-    profile_state=$config_dir/profiles.json
-    runtime_dir=${XDG_RUNTIME_DIR:-/tmp}
+config_dir=${XDG_CONFIG_HOME:-"$HOME/.config"}/stradilabos
+profile_state=$config_dir/profiles.json
+runtime_dir=${XDG_RUNTIME_DIR:-/tmp}
+temporary_profile=false
+if [ -e /run/live/medium ] \
+    || grep -qw 'boot=live' /proc/cmdline 2>/dev/null \
+    || grep -q '"device_mode"[[:space:]]*:[[:space:]]*"shared"' "$profile_state" 2>/dev/null; then
+    temporary_profile=true
+    user_data_dir="$runtime_dir/stradilabos-browser-session"
+fi
 
-    # Una sola directory di profilo per tutte le micro-app: su PC personale è
-    # persistente (la stessa usata dal passo Google del Benvenuto), su PC
-    # condiviso o sessione live è temporanea e scompare all'uscita.
+chrome=""
+if command -v google-chrome-stable >/dev/null 2>&1; then
+    chrome=google-chrome-stable
+elif command -v google-chrome >/dev/null 2>&1; then
+    chrome=google-chrome
+fi
+if [ -n "$chrome" ]; then
+    if [ "$temporary_profile" = true ]; then
+        exec "$chrome" \
+            --user-data-dir="$user_data_dir" \
+            --profile-directory=Default \
+            --app="$url" \
+            --class="StradilabOS-$app_id" \
+            --start-maximized
+    fi
+    exec "$chrome" \
+        --app="$url" \
+        --class="StradilabOS-$app_id" \
+        --start-maximized
+fi
+
+if command -v chromium >/dev/null 2>&1; then
+    # Ripiego Chromium: usa una directory coerente fra le micro-app. Chrome,
+    # quando installato, viene sempre preferito dal ramo precedente.
     if [ -e /run/live/medium ] \
         || grep -qw 'boot=live' /proc/cmdline 2>/dev/null \
         || grep -q '"device_mode"[[:space:]]*:[[:space:]]*"shared"' "$profile_state" 2>/dev/null; then

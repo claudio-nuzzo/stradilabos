@@ -22,10 +22,10 @@ scuola resta necessario il collaudo su hardware reale.
 - tema morbido e accessibile coordinato alla palette StradiLab, senza effetti
   pesanti per i computer meno recenti, esteso a menu di avvio, caricamento,
   schermata di accesso, pannello e sistema installato;
-- app StradiLab aperte in finestre Chromium dedicate, con una sola sessione
-  Google condivisa;
-- accesso guidato a Google Workspace e micro-app per Classroom, Drive, Gmail,
-  Meet, Calendar, Documenti, Fogli, Presentazioni e Moduli;
+- Google Chrome installabile con consenso dal Benvenuto, impostato come browser
+  predefinito e configurato con un solo profilo Google sincronizzato;
+- micro-app per Classroom, Drive, Gmail, Meet, Calendar, Documenti, Fogli,
+  Presentazioni e Moduli, tutte collegate allo stesso profilo Chrome;
 - Centro App grafico che, dopo l'installazione, scarica soltanto i pacchetti
   scelti per Liceo Artistico, Liceo Musicale, Liuteria, Moda e
   Arredo/Architettura;
@@ -42,7 +42,7 @@ scuola resta necessario il collaudo su hardware reale.
 Sono previste due edizioni a 64 bit: `amd64` per i PC Intel/AMD e `arm64` per
 Mac Apple Silicon e dispositivi ARM compatibili. I PC esclusivamente a 32 bit
 richiederanno una variante distinta, perché le immagini live ufficiali Debian
-e Chromium correnti non coprono bene quel segmento.
+e i browser correnti non coprono bene quel segmento.
 
 ## Struttura
 

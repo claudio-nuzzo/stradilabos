@@ -2,21 +2,24 @@
 
 ## Esperienza utente
 
-StradilabOS presenta un pulsante «Accedi a Google Workspace» e micro-app
+StradilabOS presenta un pulsante «Scarica Chrome e accedi» e micro-app
 dedicate per Classroom, Drive, Gmail, Meet, Calendar, Documenti, Fogli,
-Presentazioni e Moduli. Tutte vengono aperte dallo stesso profilo del browser:
-l'accesso con l'account `@istitutostradivari.it` si effettua una volta sola e
-vale per l'intera sessione.
+Presentazioni e Moduli. Sul sistema installato il pulsante scarica il pacchetto
+stabile ufficiale Google per AMD64 o ARM64, ne verifica nome e architettura,
+chiede l'autorizzazione amministrativa e imposta Chrome come browser
+predefinito. Tutte le web app vengono poi aperte dallo stesso profilo Chrome
+nativo: l'accesso con `@istitutostradivari.it` si effettua una volta sola.
 
 Durante l'installazione una pagina dedicata chiede se proporre l'accesso al
 primo avvio oppure lasciarlo per un secondo momento. Nel primo caso il pulsante
-Workspace è l'azione principale della schermata di benvenuto; nel secondo lo
+Chrome/Workspace è l'azione principale della schermata di benvenuto; nel secondo lo
 resta disponibile nella barra e nel menu senza interrompere la configurazione.
 
-Chromium riceve inoltre il criterio gestito `AllowedDomainsForApps` con valore
-`istitutostradivari.it`: i servizi Google accettano l'accesso degli account del
-dominio scolastico e non propongono account personali. Il criterio è verificabile
-graficamente aprendo `chrome://policy`.
+Il Benvenuto spiega i passaggi «Accedi a Chrome» e «Attiva la
+sincronizzazione», poi attende una conferma esplicita: aprire Gmail non viene
+più interpretato erroneamente come configurazione conclusa. Chromium conserva
+il criterio locale `AllowedDomainsForApps=istitutostradivari.it` quando viene
+usato come browser di riserva.
 
 Nessuna password, cookie o token Google viene inserito nella ISO master.
 Google Drive per desktop non esiste per Linux: file ed editor sono quindi usati
@@ -26,8 +29,8 @@ nel browser, affiancati da LibreOffice per il lavoro locale.
 
 Durante l'installazione viene chiesto il tipo di utilizzo:
 
-- **personale o assegnato**: il profilo Chromium resta nella cartella utente e
-  mantiene l'accesso tra i riavvii;
+- **personale o assegnato**: Chrome usa il proprio profilo nativo nella cartella
+  utente e mantiene accesso e sincronizzazione tra i riavvii;
 - **condiviso o di laboratorio**: il profilo viene creato nella cartella
   temporanea della sessione e scompare al logout o allo spegnimento.
 
@@ -42,16 +45,14 @@ l'amministratore genera un token dalla Console di amministrazione e registra
 ogni browser. Può quindi applicare criteri come accesso obbligatorio e
 limitazione degli account al dominio della scuola.
 
-La gestione completa dell'inventario dei browser richiede il browser Google
-Chrome ufficiale e un token amministrativo. Il prototipo usa Debian Chromium,
-applica localmente il vincolo di dominio e non incorpora alcun token. Una
-successiva edizione «gestita» potrà:
+La gestione completa dell'inventario richiede un token amministrativo. Il
+prototipo installa Chrome soltanto dopo consenso, ma non incorpora token né
+registra automaticamente il browser. Una successiva edizione «gestita» potrà:
 
-1. includere Google Chrome con una decisione esplicita sulla licenza;
-2. ricevere il token da un archivio privato durante la build o dopo
+1. ricevere il token da un archivio privato dopo
    l'installazione;
-3. confermare centralmente il criterio di accesso del dominio;
-4. verificare i criteri in `chrome://policy` e il browser nella Console di
+2. confermare centralmente il criterio di accesso del dominio;
+3. verificare i criteri in `chrome://policy` e il browser nella Console di
    amministrazione.
 
 Il token non deve essere pubblicato nel repository né in una ISO liberamente

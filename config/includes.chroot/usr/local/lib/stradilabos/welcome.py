@@ -7,6 +7,7 @@ import json
 import shutil
 import subprocess
 import sys
+import threading
 from pathlib import Path
 
 import gi
@@ -31,6 +32,7 @@ GTK_ARGV = [
 CONFIG_DIR = Path.home() / ".config" / "stradilabos"
 FIRST_RUN_DONE = CONFIG_DIR / "first-run-done"
 PROFILE_STATE = CONFIG_DIR / "profiles.json"
+CHROME_SETUP_DONE = CONFIG_DIR / "chrome-setup-done"
 PACKS_CATALOG = Path("/usr/local/share/stradilabos/packs.json")
 ADDRESS_IDS = ("artistico", "musicale", "liuteria", "moda", "arredo")
 ROLE_IDS = ("student", "teacher", "staff", "base")
@@ -159,7 +161,17 @@ def store_workspace_onboarding(mode: str) -> None:
 class WelcomeWindow(Gtk.ApplicationWindow):
     def __init__(self, application: Gtk.Application):
         super().__init__(application=application, title="Benvenuto in StradiLabOS")
-        self.set_default_size(860, 720)
+        display = Gdk.Display.get_default()
+        monitor = display.get_primary_monitor() if display else None
+        if monitor is None and display and display.get_n_monitors() > 0:
+            monitor = display.get_monitor(0)
+        if monitor:
+            workarea = monitor.get_workarea()
+            width = max(560, min(860, workarea.width - 48))
+            height = max(480, min(680, workarea.height - 48))
+            self.set_default_size(width, height)
+        else:
+            self.set_default_size(820, 640)
         self.set_resizable(True)
         self.set_position(Gtk.WindowPosition.CENTER)
         self.set_icon_name("stradilabos")
@@ -168,6 +180,7 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         self.profiles = load_profiles()
         self.device_mode = load_device_mode()
         self.workspace_onboarding = load_workspace_onboarding()
+        self.chrome_onboarding_opened = False
         self.profile_checks: dict[str, Gtk.CheckButton] = {}
         self.role_buttons: dict[str, Gtk.RadioButton] = {}
 
@@ -179,6 +192,8 @@ class WelcomeWindow(Gtk.ApplicationWindow):
 
         self.stack = Gtk.Stack()
         self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
+        self.stack.set_hhomogeneous(False)
+        self.stack.set_vhomogeneous(False)
         self.stack.add_named(self.build_home_page(), "home")
         self.stack.add_named(self.build_profile_page(), "profiles")
         self.add(self.stack)
@@ -280,17 +295,26 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         # installazione e solo a rete attiva.
         google_primary = (
             not live_session
-            and self.workspace_onboarding == "first-boot"
+            and not CHROME_SETUP_DONE.exists()
             and connected
         )
-        workspace_completed = self.workspace_onboarding == "completed"
+        chrome_installed = self.chrome_command() is not None
+        workspace_completed = CHROME_SETUP_DONE.exists() and chrome_installed
         self.workspace_button = self.action(
-            "2 · Google Workspace configurato ✓"
+            "2 · Chrome e Google Workspace configurati ✓"
             if workspace_completed
-            else "2 · Accedi a Google Workspace",
-            "Accesso condiviso tra posta, Classroom, Drive, Meet e le altre app"
+            else (
+                "2 · Apri Chrome e configura il profilo"
+                if chrome_installed
+                else "2 · Scarica Chrome e accedi"
+            ),
+            "Profilo Chrome e accesso condivisi tra Gmail, Classroom, Drive, Meet e le altre app"
             if workspace_completed
-            else "Solo account @istitutostradivari.it · posta, Classroom, Drive, Meet e le altre app",
+            else (
+                "Accedi con @istitutostradivari.it e attiva la sincronizzazione"
+                if chrome_installed
+                else "Installa il browser Google, crea il profilo e attiva la sincronizzazione"
+            ),
             self.open_workspace,
             primary=google_primary,
         )
@@ -305,7 +329,10 @@ class WelcomeWindow(Gtk.ApplicationWindow):
                 "3 · Scarica le app consigliate",
                 "Il Centro App segue il profilo scelto; per il download serve Internet",
                 ["stradilabos-app-center"],
-                primary=self.workspace_onboarding in {"later", "completed"} and connected,
+                primary=(
+                    self.workspace_onboarding == "later" or CHROME_SETUP_DONE.exists()
+                )
+                and connected,
             )
             root.pack_start(
                 self.apps_button,
@@ -357,8 +384,20 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         footer.pack_start(self.status_footer, True, True, 0)
         footer.pack_start(check_now, False, False, 0)
         footer.pack_end(close, False, False, 0)
-        root.pack_end(footer, False, False, 3)
-        return root
+        footer.set_margin_start(32)
+        footer.set_margin_end(32)
+        footer.set_margin_top(8)
+        footer.set_margin_bottom(18)
+        # Su portatili 1366×768 il pannello e le decorazioni riducono l'area
+        # utile: il contenuto scorre, mentre aggiornamenti e chiusura restano
+        # sempre visibili in un piè di pagina fisso sopra la barra.
+        home_scroller = Gtk.ScrolledWindow()
+        home_scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        home_scroller.add(root)
+        page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        page.pack_start(home_scroller, True, True, 0)
+        page.pack_end(footer, False, False, 0)
+        return page
 
     def build_profile_page(self) -> Gtk.Widget:
         root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
@@ -462,8 +501,17 @@ class WelcomeWindow(Gtk.ApplicationWindow):
         save.get_style_context().add_class("suggested-action")
         save.connect("clicked", self.save_profiles)
         footer.pack_end(save, False, False, 0)
-        root.pack_end(footer, False, False, 0)
-        return root
+        footer.set_margin_start(32)
+        footer.set_margin_end(32)
+        footer.set_margin_top(8)
+        footer.set_margin_bottom(18)
+        profile_scroller = Gtk.ScrolledWindow()
+        profile_scroller.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        profile_scroller.add(root)
+        page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        page.pack_start(profile_scroller, True, True, 0)
+        page.pack_end(footer, False, False, 0)
+        return page
 
     def update_profile_summary(self) -> None:
         titles = {pack["id"]: pack["title"] for pack in self.packs}
@@ -650,28 +698,196 @@ class WelcomeWindow(Gtk.ApplicationWindow):
             if open_nets:
                 self.open_network_center()
             return
-        if not self.launch(["stradilabos-open-app", WORKSPACE_LOGIN, "workspace-login"]):
+
+        chrome = self.chrome_command()
+        if not chrome:
+            if is_live():
+                self.message(
+                    "Installa prima StradiLabOS",
+                    "Nella sessione di prova Chrome scomparirebbe allo spegnimento. "
+                    "Installa StradiLabOS sul computer: al primo avvio questo pulsante "
+                    "scaricherà Chrome e configurerà l’account.",
+                    Gtk.MessageType.INFO,
+                )
+                return
+            accepted = self.choice(
+                "Scaricare Google Chrome?",
+                "Verrà scaricato dal sito ufficiale Google il pacchetto adatto a questo "
+                "computer (circa 130–140 MB). Chrome diventerà il browser predefinito "
+                "e aggiungerà il proprio canale per gli aggiornamenti di sicurezza.\n\n"
+                "Al primo avvio Google mostrerà i propri Termini di servizio. "
+                "Chromium resterà installato soltanto come browser di riserva.",
+                "Scarica e installa",
+                "Annulla",
+            )
+            if accepted:
+                self.start_chrome_install()
             return
-        if is_live():
+
+        self.make_chrome_default()
+        if CHROME_SETUP_DONE.exists():
+            self.launch(["stradilabos-open-app", WORKSPACE_LOGIN, "workspace-login"])
             return
-        try:
-            store_workspace_onboarding("completed")
-        except (OSError, TypeError, ValueError, json.JSONDecodeError) as error:
-            self.message("Accesso aperto, stato non salvato", str(error))
+
+        if self.chrome_onboarding_opened:
+            completed = self.choice(
+                "Profilo Chrome configurato?",
+                "Conferma soltanto dopo avere eseguito in Chrome l’accesso con "
+                "l’account @istitutostradivari.it e avere attivato la sincronizzazione.",
+                "Sì, ho completato",
+                "Non ancora",
+            )
+            if completed:
+                self.complete_workspace_onboarding()
             return
-        self.workspace_onboarding = "completed"
+
+        self.begin_chrome_onboarding()
+
+    @staticmethod
+    def chrome_command() -> str | None:
+        for command in ("google-chrome-stable", "google-chrome"):
+            executable = shutil.which(command)
+            if executable:
+                return executable
+        return None
+
+    def start_chrome_install(self) -> None:
+        installer = shutil.which("stradilabos-install-chrome")
+        pkexec = shutil.which("pkexec")
+        if not installer or not pkexec:
+            self.message(
+                "Installazione non disponibile",
+                "Il programma per installare Chrome non è presente o è incompleto.",
+            )
+            return
+        self.workspace_button.set_sensitive(False)
         self.update_action(
             self.workspace_button,
-            "2 · Google Workspace configurato ✓",
-            "Accesso condiviso tra posta, Classroom, Drive, Meet e le altre app",
-            primary=False,
-        )
-        self.update_action(
-            self.apps_button,
-            "3 · Scarica le app consigliate",
-            "Il Centro App segue il profilo scelto; per il download serve Internet",
+            "2 · Download e installazione di Chrome in corso…",
+            "Attendi il completamento e autorizza l’operazione quando richiesto",
             primary=True,
         )
+        threading.Thread(
+            target=self.run_chrome_install,
+            args=(pkexec, installer),
+            daemon=True,
+        ).start()
+
+    def run_chrome_install(self, pkexec: str, installer: str) -> None:
+        try:
+            completed = subprocess.run(
+                [pkexec, installer],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                check=False,
+            )
+            output = completed.stdout.strip()
+            returncode = completed.returncode
+        except OSError as error:
+            output = str(error)
+            returncode = 1
+        GLib.idle_add(self.finish_chrome_install, returncode, output)
+
+    def finish_chrome_install(self, returncode: int, output: str) -> bool:
+        self.workspace_button.set_sensitive(True)
+        if returncode in (126, 127):
+            self.restore_workspace_action()
+            self.message(
+                "Installazione annullata",
+                "Google Chrome non è stato installato. Puoi riprovare quando vuoi.",
+                Gtk.MessageType.INFO,
+            )
+            return False
+        if returncode != 0 or not self.chrome_command():
+            self.restore_workspace_action()
+            detail = "\n".join(output.splitlines()[-5:]) or "Errore sconosciuto."
+            self.message("Chrome non è stato installato", detail)
+            return False
+        self.make_chrome_default()
+        self.begin_chrome_onboarding()
+        return False
+
+    def begin_chrome_onboarding(self) -> None:
+        proceed = self.choice(
+            "Configura un solo profilo Google Chrome",
+            "1. In Chrome scegli «Accedi a Chrome».\n"
+            "2. Usa l’account @istitutostradivari.it.\n"
+            "3. Scegli «Attiva la sincronizzazione» e conferma.\n"
+            "4. Torna qui e premi di nuovo il pulsante rosso per confermare.\n\n"
+            "Da quel momento Gmail, Classroom, Drive, Meet e le altre web app "
+            "StradiLabOS useranno lo stesso account.",
+            "Apri Google Chrome",
+            "Annulla",
+        )
+        if not proceed:
+            self.restore_workspace_action()
+            return
+        if not self.launch(["stradilabos-browser", WORKSPACE_LOGIN]):
+            self.restore_workspace_action()
+            return
+        self.chrome_onboarding_opened = True
+        self.update_action(
+            self.workspace_button,
+            "2 · Completa accesso e sincronizzazione in Chrome",
+            "Quando hai finito, torna qui e premi per confermare",
+            primary=True,
+        )
+
+    def make_chrome_default(self) -> None:
+        if not self.chrome_command():
+            return
+        for command in (
+            ["xdg-settings", "set", "default-web-browser", "google-chrome.desktop"],
+            ["xdg-mime", "default", "google-chrome.desktop", "x-scheme-handler/http"],
+            ["xdg-mime", "default", "google-chrome.desktop", "x-scheme-handler/https"],
+        ):
+            if shutil.which(command[0]):
+                subprocess.run(
+                    command,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                )
+
+    def restore_workspace_action(self) -> None:
+        chrome_installed = self.chrome_command() is not None
+        self.update_action(
+            self.workspace_button,
+            "2 · Apri Chrome e configura il profilo"
+            if chrome_installed
+            else "2 · Scarica Chrome e accedi",
+            "Accedi con @istitutostradivari.it e attiva la sincronizzazione"
+            if chrome_installed
+            else "Installa il browser Google, crea il profilo e attiva la sincronizzazione",
+            primary=self.nm_is_connected() and not is_live(),
+        )
+
+    def complete_workspace_onboarding(self) -> None:
+        try:
+            store_workspace_onboarding("completed")
+            CHROME_SETUP_DONE.parent.mkdir(parents=True, exist_ok=True)
+            temporary = CHROME_SETUP_DONE.with_suffix(".tmp")
+            temporary.write_text("completed\n", encoding="utf-8")
+            temporary.replace(CHROME_SETUP_DONE)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError) as error:
+            self.message("Configurazione completata, stato non salvato", str(error))
+            return
+        self.workspace_onboarding = "completed"
+        self.chrome_onboarding_opened = False
+        self.update_action(
+            self.workspace_button,
+            "2 · Chrome e Google Workspace configurati ✓",
+            "Profilo Chrome e accesso condivisi tra Gmail, Classroom, Drive, Meet e le altre app",
+            primary=False,
+        )
+        if hasattr(self, "apps_button"):
+            self.update_action(
+                self.apps_button,
+                "3 · Scarica le app consigliate",
+                "Il Centro App segue il profilo scelto; per il download serve Internet",
+                primary=True,
+            )
 
     def install_and_check(self, *_args) -> None:
         if not shutil.which("calamares-install-debian"):

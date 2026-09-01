@@ -48,7 +48,11 @@ jobs:
               shellcheck scripts/validate_debian_packages.sh
               shellcheck scripts/test_panel_xvfb.sh
               shellcheck scripts/test_wifi_xvfb.sh
+              shellcheck scripts/test_welcome_xvfb.sh
               shellcheck config/includes.chroot/usr/local/bin/stradilabos-repair-panel
+              shellcheck config/includes.chroot/usr/local/bin/stradilabos-install-chrome
+              shellcheck config/includes.chroot/usr/local/bin/stradilabos-browser
+              shellcheck config/includes.chroot/usr/local/bin/stradilabos-open-app
               shellcheck updates/update.sh
               python3 -m unittest discover -s tests -v
               python3 scripts/validate_project.py
@@ -61,6 +65,7 @@ jobs:
               timeout 90s sh scripts/test_window_manager_xvfb.sh
               timeout 60s sh scripts/test_panel_xvfb.sh
               timeout 60s sh scripts/test_wifi_xvfb.sh
+              timeout 60s sh scripts/test_welcome_xvfb.sh
             '
 
   validate-arm64:
@@ -94,6 +99,7 @@ jobs:
               timeout 90s sh scripts/test_window_manager_xvfb.sh
               timeout 60s sh scripts/test_panel_xvfb.sh
               timeout 60s sh scripts/test_wifi_xvfb.sh
+              timeout 60s sh scripts/test_welcome_xvfb.sh
             '
 
   preflight-xfce:
