@@ -424,6 +424,25 @@ class DesktopDefaultsTests(unittest.TestCase):
             self.assertTrue(alias.is_symlink())
             self.assertEqual(os.readlink(alias), target)
 
+        wallpaper_dir = CHROOT / "usr/share/backgrounds/stradilabos"
+        study_wallpapers = {
+            "StradiLabOS-Liceo-Artistico.jpg",
+            "StradiLabOS-Liceo-Musicale.jpg",
+            "StradiLabOS-Liuteria.jpg",
+            "StradiLabOS-Moda.jpg",
+            "StradiLabOS-Arredo-e-Architettura.jpg",
+        }
+        for visible_name in study_wallpapers:
+            path = wallpaper_dir / visible_name
+            with self.subTest(wallpaper=visible_name):
+                self.assertTrue(path.exists())
+                self.assertEqual(path.read_bytes()[:2], b"\xff\xd8")
+                self.assertLessEqual(path.stat().st_size, 1_000_000)
+        self.assertLessEqual(
+            sum((wallpaper_dir / name).stat().st_size for name in study_wallpapers),
+            2_500_000,
+        )
+
     def test_built_image_validator_tracks_the_current_desktop_theme(self) -> None:
         text = (ROOT / "scripts/validate_built_image.sh").read_text(encoding="utf-8")
         self.assertIn("usr/share/themes/WhiteSur-Light/xfwm4/themerc", text)
@@ -431,6 +450,8 @@ class DesktopDefaultsTests(unittest.TestCase):
         self.assertIn("usr/share/icons/WhiteSur/index.theme", text)
         self.assertIn('value="WhiteSur-Light"', text)
         self.assertNotIn("usr/share/themes/StradiLab/xfwm4/themerc", text)
+        self.assertIn("StradiLabOS-Liceo-Artistico.jpg", text)
+        self.assertIn("StradiLabOS-Arredo-e-Architettura.jpg", text)
 
     def test_update_client_applies_a_local_series_once(self) -> None:
         """Un PC già installato applica una serie senza ricostruire una ISO."""
@@ -496,6 +517,63 @@ cp "${url#file://}" "$destination"
             failed = subprocess.run(["bash", str(client)], env=environment, check=False)
             self.assertNotEqual(failed.returncode, 0)
             self.assertEqual((state / "update-serial").read_text(encoding="utf-8").strip(), "42")
+
+    def test_series_seven_installs_only_verified_wallpapers(self) -> None:
+        """Da serie 6 l'OTA evita l'archivio completo e installa i cinque JPEG."""
+        payload = ROOT / "updates/update.sh"
+        wallpaper_source = CHROOT / "usr/share/backgrounds/stradilabos"
+        names = (
+            "StradiLabOS-Liceo-Artistico.jpg",
+            "StradiLabOS-Liceo-Musicale.jpg",
+            "StradiLabOS-Liuteria.jpg",
+            "StradiLabOS-Moda.jpg",
+            "StradiLabOS-Arredo-e-Architettura.jpg",
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            destination = root / "installed-wallpapers"
+            fake_bin = root / "bin"
+            fake_bin.mkdir()
+            fake_curl = fake_bin / "curl"
+            fake_curl.write_text(
+                """#!/bin/sh
+destination=
+url=
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        -o) destination=$2; shift 2 ;;
+        --connect-timeout) shift 2 ;;
+        -*) shift ;;
+        *) url=$1; shift ;;
+    esac
+done
+cp "${url#file://}" "$destination"
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = {
+                **os.environ,
+                "PATH": f"{fake_bin}:{os.environ['PATH']}",
+                "STRADILABOS_UPDATE_LOCAL_SERIAL": "6",
+                "STRADILABOS_UPDATE_SOURCE_ARCHIVE_URL": "file:///non-esiste.tar.gz",
+                "STRADILABOS_WALLPAPER_BASE_URL": wallpaper_source.as_uri(),
+                "STRADILABOS_WALLPAPER_INSTALL_DIR": str(destination),
+            }
+            result = subprocess.run(
+                ["bash", str(payload)],
+                env=environment,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual({path.name for path in destination.iterdir()}, set(names))
+            for name in names:
+                self.assertEqual(
+                    (destination / name).read_bytes(),
+                    (wallpaper_source / name).read_bytes(),
+                )
 
     def test_window_manager_guard_is_installed_and_bounded(self) -> None:
         guard = CHROOT / "usr/local/bin/stradilabos-window-manager-guard"
@@ -567,7 +645,7 @@ cp "${url#file://}" "$destination"
         )
         self.assertIn('GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3"', installed)
         self.assertIn("quiet splash loglevel=3", (ROOT / "auto/config").read_text(encoding="utf-8"))
-        self.assertEqual((ROOT / "updates/version.txt").read_text(encoding="utf-8").strip(), "6")
+        self.assertEqual((ROOT / "updates/version.txt").read_text(encoding="utf-8").strip(), "7")
         update = (ROOT / "updates/update.sh").read_text(encoding="utf-8")
         self.assertIn("usr/share/grub/themes/stradilabos", update)
         self.assertIn("update-grub || return 1", update)
@@ -577,6 +655,9 @@ cp "${url#file://}" "$destination"
         self.assertIn("stradilabos-repair-panel --force", update)
         self.assertIn('chmod 0755 "$file"', update)
         self.assertIn("launcher-21/chromium.desktop", update)
+        self.assertIn("install_study_wallpapers", update)
+        self.assertIn('if [ "$LOCAL_SERIES" -lt 6 ]', update)
+        self.assertIn("STRADILABOS_WALLPAPER_BASE_URL", update)
 
     def test_container_workflows_fail_on_intermediate_errors(self) -> None:
         workflows = ROOT / ".github/workflows"

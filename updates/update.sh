@@ -1,5 +1,5 @@
 #!/bin/bash
-# StradilabOS — aggiornamento cumulativo, serie 6 (2026-09-01)
+# StradilabOS — aggiornamento cumulativo, serie 7 (2026-09-01)
 #
 # È pensato anche per PC già installati con la 0.2: scarica soltanto il
 # materiale pubblicato dal repository ufficiale, aggiorna i file posseduti da
@@ -7,6 +7,10 @@
 set -u
 
 SOURCE_ARCHIVE_URL="${STRADILABOS_UPDATE_SOURCE_ARCHIVE_URL:-https://codeload.github.com/claudio-nuzzo/stradilabos/tar.gz/refs/heads/main}"
+WALLPAPER_BASE_URL="${STRADILABOS_WALLPAPER_BASE_URL:-https://raw.githubusercontent.com/claudio-nuzzo/stradilabos/main/config/includes.chroot/usr/share/backgrounds/stradilabos}"
+WALLPAPER_INSTALL_DIR="${STRADILABOS_WALLPAPER_INSTALL_DIR:-/usr/share/backgrounds/stradilabos}"
+LOCAL_SERIES="${STRADILABOS_UPDATE_LOCAL_SERIAL:-$(cat /var/lib/stradilabos/update-serial 2>/dev/null || echo 0)}"
+case "$LOCAL_SERIES" in (*[!0-9]*|'') LOCAL_SERIES=0;; esac
 update_tmpdir=$(mktemp -d)
 trap 'rm -rf "$update_tmpdir"' EXIT
 
@@ -17,6 +21,52 @@ fetch() {
   else
     wget -q --timeout=20 -O "$2" "$1"
   fi
+}
+
+install_study_wallpapers() {
+  # La serie grafica pesa circa 2 MB: sui PC già alla serie 6 viene scaricata
+  # direttamente, senza trasferire di nuovo l'intero repository e gli asset
+  # WhiteSur. Gli hash impediscono di installare download troncati o inattesi.
+  local expected name downloaded actual
+  while read -r expected name; do
+    [ -n "$expected" ] || continue
+    downloaded="$update_tmpdir/$name"
+    if ! fetch "$WALLPAPER_BASE_URL/$name" "$downloaded"; then
+      echo "ERRORE: download dello sfondo $name non riuscito; la serie sarà ritentata." >&2
+      return 1
+    fi
+    if command -v sha256sum >/dev/null 2>&1; then
+      actual=$(sha256sum "$downloaded" | awk '{print $1}')
+    elif command -v shasum >/dev/null 2>&1; then
+      actual=$(shasum -a 256 "$downloaded" | awk '{print $1}')
+    else
+      echo "ERRORE: verifica SHA-256 non disponibile; nessuno sfondo installato." >&2
+      return 1
+    fi
+    if [ "$actual" != "$expected" ]; then
+      echo "ERRORE: verifica SHA-256 fallita per $name; nessuno sfondo installato." >&2
+      return 1
+    fi
+  done <<'WALLPAPERS'
+78a6a636a0e4c964272ff0d6346c0156a43e11374b5d7ee5fec32a55f8eb5d62 StradiLabOS-Arredo-e-Architettura.jpg
+6984911e6c5f0c49d1e7f6b6d7318e1191d278d489c1c49123f89ed1edb093cf StradiLabOS-Liceo-Artistico.jpg
+40f3a87bceb4a402578dc3ef7cc9eae31ee456895c2ea9441ce76c2f5a819e4e StradiLabOS-Liceo-Musicale.jpg
+3789ea04f8e7a9bc183f21907e745c08d42d2e97ee471c383e65530ec6543d15 StradiLabOS-Liuteria.jpg
+e59c99ebef2ed7c24e4c73a6acabcd68be457e980ca89f737a5a9a2f0299d299 StradiLabOS-Moda.jpg
+WALLPAPERS
+
+  install -d -m 0755 "$WALLPAPER_INSTALL_DIR" || return 1
+  while read -r _ name; do
+    [ -n "$name" ] || continue
+    install -m 0644 "$update_tmpdir/$name" "$WALLPAPER_INSTALL_DIR/.$name.nuovo" || return 1
+    mv -f "$WALLPAPER_INSTALL_DIR/.$name.nuovo" "$WALLPAPER_INSTALL_DIR/$name" || return 1
+  done <<'WALLPAPERS'
+78a6a636a0e4c964272ff0d6346c0156a43e11374b5d7ee5fec32a55f8eb5d62 StradiLabOS-Arredo-e-Architettura.jpg
+6984911e6c5f0c49d1e7f6b6d7318e1191d278d489c1c49123f89ed1edb093cf StradiLabOS-Liceo-Artistico.jpg
+40f3a87bceb4a402578dc3ef7cc9eae31ee456895c2ea9441ce76c2f5a819e4e StradiLabOS-Liceo-Musicale.jpg
+3789ea04f8e7a9bc183f21907e745c08d42d2e97ee471c383e65530ec6543d15 StradiLabOS-Liuteria.jpg
+e59c99ebef2ed7c24e4c73a6acabcd68be457e980ca89f737a5a9a2f0299d299 StradiLabOS-Moda.jpg
+WALLPAPERS
 }
 
 install_cookie_policy() {
@@ -226,9 +276,12 @@ install_security_updates() {
   fi
 }
 
-echo "— Serie 6: Chrome, profilo Google, desktop e aggiornamenti StradiLabOS 0.3 —"
-install_cookie_policy || exit 1
-sync_0_3_interface || exit 1
-repair_existing_panel_profiles || exit 1
-install_security_updates || exit 1
-echo "Chrome guidato, profilo Google condiviso, barra, Guide e aggiornamenti corretti: nessuna reinstallazione necessaria."
+echo "— Serie 7: sfondi per indirizzo e aggiornamenti StradiLabOS 0.3 —"
+if [ "$LOCAL_SERIES" -lt 6 ]; then
+  install_cookie_policy || exit 1
+  sync_0_3_interface || exit 1
+  repair_existing_panel_profiles || exit 1
+  install_security_updates || exit 1
+fi
+install_study_wallpapers || exit 1
+echo "Installati i cinque sfondi StradiLabOS per indirizzo: nessuna reinstallazione necessaria."

@@ -21,7 +21,7 @@ Per i PC gia' installati con la 0.2 (una tantum, da terminale):
 
   sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/claudio-nuzzo/stradilabos/main/updates/install-updater.sh)"
 
-La serie 6 è cumulativa: aggiorna un PC 0.2/0.3 già installato senza cancellare
+La serie 7 è cumulativa: aggiorna un PC 0.2/0.3 già installato senza cancellare
 documenti o profili e senza richiedere una nuova ISO. Migra il profilo Xfce a
 una sola barra nativa in basso: menu StradiLabOS e launcher a sinistra, finestre
 al centro, rete/Bluetooth, notifiche, batteria, audio, orologio e menu di
@@ -48,6 +48,12 @@ Gli sfondi hanno nomi visibili
 scuro o chiaro per le icone del desktop in base alla luminosità dello sfondo.
 Le icone StradiLabOS restano differenziate e colorate.
 
+La serie 7 aggiunge anche cinque sfondi originali, uno per Liceo Artistico,
+Liceo Musicale, Liuteria, Moda e Arredo/Architettura. Sui PC che hanno già la
+serie 6 scarica soltanto i cinque JPEG (circa 2 MB complessivi), verifica ogni
+file con SHA-256 e lo installa in modo atomico: non riscarica l'archivio pesante
+del repository.
+
 Dopo una nuova connessione Wi-Fi, il selettore StradiLabOS propone di scaricare
 e installare subito gli aggiornamenti sul sistema installato. Si può anche usare
 in qualunque momento il pulsante «Controlla aggiornamenti» nel Benvenuto oppure
@@ -56,7 +62,7 @@ aprono la stessa finestra grafica; se si rimanda, il timer di sistema continua
 a eseguire i controlli periodici.
 
 File del canale:
-- update.sh            payload cumulativo (serie corrente: 6)
+- update.sh            payload cumulativo (serie corrente: 7)
 - version.txt          numero di serie corrente
 - install-updater.sh   installazione una tantum su PC 0.2
 - stradilabos-update, stradilabos-update.service, stradilabos-update.timer

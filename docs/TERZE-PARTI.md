@@ -32,6 +32,11 @@ sicurezza. Chromium, proveniente da Debian, resta disponibile come ripiego.
   con ombre leggere e il compositore disabilitato per i PC meno recenti.
 - Gli sfondi `stradilabos-wallpaper-v3.*` sono originali, generati da
   `scripts/generate_wallpaper.py` con la palette StradiLab.
+- I cinque sfondi `StradiLabOS-*.jpg` dedicati agli indirizzi sono
+  illustrazioni originali generate per il progetto con OpenAI image generation,
+  rifinite e controllate come raccolta coordinata. Non incorporano loghi,
+  scritte, fotografie o asset di terze parti; il brief è documentato in
+  `docs/WALLPAPER-INDIRIZZI.md`.
 
 ## Componenti di sistema già in uso
 

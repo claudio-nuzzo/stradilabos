@@ -20,6 +20,13 @@ APPLICATIONS = CHROOT / "usr/local/share/applications"
 PACKAGE_RE = re.compile(r"^[a-z0-9][a-z0-9+.-]*$")
 FLATPAK_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 ADDRESS_PROFILES = {"artistico", "musicale", "liuteria", "moda", "arredo"}
+STUDY_WALLPAPERS = (
+    "StradiLabOS-Liceo-Artistico.jpg",
+    "StradiLabOS-Liceo-Musicale.jpg",
+    "StradiLabOS-Liuteria.jpg",
+    "StradiLabOS-Moda.jpg",
+    "StradiLabOS-Arredo-e-Architettura.jpg",
+)
 USER_PROFILE_OPTIONS = {"docente", "segreteria", "base"}
 BRAND_COLORS = {
     "#16130f",
@@ -228,8 +235,8 @@ def validate_updates(errors: list[str]) -> None:
     version = ROOT / "updates/version.txt"
     require(version.read_text(encoding="utf-8").strip().isdigit(), "Serie aggiornamenti non numerica.", errors)
     require(
-        version.read_text(encoding="utf-8").strip() == "6",
-        "La configurazione guidata di Google Chrome deve essere pubblicata nella serie 6.",
+        version.read_text(encoding="utf-8").strip() == "7",
+        "Gli sfondi per indirizzo devono essere pubblicati nella serie 7.",
         errors,
     )
     payload = ROOT / "updates/update.sh"
@@ -250,6 +257,9 @@ def validate_updates(errors: list[str]) -> None:
             "stradilabos-wallpaper-contrast --once",
             "usr/share/backgrounds/stradilabos",
             "stradilabos-install-chrome",
+            "install_study_wallpapers",
+            "STRADILABOS_WALLPAPER_BASE_URL",
+            'if [ "$LOCAL_SERIES" -lt 6 ]',
             "nessuna reinstallazione necessaria",
         ):
             require(fragment in text, f"Payload cumulativo incompleto: {fragment}.", errors)
@@ -366,6 +376,31 @@ def validate_branding(errors: list[str]) -> None:
             f"Nome visibile dello sfondo non valido: {visible_name}.",
             errors,
         )
+    wallpaper_bytes = 0
+    for visible_name in STUDY_WALLPAPERS:
+        variant = wallpaper.parent / visible_name
+        dimensions = jpeg_size(variant)
+        require(variant.exists(), f"Sfondo per indirizzo assente: {visible_name}.", errors)
+        require(
+            dimensions is not None
+            and dimensions[0] >= 1600
+            and dimensions[1] >= 900
+            and abs(dimensions[0] / dimensions[1] - 16 / 9) < 0.02,
+            f"Sfondo per indirizzo non valido o non 16:9: {visible_name}.",
+            errors,
+        )
+        if variant.exists():
+            wallpaper_bytes += variant.stat().st_size
+            require(
+                variant.stat().st_size <= 1_000_000,
+                f"Sfondo per indirizzo troppo pesante: {visible_name}.",
+                errors,
+            )
+    require(
+        wallpaper_bytes <= 2_500_000,
+        "La raccolta degli sfondi supera 2,5 MB e spreca banda OTA.",
+        errors,
+    )
     theme = CHROOT / "usr/share/icons/StradiLab"
     require((theme / "index.theme").exists(), "Tema icone StradilabOS assente.", errors)
     require(
@@ -502,6 +537,43 @@ def png_size(path: Path) -> tuple[int, int] | None:
     if len(header) != 24 or header[:8] != b"\x89PNG\r\n\x1a\n":
         return None
     return struct.unpack(">II", header[16:24])
+
+
+def jpeg_size(path: Path) -> tuple[int, int] | None:
+    """Legge le dimensioni JPEG senza dipendenze grafiche nella pipeline."""
+    try:
+        with path.open("rb") as image:
+            if image.read(2) != b"\xff\xd8":
+                return None
+            while True:
+                prefix = image.read(1)
+                if not prefix:
+                    return None
+                if prefix != b"\xff":
+                    continue
+                marker = image.read(1)
+                while marker == b"\xff":
+                    marker = image.read(1)
+                if marker in {b"\xd8", b"\xd9"}:
+                    continue
+                length_bytes = image.read(2)
+                if len(length_bytes) != 2:
+                    return None
+                length = struct.unpack(">H", length_bytes)[0]
+                if marker and marker[0] in {
+                    0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7,
+                    0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF,
+                }:
+                    frame = image.read(5)
+                    if len(frame) != 5:
+                        return None
+                    height, width = struct.unpack(">HH", frame[1:5])
+                    return width, height
+                if length < 2:
+                    return None
+                image.seek(length - 2, 1)
+    except OSError:
+        return None
 
 
 def validate_system_branding(errors: list[str]) -> None:
