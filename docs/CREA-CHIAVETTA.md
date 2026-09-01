@@ -13,7 +13,7 @@
 1. Scaricare Rufus dal sito ufficiale.
 2. Inserire la chiavetta.
 3. Aprire Rufus e selezionare la chiavetta corretta in «Dispositivo».
-4. Premere «SELEZIONA» e scegliere `stradilabos-live-amd64.hybrid.iso`.
+4. Premere «SELEZIONA» e scegliere `StradiLabOS-0.4-amd64.hybrid.iso`.
 5. Lasciare le impostazioni proposte e premere «AVVIA».
 6. Confermare la cancellazione soltanto dopo aver ricontrollato il nome della
    chiavetta.

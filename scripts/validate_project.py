@@ -347,6 +347,11 @@ def validate_branding(errors: list[str]) -> None:
             "Il branding Calamares non collega show.qml.",
             errors,
         )
+        require(
+            'versionedName:       "StradiLabOS 0.4"' in text,
+            "Versione Calamares diversa da StradiLabOS 0.4.",
+            errors,
+        )
     if slideshow.exists():
         text = slideshow.read_text(encoding="utf-8")
         require("Presentation" in text, "Presentazione Calamares non valida.", errors)
@@ -581,9 +586,16 @@ def validate_system_branding(errors: list[str]) -> None:
     require(os_release.exists(), "Identità StradilabOS in os-release assente.", errors)
     if os_release.exists():
         text = os_release.read_text(encoding="utf-8")
+        require('PRETTY_NAME="StradiLabOS 0.4"' in text, "Versione OS non aggiornata a 0.4.", errors)
+        require('VERSION_ID="0.4"' in text, "VERSION_ID non aggiornato a 0.4.", errors)
         require('NAME="StradiLabOS"' in text, "Nome OS non personalizzato.", errors)
         require('ID=stradilabos' in text, "ID OS non personalizzato.", errors)
         require('ID_LIKE=debian' in text, "Compatibilità Debian non dichiarata.", errors)
+    version_file = SHARE / "version.json"
+    require(version_file.exists(), "Metadati versione StradiLabOS assenti.", errors)
+    if version_file.exists():
+        version_data = json.loads(version_file.read_text(encoding="utf-8"))
+        require(version_data.get("version") == "0.4.0", "version.json non aggiornato a 0.4.0.", errors)
 
     boot_image = ROOT / "config/branding/stradilabos-boot-800x600.png"
     require(
@@ -596,7 +608,7 @@ def validate_system_branding(errors: list[str]) -> None:
     if binary_hook.exists():
         text = binary_hook.read_text(encoding="utf-8")
         require("Prova StradiLabOS" in text, "Menu Live non rinominato.", errors)
-        require("StradiLabOS 0.3" in text, "Metadati ISO non personalizzati.", errors)
+        require("StradiLabOS 0.4" in text, "Metadati ISO non personalizzati.", errors)
     live_theme = ROOT / "config/branding/grub-live-theme.txt"
     require(live_theme.exists(), "Tema del menu Live assente.", errors)
     if live_theme.exists():

@@ -1,8 +1,8 @@
-# Componenti di terze parti — StradilabOS 0.3
+# Componenti di terze parti — StradiLabOS 0.4
 
-Questa pagina censisce i componenti esterni presenti nella ISO 0.3. Tutti sono
+Questa pagina censisce i componenti esterni presenti nella ISO 0.4. Tutti sono
 inclusi nel repository: la sessione non scarica né installa temi o icone al
-primo avvio. StradilabOS mantiene i propri nome, palette bordeaux/navy/crema,
+primo avvio. StradiLabOS mantiene i propri nome, palette bordeaux/navy/crema,
 icone e sfondi; non usa loghi, immagini o sfondi proprietari Apple.
 
 | Componente | Versione fissata | Origine | Licenza | Uso nella ISO |

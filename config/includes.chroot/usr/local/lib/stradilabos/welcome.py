@@ -927,7 +927,7 @@ class WelcomeWindow(Gtk.ApplicationWindow):
             self.message("Impossibile avviare la verifica", str(error))
 
     def status_text(self) -> str:
-        base = "StradiLabOS 0.3"
+        base = "StradiLabOS 0.4"
         if system_status is not None:
             try:
                 return system_status.status_label()

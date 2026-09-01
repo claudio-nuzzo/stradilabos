@@ -22,7 +22,7 @@ grep -q "Prova StradiLabOS" "$grub_dir/grub.cfg" || \
     fail "il menu Live conserva il nome Debian"
 grep -q "quiet splash loglevel=3" "$grub_dir/grub.cfg" || \
     fail "il menu Live non filtra i messaggi firmware non critici"
-grep -q "StradiLabOS 0.3" "$binary_dir/.disk/info" || \
+grep -q "StradiLabOS 0.4" "$binary_dir/.disk/info" || \
     fail "il supporto non si identifica come StradiLabOS"
 
 os_release=$(unsquashfs -cat "$squashfs" usr/lib/os-release 2>/dev/null) || \
