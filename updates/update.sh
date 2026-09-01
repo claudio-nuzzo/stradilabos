@@ -1,5 +1,5 @@
 #!/bin/bash
-# StradilabOS — aggiornamento cumulativo, serie 3 (2026-09-01)
+# StradilabOS — aggiornamento cumulativo, serie 4 (2026-09-01)
 #
 # È pensato anche per PC già installati con la 0.2: scarica soltanto il
 # materiale pubblicato dal repository ufficiale, aggiorna i file posseduti da
@@ -124,6 +124,45 @@ sync_0_3_interface() {
   fi
 }
 
+repair_existing_panel_profiles() {
+  # L'autostart di Xfce viene eseguito dopo che il pannello ha già letto la
+  # configurazione personale: sui PC installati il dialogo “(null)” può quindi
+  # comparire prima della riparazione. Migriamo qui i profili esistenti, usando
+  # la sessione D-Bus dell'utente quando è attiva e conservando il backup.
+  local user uid home runtime_dir bus_address
+  if ! command -v runuser >/dev/null 2>&1; then
+    echo "ERRORE: runuser non disponibile; impossibile migrare il pannello utente." >&2
+    return 1
+  fi
+  if [ ! -x /usr/local/bin/stradilabos-repair-panel ]; then
+    echo "ERRORE: riparatore del pannello non installato." >&2
+    return 1
+  fi
+
+  while IFS=: read -r user _ uid _ _ home _; do
+    [ "$uid" -ge 1000 ] 2>/dev/null || continue
+    [ "$uid" -lt 60000 ] 2>/dev/null || continue
+    case "$home" in
+      /home/*) ;;
+      *) continue ;;
+    esac
+    [ -f "$home/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml" ] || continue
+
+    runtime_dir="/run/user/$uid"
+    bus_address="unix:path=$runtime_dir/bus"
+    runuser -u "$user" -- env \
+      HOME="$home" USER="$user" LOGNAME="$user" \
+      XDG_CONFIG_HOME="$home/.config" \
+      XDG_RUNTIME_DIR="$runtime_dir" \
+      DBUS_SESSION_BUS_ADDRESS="$bus_address" \
+      DISPLAY="${DISPLAY:-:0}" \
+      XAUTHORITY="$home/.Xauthority" \
+      STRADILABOS_PANEL_DEFAULT=/etc/xdg/xfce4/panel/default.xml \
+      STRADILABOS_PANEL_RESTART_DELAY=0 \
+      /usr/local/bin/stradilabos-repair-panel --force || return 1
+  done < /etc/passwd
+}
+
 install_security_updates() {
   # Una 0.2 aggiornata riceve anche unattended-upgrades senza interventi
   # manuali. Se il mirror APT è momentaneamente irraggiungibile, l'aggiornamento
@@ -141,8 +180,9 @@ install_security_updates() {
   fi
 }
 
-echo "— Serie 3: correzioni collaudo StradilabOS 0.3 —"
+echo "— Serie 4: riparazione profili pannello StradilabOS 0.3 —"
 install_cookie_policy || exit 1
 sync_0_3_interface || exit 1
+repair_existing_panel_profiles || exit 1
 install_security_updates || exit 1
-echo "Correzioni di avvio, pannelli e rete installate: nessuna reinstallazione necessaria."
+echo "Pannelli, rete e avvio corretti: nessuna reinstallazione necessaria."

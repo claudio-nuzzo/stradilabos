@@ -7,9 +7,27 @@ config_root=${XDG_CONFIG_HOME:-"$HOME/.config"}
 panel_config="$config_root/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"
 panel_default=${STRADILABOS_PANEL_DEFAULT:-/etc/xdg/xfce4/panel/default.xml}
 marker_dir="$config_root/stradilabos"
-marker="$marker_dir/panel-layout-v3"
+marker="$marker_dir/panel-layout-v4"
 
-[ -e "$marker" ] && exit 0
+force_check=false
+case ${1:-} in
+    --force)
+        force_check=true
+        ;;
+    "")
+        ;;
+    *)
+        echo "Uso: stradilabos-repair-panel [--force]" >&2
+        exit 2
+        ;;
+esac
+
+# L'autostart normale lavora una volta sola. L'aggiornamento OTA usa --force
+# per ricontrollare anche i profili sui quali una versione precedente aveva
+# scritto il marcatore prima che xfce4-panel mostrasse l'errore “(null)”.
+if [ "$force_check" = false ] && [ -e "$marker" ]; then
+    exit 0
+fi
 [ -f "$panel_default" ] || exit 0
 
 mkdir -p "$marker_dir"
