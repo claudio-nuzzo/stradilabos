@@ -228,8 +228,8 @@ def validate_updates(errors: list[str]) -> None:
     version = ROOT / "updates/version.txt"
     require(version.read_text(encoding="utf-8").strip().isdigit(), "Serie aggiornamenti non numerica.", errors)
     require(
-        version.read_text(encoding="utf-8").strip() == "3",
-        "Le correzioni del collaudo devono essere pubblicate nella serie 3.",
+        version.read_text(encoding="utf-8").strip() == "4",
+        "La migrazione dei profili pannello deve essere pubblicata nella serie 4.",
         errors,
     )
     payload = ROOT / "updates/update.sh"
@@ -238,6 +238,9 @@ def validate_updates(errors: list[str]) -> None:
         text = payload.read_text(encoding="utf-8")
         for fragment in (
             "sync_0_3_interface",
+            "repair_existing_panel_profiles",
+            "stradilabos-repair-panel --force",
+            "runuser",
             "SOURCE_ARCHIVE_URL",
             "install_security_updates",
             "usr/share/grub/themes/stradilabos",

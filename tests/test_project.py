@@ -155,6 +155,9 @@ class DesktopDefaultsTests(unittest.TestCase):
                 1,
             )
             personal.write_text(broken_text, encoding="utf-8")
+            marker = config_home / "stradilabos/panel-layout-v4"
+            marker.parent.mkdir(parents=True)
+            marker.touch()
 
             fake_bin = root / "bin"
             fake_bin.mkdir()
@@ -169,14 +172,16 @@ class DesktopDefaultsTests(unittest.TestCase):
                 "STRADILABOS_PANEL_DEFAULT": str(default),
                 "STRADILABOS_PANEL_RESTART_DELAY": "0",
             }
-            result = subprocess.run(["sh", str(repair)], env=environment, check=False)
+            result = subprocess.run(
+                ["sh", str(repair), "--force"], env=environment, check=False
+            )
             self.assertEqual(result.returncode, 0)
             self.assertEqual(personal.read_text(encoding="utf-8"), valid_text)
             self.assertEqual(
                 personal.with_name("xfce4-panel.xml.stradilabos-backup").read_text(encoding="utf-8"),
                 broken_text,
             )
-            self.assertTrue((config_home / "stradilabos/panel-layout-v3").exists())
+            self.assertTrue(marker.exists())
 
     def test_wifi_chooser_handles_escaped_network_names(self) -> None:
         wifi = CHROOT / "usr/local/bin/stradilabos-wifi"
@@ -319,12 +324,14 @@ class DesktopDefaultsTests(unittest.TestCase):
         )
         self.assertIn('GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3"', installed)
         self.assertIn("quiet splash loglevel=3", (ROOT / "auto/config").read_text(encoding="utf-8"))
-        self.assertEqual((ROOT / "updates/version.txt").read_text(encoding="utf-8").strip(), "3")
+        self.assertEqual((ROOT / "updates/version.txt").read_text(encoding="utf-8").strip(), "4")
         update = (ROOT / "updates/update.sh").read_text(encoding="utf-8")
         self.assertIn("usr/share/grub/themes/stradilabos", update)
         self.assertIn("update-grub || return 1", update)
         self.assertIn("xfce4-power-manager-plugins", update)
         self.assertIn("xfce4-pulseaudio-plugin", update)
+        self.assertIn("repair_existing_panel_profiles", update)
+        self.assertIn("stradilabos-repair-panel --force", update)
 
     def test_container_workflows_fail_on_intermediate_errors(self) -> None:
         workflows = ROOT / ".github/workflows"
