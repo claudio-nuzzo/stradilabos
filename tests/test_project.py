@@ -530,9 +530,31 @@ cp "${url#file://}" "$destination"
             "StradiLabOS-Arredo-e-Architettura.jpg",
         )
         with tempfile.TemporaryDirectory() as temporary:
-            destination = Path(temporary) / "installed-wallpapers"
+            root = Path(temporary)
+            destination = root / "installed-wallpapers"
+            fake_bin = root / "bin"
+            fake_bin.mkdir()
+            fake_curl = fake_bin / "curl"
+            fake_curl.write_text(
+                """#!/bin/sh
+destination=
+url=
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        -o) destination=$2; shift 2 ;;
+        --connect-timeout) shift 2 ;;
+        -*) shift ;;
+        *) url=$1; shift ;;
+    esac
+done
+cp "${url#file://}" "$destination"
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
             environment = {
                 **os.environ,
+                "PATH": f"{fake_bin}:{os.environ['PATH']}",
                 "STRADILABOS_UPDATE_LOCAL_SERIAL": "6",
                 "STRADILABOS_UPDATE_SOURCE_ARCHIVE_URL": "file:///non-esiste.tar.gz",
                 "STRADILABOS_WALLPAPER_BASE_URL": wallpaper_source.as_uri(),
