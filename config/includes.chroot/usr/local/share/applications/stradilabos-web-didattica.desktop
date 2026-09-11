@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=Autovalutazione alunni
-Comment=Griglia di autovalutazione sulle competenze del PTOF.
-Exec=stradilabos-open-app "https://autovalutazione-alunni.stradilab.org" "autovalutazione-alunni"
+Name=Didattica e metodi
+Comment=Metodo di studio, app, griglie disciplinari e percorso DigComp 3.0.
+Exec=stradilabos-open-app "https://didattica.stradilab.org" "didattica"
 TryExec=stradilabos-open-app
 Icon=stradilabos
 Terminal=false
