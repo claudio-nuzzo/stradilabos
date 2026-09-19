@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Verifiche digitali sicure
+Comment=Verifiche con Google Moduli, SEB e voti in bozza su Classroom.
+Exec=stradilabos-open-app "https://portale-verifiche.stradilab.org" "verifiche-digitali-sicure"
+TryExec=stradilabos-open-app
+Icon=stradilabos-guide
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;StradiLab;docenti;
+X-StradilabOS-Category=StradiLab
+StartupNotify=true

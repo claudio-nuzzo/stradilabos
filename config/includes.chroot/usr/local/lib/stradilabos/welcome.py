@@ -341,7 +341,11 @@ class WelcomeWindow(Gtk.ApplicationWindow):
                 3,
             )
         root.pack_start(
-            self.action("Apri StradiLab", "Web app e servizi della scuola", ["stradilabos-hub"]),
+            self.action(
+                "Apri StradiLab",
+                "Gestione Classi, Deepstrad, Didattica e le nuove card della scuola",
+                ["stradilabos-hub"],
+            ),
             False,
             False,
             0,

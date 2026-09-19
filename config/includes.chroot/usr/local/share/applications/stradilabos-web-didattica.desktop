@@ -8,6 +8,6 @@ TryExec=stradilabos-open-app
 Icon=stradilabos
 Terminal=false
 Categories=Education;Network;
-Keywords=StradiLab;StradiLab;studenti;
+Keywords=StradiLab;StradiLab;studenti;docenti;
 X-StradilabOS-Category=StradiLab
 StartupNotify=true

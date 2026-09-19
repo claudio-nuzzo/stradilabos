@@ -1,5 +1,5 @@
 #!/bin/bash
-# StradilabOS — aggiornamento cumulativo, serie 7 (2026-09-01)
+# StradilabOS — aggiornamento cumulativo, serie 8 (2026-09-19)
 #
 # È pensato anche per PC già installati con la 0.2: scarica soltanto il
 # materiale pubblicato dal repository ufficiale, aggiorna i file posseduti da
@@ -94,7 +94,7 @@ copy_tree() {
 }
 
 sync_0_3_interface() {
-  local archive source_root source_file unit file client_new
+  local archive source_root source_file unit file client_new obsolete
   archive="$update_tmpdir/stradilabos-main.tar.gz"
 
   if ! fetch "$SOURCE_ARCHIVE_URL" "$archive"; then
@@ -122,6 +122,13 @@ sync_0_3_interface() {
 
   # File applicativi e guide: tutti sotto /usr/local sono di StradilabOS.
   copy_tree "$source_root/config/includes.chroot/usr/local" /usr/local || return 1
+  # Card ritirate dal catalogo: rimuoverle esplicitamente evita duplicati sui
+  # PC che hanno già applicato la serie precedente.
+  for obsolete in \
+      /usr/local/share/applications/stradilabos-web-elezioni-rappresentanti-genitori.desktop \
+      /usr/local/share/applications/stradilabos-web-gestione-uda-e-pfi.desktop; do
+    rm -f "$obsolete" || return 1
+  done
   # I launcher desktop eseguono direttamente questi comandi. Rendere espliciti
   # i permessi evita che un bit perso nell'archivio provochi “permesso negato”.
   for file in /usr/local/bin/stradilabos-*; do
@@ -276,12 +283,17 @@ install_security_updates() {
   fi
 }
 
-echo "— Serie 7: sfondi per indirizzo e aggiornamenti StradiLabOS 0.3 —"
+echo "— Serie 8: nuove card StradiLab e pannello iniziale aggiornato —"
+if [ "$LOCAL_SERIES" -lt 8 ]; then
+  sync_0_3_interface || exit 1
+fi
 if [ "$LOCAL_SERIES" -lt 6 ]; then
   install_cookie_policy || exit 1
-  sync_0_3_interface || exit 1
   repair_existing_panel_profiles || exit 1
   install_security_updates || exit 1
 fi
-install_study_wallpapers || exit 1
-echo "Installati i cinque sfondi StradiLabOS per indirizzo: nessuna reinstallazione necessaria."
+if [ "$LOCAL_SERIES" -lt 7 ]; then
+  install_study_wallpapers || exit 1
+  echo "Installati i cinque sfondi StradiLabOS per indirizzo."
+fi
+echo "Catalogo e pannello StradiLabOS aggiornati: nessuna reinstallazione necessaria."

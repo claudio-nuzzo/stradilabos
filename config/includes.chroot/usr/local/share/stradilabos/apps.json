@@ -245,6 +245,49 @@
       "icon": "fashion-cad"
     },
     {
+      "id": "gestione-classi",
+      "title": "Gestione Classi",
+      "description": "Devi lavorare su una classe? Scegli il pulsante dell’attività che ti serve e apri direttamente il relativo portale.",
+      "url": "https://stradilab.org/#progetti",
+      "audience": [
+        "docenti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos-scuola",
+      "access": "libero",
+      "updated": "2026-09-18"
+    },
+    {
+      "id": "deepstrad",
+      "title": "Deepstrad",
+      "description": "In sviluppo · Già attiva · Testo, micro-mappe, voce, ripasso e NotebookLM in italiano e inglese.",
+      "url": "https://deepstrad.stradilab.org",
+      "audience": [
+        "studenti",
+        "docenti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos-workspace",
+      "access": "riservato",
+      "updated": "2026-09-13"
+    },
+    {
+      "id": "verifiche-digitali-sicure",
+      "title": "Verifiche digitali sicure",
+      "description": "Verifiche con Google Moduli, SEB e voti in bozza su Classroom.",
+      "url": "https://portale-verifiche.stradilab.org",
+      "audience": [
+        "docenti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos-guide",
+      "access": "riservato",
+      "updated": "2026-09-08"
+    },
+    {
       "id": "corso-ia-dall-archivio-alla-classe",
       "title": "Corso IA — Dall'Archivio alla Classe",
       "description": "Il corso IA per i docenti: dieci lezioni, un'esercitazione a settimana.",
@@ -330,8 +373,8 @@
     },
     {
       "id": "biblioteca-liuteria",
-      "title": "Biblioteca Liuteria",
-      "description": "Ricerca nel catalogo della biblioteca Tiziano Vago.",
+      "title": "Biblioteca della Scuola Internazionale di Liuteria - CREMONA",
+      "description": "Ricerca nel catalogo della biblioteca",
       "url": "https://biblioteca-liuteria.stradilab.org",
       "audience": [
         "tutti"
@@ -369,20 +412,6 @@
       "icon": "stradilabos",
       "access": "riservato",
       "updated": "2026-06-20"
-    },
-    {
-      "id": "gestione-uda-e-pfi",
-      "title": "Gestione UDA e PFI",
-      "description": "UDA e piani formativi individuali degli istituti professionali.",
-      "url": "https://gestione-uda.stradilab.org",
-      "audience": [
-        "docenti"
-      ],
-      "category": "StradiLab",
-      "source": "stradilab",
-      "icon": "stradilabos",
-      "access": "riservato",
-      "updated": "2026-06-25"
     },
     {
       "id": "didattica",
@@ -426,20 +455,6 @@
       "icon": "stradilabos",
       "access": "riservato",
       "updated": "2026-07-04"
-    },
-    {
-      "id": "elezioni-rappresentanti-genitori",
-      "title": "Elezioni Rappresentanti Genitori",
-      "description": "Candidature, spoglio e verbale per i consigli di classe.",
-      "url": "https://elezioni-genitori.stradilab.org",
-      "audience": [
-        "tutti"
-      ],
-      "category": "StradiLab",
-      "source": "stradilab",
-      "icon": "stradilabos",
-      "access": "riservato",
-      "updated": "2026-07-05"
     },
     {
       "id": "locandine-eventi",

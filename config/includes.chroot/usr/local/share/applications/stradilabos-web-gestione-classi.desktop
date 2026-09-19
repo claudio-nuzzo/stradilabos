@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Gestione Classi
+Comment=Devi lavorare su una classe? Scegli il pulsante dell’attività che ti serve e apri direttamente il relativo portale.
+Exec=stradilabos-open-app "https://stradilab.org/#progetti" "gestione-classi"
+TryExec=stradilabos-open-app
+Icon=stradilabos-scuola
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;StradiLab;docenti;
+X-StradilabOS-Category=StradiLab
+StartupNotify=true

@@ -543,8 +543,8 @@ cp "${url#file://}" "$destination"
             self.assertNotEqual(failed.returncode, 0)
             self.assertEqual((state / "update-serial").read_text(encoding="utf-8").strip(), "42")
 
-    def test_series_seven_installs_only_verified_wallpapers(self) -> None:
-        """Da serie 6 l'OTA evita l'archivio completo e installa i cinque JPEG."""
+    def test_series_eight_requires_the_interface_archive(self) -> None:
+        """La serie 8 non avanza se il payload dell'interfaccia non è scaricabile."""
         payload = ROOT / "updates/update.sh"
         wallpaper_source = CHROOT / "usr/share/backgrounds/stradilabos"
         names = (
@@ -580,7 +580,7 @@ cp "${url#file://}" "$destination"
             environment = {
                 **os.environ,
                 "PATH": f"{fake_bin}:{os.environ['PATH']}",
-                "STRADILABOS_UPDATE_LOCAL_SERIAL": "6",
+                "STRADILABOS_UPDATE_LOCAL_SERIAL": "7",
                 "STRADILABOS_UPDATE_SOURCE_ARCHIVE_URL": "file:///non-esiste.tar.gz",
                 "STRADILABOS_WALLPAPER_BASE_URL": wallpaper_source.as_uri(),
                 "STRADILABOS_WALLPAPER_INSTALL_DIR": str(destination),
@@ -592,13 +592,8 @@ cp "${url#file://}" "$destination"
                 capture_output=True,
                 check=False,
             )
-            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            self.assertEqual({path.name for path in destination.iterdir()}, set(names))
-            for name in names:
-                self.assertEqual(
-                    (destination / name).read_bytes(),
-                    (wallpaper_source / name).read_bytes(),
-                )
+            self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertFalse(destination.exists())
 
     def test_window_manager_guard_is_installed_and_bounded(self) -> None:
         guard = CHROOT / "usr/local/bin/stradilabos-window-manager-guard"
@@ -670,7 +665,7 @@ cp "${url#file://}" "$destination"
         )
         self.assertIn('GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3"', installed)
         self.assertIn("quiet splash loglevel=3", (ROOT / "auto/config").read_text(encoding="utf-8"))
-        self.assertEqual((ROOT / "updates/version.txt").read_text(encoding="utf-8").strip(), "7")
+        self.assertEqual((ROOT / "updates/version.txt").read_text(encoding="utf-8").strip(), "8")
         update = (ROOT / "updates/update.sh").read_text(encoding="utf-8")
         self.assertIn("usr/share/grub/themes/stradilabos", update)
         self.assertIn("update-grub || return 1", update)
