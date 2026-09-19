@@ -126,7 +126,7 @@ class HubWindow(Gtk.ApplicationWindow):
         title = Gtk.Label(label="STRADILAB", xalign=0)
         title.get_style_context().add_class("hero-title")
         copy = Gtk.Label(
-            label="App, documenti e servizi dell'IIS Antonio Stradivari in un unico posto.",
+            label="Nuove card per Gestione Classi, Deepstrad, Didattica e tutti i servizi dell'IIS Antonio Stradivari.",
             xalign=0,
         )
         copy.get_style_context().add_class("hero-copy")

@@ -21,7 +21,7 @@ Per i PC gia' installati con la 0.2 (una tantum, da terminale):
 
   sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/claudio-nuzzo/stradilabos/main/updates/install-updater.sh)"
 
-La serie 7 è cumulativa: aggiorna un PC 0.2/0.3 già installato senza cancellare
+La serie 8 è cumulativa: aggiorna un PC 0.2/0.3 già installato senza cancellare
 documenti o profili e senza richiedere una nuova ISO. Migra il profilo Xfce a
 una sola barra nativa in basso: menu StradiLabOS e launcher a sinistra, finestre
 al centro, rete/Bluetooth, notifiche, batteria, audio, orologio e menu di
@@ -61,8 +61,15 @@ la voce permanente «Aggiornamenti StradiLabOS» nel menu principale. Entrambe
 aprono la stessa finestra grafica; se si rimanda, il timer di sistema continua
 a eseguire i controlli periodici.
 
+La serie 8 aggiorna anche il catalogo del pannello iniziale con le card
+Gestione Classi, Deepstrad, Verifiche digitali sicure e Didattica e metodi.
+Le audience vengono normalizzate per rendere corretti i filtri studenti/docenti;
+Gestione Classi apre l'hub dei nove strumenti collegati, mentre Verifiche apre
+direttamente il portale protetto. I vecchi launcher ritirati vengono rimossi
+per evitare doppioni. Anche questa modifica è OTA: non richiede una nuova ISO.
+
 File del canale:
-- update.sh            payload cumulativo (serie corrente: 7)
+- update.sh            payload cumulativo (serie corrente: 8)
 - version.txt          numero di serie corrente
 - install-updater.sh   installazione una tantum su PC 0.2
 - stradilabos-update, stradilabos-update.service, stradilabos-update.timer

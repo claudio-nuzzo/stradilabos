@@ -235,8 +235,8 @@ def validate_updates(errors: list[str]) -> None:
     version = ROOT / "updates/version.txt"
     require(version.read_text(encoding="utf-8").strip().isdigit(), "Serie aggiornamenti non numerica.", errors)
     require(
-        version.read_text(encoding="utf-8").strip() == "7",
-        "Gli sfondi per indirizzo devono essere pubblicati nella serie 7.",
+        version.read_text(encoding="utf-8").strip() == "8",
+        "Il catalogo e il pannello aggiornati devono essere pubblicati nella serie 8.",
         errors,
     )
     payload = ROOT / "updates/update.sh"

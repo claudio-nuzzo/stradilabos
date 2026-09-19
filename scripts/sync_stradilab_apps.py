@@ -31,6 +31,25 @@ CATEGORY_ICONS = {
     "Moda": "fashion-cad",
 }
 
+# Alcune card della home sono hub o pagine di presentazione: il catalogo
+# locale deve comunque puntare al servizio effettivo, senza duplicare la
+# logica del sito. Gli ID mantengono i nomi già distribuiti nelle ISO.
+PROJECT_URL_OVERRIDES = {
+    "Gestione Classi": "https://stradilab.org/#progetti",
+    "Verifiche digitali sicure": "https://portale-verifiche.stradilab.org",
+}
+PROJECT_ID_OVERRIDES = {
+    "https://biblioteca-liuteria.stradilab.org": "biblioteca-liuteria",
+    "https://didattica.stradilab.org": "didattica",
+    "https://elezioni-genitori.stradilab.org": "elezioni-rappresentanti-genitori",
+    "https://gestione-uda.stradilab.org": "gestione-uda-e-pfi",
+}
+PROJECT_ICON_OVERRIDES = {
+    "Gestione Classi": "stradilabos-scuola",
+    "Deepstrad": "stradilabos-workspace",
+    "Verifiche digitali sicure": "stradilabos-guide",
+}
+
 INSTITUTIONAL_APPS = [
     {
         "id": "stradilab-home",
@@ -218,17 +237,35 @@ def desktop_quote(value: str) -> str:
     return f'"{value}"'
 
 
+def project_url(project: dict) -> str | None:
+    override = PROJECT_URL_OVERRIDES.get(project.get("titolo"))
+    if override:
+        return override
+    url = project.get("url")
+    return url if isinstance(url, str) else None
+
+
+def project_audience(project: dict) -> list[str]:
+    value = project.get("destinatari", "tutti")
+    values = value if isinstance(value, list) else re.split(r"\s+e\s+|[,;/]+", str(value))
+    audience = [item.strip().casefold() for item in values if item.strip()]
+    return audience or ["tutti"]
+
+
 def project_to_app(project: dict) -> dict:
+    url = project_url(project)
+    assert url is not None
     category = "Orientamento" if project.get("colore") == "vetrina" else "StradiLab"
+    project_id = PROJECT_ID_OVERRIDES.get(url.rstrip("/"), slugify(project["titolo"]))
     return {
-        "id": slugify(project["titolo"]),
+        "id": project_id,
         "title": project["titolo"],
         "description": project.get("breve") or project.get("desc") or "App StradiLab",
-        "url": project["url"],
-        "audience": [project.get("destinatari", "tutti")],
+        "url": url,
+        "audience": project_audience(project),
         "category": category,
         "source": "stradilab",
-        "icon": CATEGORY_ICONS[category],
+        "icon": PROJECT_ICON_OVERRIDES.get(project["titolo"], CATEGORY_ICONS[category]),
         "access": project.get("accesso", "libero"),
         "updated": project.get("aggiornato"),
     }
@@ -266,8 +303,8 @@ def main() -> int:
         project_to_app(project)
         for project in source_data
         if project.get("attivo") is True
-        and isinstance(project.get("url"), str)
-        and urlparse(project["url"]).scheme == "https"
+        and project_url(project)
+        and urlparse(project_url(project)).scheme == "https"
     ]
 
     # Due launcher istituzionali possono aprire lo stesso servizio con scopi

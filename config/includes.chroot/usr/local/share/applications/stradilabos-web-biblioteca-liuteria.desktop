@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=Biblioteca Liuteria
-Comment=Ricerca nel catalogo della biblioteca Tiziano Vago.
+Name=Biblioteca della Scuola Internazionale di Liuteria - CREMONA
+Comment=Ricerca nel catalogo della biblioteca
 Exec=stradilabos-open-app "https://biblioteca-liuteria.stradilab.org" "biblioteca-liuteria"
 TryExec=stradilabos-open-app
 Icon=stradilabos
