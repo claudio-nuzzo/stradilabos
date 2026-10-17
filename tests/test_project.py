@@ -121,6 +121,7 @@ class DesktopDefaultsTests(unittest.TestCase):
         self.assertIn("storytold/craft-launcher", script.read_text(encoding="utf-8"))
         self.assertIn("18ee584f651c6ab00f591f98118e78631638e0ea20f84b239b6c39b42a4f5426", script.read_text(encoding="utf-8"))
         self.assertIn("3b6c43202d7388a75435c63a3932a8aac6c24f5b15fb1b1865c81818847afd0f", script.read_text(encoding="utf-8"))
+        self.assertIn('DESKTOP_FILE="$DESKTOP_DIR/stradilabos-artcraft-launcher.desktop"', script.read_text(encoding="utf-8"))
         self.assertIn("Terminal=false", desktop.read_text(encoding="utf-8"))
 
     def test_all_xml_defaults_are_well_formed(self) -> None:
