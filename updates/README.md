@@ -73,8 +73,12 @@ scaricato soltanto al primo click, sceglie la build AppImage x86_64 o aarch64,
 verifica lo SHA-256 della release fissata e installa il file nel profilo
 dell'utente. La ISO resta leggera e non ridistribuisce il binario upstream.
 
+La serie 10 corregge il menu sui PC già aggiornati alla serie 9: elimina la
+vecchia voce per utente, lascia che la voce di sistema richiami il wrapper e
+aggiorna lo script del launcher con verifica SHA-256. Non serve ricreare la ISO.
+
 File del canale:
-- update.sh            payload cumulativo (serie corrente: 9)
+- update.sh            payload cumulativo (serie corrente: 10)
 - version.txt          numero di serie corrente
 - install-updater.sh   installazione una tantum su PC 0.2
 - stradilabos-update, stradilabos-update.service, stradilabos-update.timer

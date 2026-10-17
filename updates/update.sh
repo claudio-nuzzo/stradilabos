@@ -1,5 +1,5 @@
 #!/bin/bash
-# StradilabOS — aggiornamento cumulativo, serie 9 (2026-10-17)
+# StradilabOS — aggiornamento cumulativo, serie 10 (2026-10-17)
 #
 # È pensato anche per PC già installati con la 0.2: scarica soltanto il
 # materiale pubblicato dal repository ufficiale, aggiorna i file posseduti da
@@ -9,6 +9,7 @@ set -u
 SOURCE_ARCHIVE_URL="${STRADILABOS_UPDATE_SOURCE_ARCHIVE_URL:-https://codeload.github.com/claudio-nuzzo/stradilabos/tar.gz/refs/heads/main}"
 WALLPAPER_BASE_URL="${STRADILABOS_WALLPAPER_BASE_URL:-https://raw.githubusercontent.com/claudio-nuzzo/stradilabos/main/config/includes.chroot/usr/share/backgrounds/stradilabos}"
 WALLPAPER_INSTALL_DIR="${STRADILABOS_WALLPAPER_INSTALL_DIR:-/usr/share/backgrounds/stradilabos}"
+ARTCRAFT_LAUNCHER_URL="${STRADILABOS_ARTCRAFT_LAUNCHER_URL:-https://raw.githubusercontent.com/claudio-nuzzo/stradilabos/main/config/includes.chroot/usr/local/bin/stradilabos-artcraft-launcher}"
 LOCAL_SERIES="${STRADILABOS_UPDATE_LOCAL_SERIAL:-$(cat /var/lib/stradilabos/update-serial 2>/dev/null || echo 0)}"
 case "$LOCAL_SERIES" in (*[!0-9]*|'') LOCAL_SERIES=0;; esac
 update_tmpdir=$(mktemp -d)
@@ -209,6 +210,43 @@ sync_0_3_interface() {
   fi
 }
 
+update_artcraft_launcher() {
+  local downloaded expected actual target
+  downloaded="$update_tmpdir/stradilabos-artcraft-launcher"
+  expected="1b26de19e632f162fa43c9f08476c76bc0915a18255e836f698eaab9172b0158"
+  target=/usr/local/bin/stradilabos-artcraft-launcher
+
+  if ! fetch "$ARTCRAFT_LAUNCHER_URL" "$downloaded"; then
+    echo "ERRORE: download del launcher ArtCraft non riuscito; la serie sarà ritentata." >&2
+    return 1
+  fi
+  if ! command -v sha256sum >/dev/null 2>&1; then
+    echo "ERRORE: verifica SHA-256 non disponibile; la serie sarà ritentata." >&2
+    return 1
+  fi
+  actual=$(sha256sum "$downloaded" | awk '{print $1}')
+  if [ "$actual" != "$expected" ]; then
+    echo "ERRORE: verifica SHA-256 del launcher ArtCraft fallita; la serie sarà ritentata." >&2
+    return 1
+  fi
+  install -D -m 0755 "$downloaded" "$target.nuovo" || return 1
+  mv -f "$target.nuovo" "$target" || return 1
+}
+
+migrate_artcraft_launcher_entries() {
+  local home applications
+  for home in /home/*; do
+    [ -d "$home" ] || continue
+    applications="$home/.local/share/applications"
+    [ -d "$applications" ] || continue
+    rm -f "$applications/artcraft-launcher.desktop" \
+      "$applications/stradilabos-artcraft-launcher.desktop" || return 1
+    if command -v update-desktop-database >/dev/null 2>&1; then
+      update-desktop-database "$applications" >/dev/null 2>&1 || true
+    fi
+  done
+}
+
 repair_existing_panel_profiles() {
   # L'autostart di Xfce viene eseguito dopo che il pannello ha già letto la
   # configurazione personale: sui PC installati il dialogo “(null)” può quindi
@@ -283,9 +321,14 @@ install_security_updates() {
   fi
 }
 
-echo "— Serie 9: ArtCraft Launcher e controllo app StradiLab —"
-if [ "$LOCAL_SERIES" -lt 9 ]; then
-  sync_0_3_interface || exit 1
+echo "— Serie 10: correzione menu ArtCraft per gli utenti esistenti —"
+if [ "$LOCAL_SERIES" -lt 10 ]; then
+  if [ "$LOCAL_SERIES" -lt 9 ]; then
+    sync_0_3_interface || exit 1
+  else
+    update_artcraft_launcher || exit 1
+  fi
+  migrate_artcraft_launcher_entries || exit 1
 fi
 if [ "$LOCAL_SERIES" -lt 6 ]; then
   install_cookie_policy || exit 1

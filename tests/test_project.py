@@ -121,7 +121,8 @@ class DesktopDefaultsTests(unittest.TestCase):
         self.assertIn("storytold/craft-launcher", script.read_text(encoding="utf-8"))
         self.assertIn("18ee584f651c6ab00f591f98118e78631638e0ea20f84b239b6c39b42a4f5426", script.read_text(encoding="utf-8"))
         self.assertIn("3b6c43202d7388a75435c63a3932a8aac6c24f5b15fb1b1865c81818847afd0f", script.read_text(encoding="utf-8"))
-        self.assertIn('DESKTOP_FILE="$DESKTOP_DIR/stradilabos-artcraft-launcher.desktop"', script.read_text(encoding="utf-8"))
+        self.assertIn('rm -f "$DESKTOP_DIR/artcraft-launcher.desktop"', script.read_text(encoding="utf-8"))
+        self.assertIn("Exec=stradilabos-artcraft-launcher", desktop.read_text(encoding="utf-8"))
         self.assertIn("Terminal=false", desktop.read_text(encoding="utf-8"))
 
     def test_all_xml_defaults_are_well_formed(self) -> None:
@@ -691,8 +692,12 @@ cp "${url#file://}" "$destination"
         )
         self.assertIn('GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3"', installed)
         self.assertIn("quiet splash loglevel=3", (ROOT / "auto/config").read_text(encoding="utf-8"))
-        self.assertEqual((ROOT / "updates/version.txt").read_text(encoding="utf-8").strip(), "9")
+        self.assertEqual((ROOT / "updates/version.txt").read_text(encoding="utf-8").strip(), "10")
         update = (ROOT / "updates/update.sh").read_text(encoding="utf-8")
+        self.assertIn('if [ "$LOCAL_SERIES" -lt 10 ]', update)
+        self.assertIn('if [ "$LOCAL_SERIES" -lt 9 ]', update)
+        self.assertIn("update_artcraft_launcher", update)
+        self.assertIn("migrate_artcraft_launcher_entries", update)
         self.assertIn("usr/share/grub/themes/stradilabos", update)
         self.assertIn("update-grub || return 1", update)
         self.assertIn("xfce4-power-manager-plugins", update)
