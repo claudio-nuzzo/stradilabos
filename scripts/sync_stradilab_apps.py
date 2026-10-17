@@ -37,6 +37,9 @@ CATEGORY_ICONS = {
 PROJECT_URL_OVERRIDES = {
     "Gestione Classi": "https://stradilab.org/#progetti",
     "Verifiche digitali sicure": "https://portale-verifiche.stradilab.org",
+    "StradiLabOS": "https://stradilab.org/stradilabos/",
+    "StradiSapiens": "https://stradilab.org/assistente/",
+    "Stradi Talk": "https://stradilab.org/stradi-talk/",
 }
 PROJECT_ID_OVERRIDES = {
     "https://biblioteca-liuteria.stradilab.org": "biblioteca-liuteria",
@@ -48,6 +51,9 @@ PROJECT_ICON_OVERRIDES = {
     "Gestione Classi": "stradilabos-scuola",
     "Deepstrad": "stradilabos-workspace",
     "Verifiche digitali sicure": "stradilabos-guide",
+    "StradiLabOS": "stradilabos",
+    "StradiSapiens": "stradilabos-guide",
+    "Stradi Talk": "stradilabos-workspace",
 }
 
 INSTITUTIONAL_APPS = [
@@ -249,6 +255,7 @@ def project_audience(project: dict) -> list[str]:
     value = project.get("destinatari", "tutti")
     values = value if isinstance(value, list) else re.split(r"\s+e\s+|[,;/]+", str(value))
     audience = [item.strip().casefold() for item in values if item.strip()]
+    audience = ["famiglie" if item == "genitori" else item for item in audience]
     return audience or ["tutti"]
 
 

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=ArtCraft Launcher
+GenericName=Strumenti creativi ArtCraft
+Comment=Installa, aggiorna e avvia le applicazioni creative ArtCraft
+Exec=stradilabos-artcraft-launcher
+TryExec=stradilabos-artcraft-launcher
+Icon=stradilabos-app-center
+Terminal=false
+Categories=Graphics;AudioVideo;Education;
+Keywords=ArtCraft;PhotoCraft;VectorCraft;FilmCraft;DesignCraft;grafica;audio;video;
+StartupNotify=true

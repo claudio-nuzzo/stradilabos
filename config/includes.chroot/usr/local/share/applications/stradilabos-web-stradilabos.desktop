@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=StradiLabOS
+Comment=StradiLabOS 0.4 · OTA 8: pannello aggiornato, nuove card e supporto AMD64/ARM64.
+Exec=stradilabos-open-app "https://stradilab.org/stradilabos/" "stradilabos"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;StradiLab;tutti;
+X-StradilabOS-Category=StradiLab
+StartupNotify=true

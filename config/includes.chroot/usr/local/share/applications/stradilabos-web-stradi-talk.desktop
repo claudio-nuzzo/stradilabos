@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Stradi Talk
+Comment=Forum interno per confrontarsi, condividere pratiche e seguire le discussioni dei docenti.
+Exec=stradilabos-open-app "https://stradilab.org/stradi-talk/" "stradi-talk"
+TryExec=stradilabos-open-app
+Icon=stradilabos-workspace
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;StradiLab;docenti;
+X-StradilabOS-Category=StradiLab
+StartupNotify=true
