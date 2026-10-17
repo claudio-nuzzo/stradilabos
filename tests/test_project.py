@@ -56,6 +56,22 @@ class CatalogTests(unittest.TestCase):
             self.assertIn("hd=istitutostradivari.it", url)
             self.assertIn("hl=it", url)
 
+    def test_stradilab_catalog_includes_current_public_cards(self) -> None:
+        by_id = {app["id"]: app for app in self.catalog}
+        for app_id in (
+            "gestione-classi",
+            "deepstrad",
+            "verifiche-digitali-sicure",
+            "portale-inclusione",
+            "portale-15-maggio",
+            "prenotazioni-stage-ed-eventi",
+        ):
+            self.assertIn(app_id, by_id)
+        self.assertEqual(
+            by_id["prenotazioni-stage-ed-eventi"]["audience"],
+            ["famiglie", "studenti", "docenti"],
+        )
+
     def test_desktop_quoting_escapes_field_codes(self) -> None:
         module = load_sync_module()
         quoted = module.desktop_quote("https://example.test/?next=%2F&value=$HOME")
@@ -97,6 +113,15 @@ class DesktopDefaultsTests(unittest.TestCase):
         for command in commands:
             with self.subTest(command=command):
                 self.assertTrue(os.access(command, os.X_OK))
+
+    def test_artcraft_launcher_is_explicit_and_architecture_verified(self) -> None:
+        script = CHROOT / "usr/local/bin/stradilabos-artcraft-launcher"
+        desktop = CHROOT / "usr/local/share/applications/stradilabos-artcraft-launcher.desktop"
+        self.assertTrue(os.access(script, os.X_OK))
+        self.assertIn("storytold/craft-launcher", script.read_text(encoding="utf-8"))
+        self.assertIn("18ee584f651c6ab00f591f98118e78631638e0ea20f84b239b6c39b42a4f5426", script.read_text(encoding="utf-8"))
+        self.assertIn("3b6c43202d7388a75435c63a3932a8aac6c24f5b15fb1b1865c81818847afd0f", script.read_text(encoding="utf-8"))
+        self.assertIn("Terminal=false", desktop.read_text(encoding="utf-8"))
 
     def test_all_xml_defaults_are_well_formed(self) -> None:
         paths = [
@@ -665,7 +690,7 @@ cp "${url#file://}" "$destination"
         )
         self.assertIn('GRUB_CMDLINE_LINUX_DEFAULT="quiet splash loglevel=3"', installed)
         self.assertIn("quiet splash loglevel=3", (ROOT / "auto/config").read_text(encoding="utf-8"))
-        self.assertEqual((ROOT / "updates/version.txt").read_text(encoding="utf-8").strip(), "8")
+        self.assertEqual((ROOT / "updates/version.txt").read_text(encoding="utf-8").strip(), "9")
         update = (ROOT / "updates/update.sh").read_text(encoding="utf-8")
         self.assertIn("usr/share/grub/themes/stradilabos", update)
         self.assertIn("update-grub || return 1", update)

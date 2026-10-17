@@ -2,7 +2,7 @@
 Type=Application
 Version=1.0
 Name=Gestione Classi
-Comment=Devi lavorare su una classe? Scegli il pulsante dell’attività che ti serve e apri direttamente il relativo portale.
+Comment=Strumenti per la gestione delle classi, riservati ai soli docenti dell’IIS Stradivari secondo il proprio ruolo.
 Exec=stradilabos-open-app "https://stradilab.org/#progetti" "gestione-classi"
 TryExec=stradilabos-open-app
 Icon=stradilabos-scuola

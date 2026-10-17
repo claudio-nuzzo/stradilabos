@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Prenotazioni Stage ed Eventi
+Comment=Area staff per preparare e gestire ministage, scuola aperta e orientamento.
+Exec=stradilabos-open-app "https://prenota.stradilab.org/area-riservata" "prenotazioni-stage-ed-eventi"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;StradiLab;famiglie;studenti;docenti;
+X-StradilabOS-Category=StradiLab
+StartupNotify=true

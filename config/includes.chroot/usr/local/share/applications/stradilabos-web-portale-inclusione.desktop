@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Portale Inclusione
+Comment=Anteprima · nessun dato reale nel portale.
+Exec=stradilabos-open-app "https://portale-inclusione.stradilab.org" "portale-inclusione"
+TryExec=stradilabos-open-app
+Icon=stradilabos
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;StradiLab;docenti;
+X-StradilabOS-Category=StradiLab
+StartupNotify=true

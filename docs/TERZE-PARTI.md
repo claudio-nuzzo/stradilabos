@@ -21,6 +21,13 @@ avvio l'utente esamina e accetta i Termini di servizio Google. Il pacchetto
 aggiunge il canale APT ufficiale Google per i successivi aggiornamenti di
 sicurezza. Chromium, proveniente da Debian, resta disponibile come ripiego.
 
+ArtCraft Launcher non è incorporato nella ISO. La voce «ArtCraft Launcher» nel
+menu scarica, solo dopo il click dell'utente, la release AppImage ufficiale
+`storytold/craft-launcher` per l'architettura corrente (x86_64 o aarch64), ne
+verifica lo SHA-256 pubblicato e la conserva nel profilo dell'utente. Il
+progetto upstream è distribuito con licenza Apache-2.0; ArtCraft e i nomi delle
+app della suite restano marchi dei rispettivi titolari.
+
 ## Scelte di integrazione
 
 - La sessione usa `WhiteSur-Light` e `WhiteSur`; le varianti chiare/scure del

@@ -1,5 +1,5 @@
 #!/bin/bash
-# StradilabOS — aggiornamento cumulativo, serie 8 (2026-09-19)
+# StradilabOS — aggiornamento cumulativo, serie 9 (2026-10-17)
 #
 # È pensato anche per PC già installati con la 0.2: scarica soltanto il
 # materiale pubblicato dal repository ufficiale, aggiorna i file posseduti da
@@ -283,8 +283,8 @@ install_security_updates() {
   fi
 }
 
-echo "— Serie 8: nuove card StradiLab e pannello iniziale aggiornato —"
-if [ "$LOCAL_SERIES" -lt 8 ]; then
+echo "— Serie 9: ArtCraft Launcher e controllo app StradiLab —"
+if [ "$LOCAL_SERIES" -lt 9 ]; then
   sync_0_3_interface || exit 1
 fi
 if [ "$LOCAL_SERIES" -lt 6 ]; then

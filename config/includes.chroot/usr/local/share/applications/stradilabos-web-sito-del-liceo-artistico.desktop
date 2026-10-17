@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Sito del Liceo Artistico
+Comment=In sviluppo · Il nuovo sito del Liceo Artistico, tra pennellate e la linea della metro dei quattro indirizzi.
+Exec=stradilabos-open-app "https://stradilab.org/artistico/" "sito-del-liceo-artistico"
+TryExec=stradilabos-open-app
+Icon=stradilabos-orientamento
+Terminal=false
+Categories=Education;Network;
+Keywords=StradiLab;Orientamento;studenti;
+X-StradilabOS-Category=Orientamento
+StartupNotify=true
