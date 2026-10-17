@@ -235,8 +235,8 @@ def validate_updates(errors: list[str]) -> None:
     version = ROOT / "updates/version.txt"
     require(version.read_text(encoding="utf-8").strip().isdigit(), "Serie aggiornamenti non numerica.", errors)
     require(
-        version.read_text(encoding="utf-8").strip() == "9",
-        "ArtCraft Launcher e il pannello aggiornati devono essere pubblicati nella serie 9.",
+        version.read_text(encoding="utf-8").strip() == "10",
+        "La correzione del menu ArtCraft deve essere pubblicata nella serie 10.",
         errors,
     )
     payload = ROOT / "updates/update.sh"
@@ -245,6 +245,9 @@ def validate_updates(errors: list[str]) -> None:
         text = payload.read_text(encoding="utf-8")
         for fragment in (
             "sync_0_3_interface",
+            "update_artcraft_launcher",
+            "migrate_artcraft_launcher_entries",
+            'if [ "$LOCAL_SERIES" -lt 10 ]',
             "repair_existing_panel_profiles",
             "stradilabos-repair-panel --force",
             "runuser",
