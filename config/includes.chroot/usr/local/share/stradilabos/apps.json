@@ -247,7 +247,7 @@
     {
       "id": "gestione-classi",
       "title": "Gestione Classi",
-      "description": "Devi lavorare su una classe? Scegli il pulsante dell’attività che ti serve e apri direttamente il relativo portale.",
+      "description": "Strumenti per la gestione delle classi, riservati ai soli docenti dell’IIS Stradivari secondo il proprio ruolo.",
       "url": "https://stradilab.org/#progetti",
       "audience": [
         "docenti"
@@ -255,7 +255,7 @@
       "category": "StradiLab",
       "source": "stradilab",
       "icon": "stradilabos-scuola",
-      "access": "libero",
+      "access": "riservato",
       "updated": "2026-09-18"
     },
     {
@@ -288,6 +288,20 @@
       "updated": "2026-09-08"
     },
     {
+      "id": "stradilabos",
+      "title": "StradiLabOS",
+      "description": "StradiLabOS 0.4 · OTA 9: ArtCraft Launcher, catalogo app aggiornato e supporto AMD64/ARM64.",
+      "url": "https://stradilab.org/stradilabos/",
+      "audience": [
+        "tutti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "libero",
+      "updated": "2026-10-17"
+    },
+    {
       "id": "corso-ia-dall-archivio-alla-classe",
       "title": "Corso IA — Dall'Archivio alla Classe",
       "description": "Il corso IA per i docenti: dieci lezioni, un'esercitazione a settimana.",
@@ -300,6 +314,48 @@
       "icon": "stradilabos",
       "access": "riservato",
       "updated": "2026-08-26"
+    },
+    {
+      "id": "stradisapiens",
+      "title": "StradiSapiens",
+      "description": "Servizio attivo · chat con fonti pubbliche e verificabili.",
+      "url": "https://stradilab.org/assistente/",
+      "audience": [
+        "tutti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos-guide",
+      "access": "libero",
+      "updated": "2026-09-22"
+    },
+    {
+      "id": "stradi-talk",
+      "title": "Stradi Talk",
+      "description": "Forum interno per confrontarsi, condividere pratiche e seguire le discussioni dei docenti.",
+      "url": "https://stradilab.org/stradi-talk/",
+      "audience": [
+        "docenti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos-workspace",
+      "access": "riservato",
+      "updated": "2026-09-27"
+    },
+    {
+      "id": "sito-del-liceo-artistico",
+      "title": "Sito del Liceo Artistico",
+      "description": "In sviluppo · Il nuovo sito del Liceo Artistico, tra pennellate e la linea della metro dei quattro indirizzi.",
+      "url": "https://stradilab.org/artistico/",
+      "audience": [
+        "studenti"
+      ],
+      "category": "Orientamento",
+      "source": "stradilab",
+      "icon": "stradilabos-orientamento",
+      "access": "libero",
+      "updated": "2026-10-03"
     },
     {
       "id": "sito-del-liceo-musicale",
@@ -457,6 +513,34 @@
       "updated": "2026-07-04"
     },
     {
+      "id": "portale-inclusione",
+      "title": "Portale Inclusione",
+      "description": "Anteprima · nessun dato reale nel portale.",
+      "url": "https://portale-inclusione.stradilab.org",
+      "audience": [
+        "docenti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "riservato",
+      "updated": "2026-09-17"
+    },
+    {
+      "id": "portale-15-maggio",
+      "title": "Portale 15 Maggio",
+      "description": "Documento di classe per l'Esame di Stato, generato da wizard.",
+      "url": "https://15maggio.stradilab.org",
+      "audience": [
+        "docenti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "riservato",
+      "updated": "2026-07-20"
+    },
+    {
       "id": "locandine-eventi",
       "title": "Locandine Eventi",
       "description": "Locandine e poster per concerti e saggi, pronte in PDF.",
@@ -469,6 +553,36 @@
       "icon": "stradilabos-orientamento",
       "access": "libero",
       "updated": "2026-07-12"
+    },
+    {
+      "id": "sito-moda-trame-in-movimento",
+      "title": "Sito Moda — Trame in movimento",
+      "description": "In sviluppo · Bozzetto di Onidia Ciriello, dossier tecnico e campagna moda.",
+      "url": "https://moda.stradilab.org/",
+      "audience": [
+        "studenti"
+      ],
+      "category": "Orientamento",
+      "source": "stradilab",
+      "icon": "stradilabos-orientamento",
+      "access": "libero",
+      "updated": "2026-10-04"
+    },
+    {
+      "id": "prenotazioni-stage-ed-eventi",
+      "title": "Prenotazioni Stage ed Eventi",
+      "description": "Area staff per preparare e gestire ministage, scuola aperta e orientamento.",
+      "url": "https://prenota.stradilab.org/area-riservata",
+      "audience": [
+        "famiglie",
+        "studenti",
+        "docenti"
+      ],
+      "category": "StradiLab",
+      "source": "stradilab",
+      "icon": "stradilabos",
+      "access": "riservato",
+      "updated": "2026-10-04"
     }
   ]
 }
